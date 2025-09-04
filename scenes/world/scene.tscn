@@ -1,23 +1,29 @@
 [gd_scene load_steps=4 format=3 uid="uid://cw0ja2d8khrr7"]
 
-[ext_resource type="MeshLibrary" uid="uid://6pp18bhexoc4" path="res://assets/meshlib.tres" id="1_bp46t"]
-[ext_resource type="PackedScene" uid="uid://baia4k0qqww23" path="res://scenes/player/scene.tscn" id="2_bp46t"]
+[ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
+[ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
 
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_bp46t"]
 
 [node name="World" type="Node3D"]
+script = ExtResource("1_0rkgh")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+light_energy = 2.0
+omni_range = 16.0
 
 [node name="GridMap" type="GridMap" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 2)
 mesh_library = ExtResource("1_bp46t")
+cell_size = Vector3(1, 1, 1)
 cell_center_x = false
 cell_center_y = false
 cell_center_z = false
+collision_layer = 2
 data = {
-"cells": PackedInt32Array(10, 3, 1441792, 10, 1, 1441792, 10, 5, 1048576, 10, 7, 1048576, 10, 9, 1048576, 10, 11, 1048576, 10, 13, 1048576, 10, 15, 1048576, 10, 65535, 1048576, 10, 65533, 1048576, 10, 17, 1048576, 10, 19, 1048576, 10, 21, 1048576, 10, 65531, 1048576, 10, 65529, 1048576, 10, 65527, 1048576, 10, 65525, 1048576, 10, 65523, 1048576, 10, 65521, 1048576, 10, 65519, 1048576, 10, 65517, 1048576, 10, 65515, 1048576, 10, 65513, 1048576, 10, 65511, 1048576, 10, 23, 1048576, 10, 25, 1048576, 10, 27, 1048576, 10, 29, 1048576, 10, 65509, 1048576, 9, 65531, 1048577, 9, 65533, 1048577, 9, 65535, 1048577, 9, 1, 1048577, 9, 3, 1048577, 7, 3, 1048577, 7, 1, 1048577, 7, 65535, 1048577, 7, 65533, 1048577, 7, 65531, 1048577, 5, 65531, 1048577, 3, 65531, 1048577, 3, 65533, 1048577, 3, 65535, 1048577, 3, 1, 1048577, 3, 3, 1048577, 5, 3, 1048577, 5, 1, 1048577, 5, 65533, 1048577, 5, 65535, 1048578, 1, 3, 1048577, 1, 1, 1048577, 1, 65535, 1048577, 1, 65533, 1048577, 1, 65531, 1048577)
+"cells": PackedInt32Array(10, 65534, 3, 65534, 65522, 1048577, 22, 10, 1441793, 22, 65522, 1, 65534, 65526, 1441792, 65534, 65530, 1441792, 2, 10, 655360, 6, 10, 655360, 10, 10, 655360, 14, 10, 655360, 18, 10, 655360, 22, 6, 1048576, 22, 2, 1048576, 22, 65534, 1048576, 22, 65530, 1048576, 22, 65526, 1048576, 18, 65522, 0, 14, 65522, 0, 10, 65522, 0, 6, 65522, 0, 2, 65522, 0, 4, 65532, 2, 4, 0, 2, 0, 0, 2, 0, 65532, 2, 12, 4, 2, 8, 4, 2, 4, 4, 2, 0, 4, 2, 4, 8, 2, 8, 8, 2, 12, 8, 2, 0, 8, 2, 0, 65528, 2, 0, 65524, 2, 4, 65528, 2, 4, 65524, 2, 8, 65524, 2, 12, 65524, 2, 16, 65524, 2, 20, 65524, 2, 20, 65528, 2, 20, 65532, 2, 20, 0, 2, 16, 0, 2, 16, 65528, 2, 8, 65528, 2, 20, 8, 2, 16, 8, 2, 16, 4, 2, 20, 4, 2, 16, 65532, 2, 12, 65528, 2, 65534, 65534, 1441792, 65534, 2, 1441792, 65534, 6, 1441792, 65534, 10, 655361)
 }
-
-[node name="Player" parent="." instance=ExtResource("2_bp46t")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -2)
 
 [node name="Floor" type="StaticBody3D" parent="."]
 

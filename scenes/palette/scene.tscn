@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://cjgy5bpnusria"]
+
+[ext_resource type="PackedScene" uid="uid://dlwfvd2ga0fun" path="res://assets/dungeon/models/wall.gltf" id="1_u4fnm"]
+[ext_resource type="PackedScene" uid="uid://c0cwvbd1spuly" path="res://assets/dungeon/models/wall_corner.gltf" id="2_yvih5"]
+[ext_resource type="PackedScene" uid="uid://bhdi2edglqhfs" path="res://assets/dungeon/models/floor_tile_large.gltf" id="3_iejse"]
+[ext_resource type="PackedScene" uid="uid://df6u8owedqkf0" path="res://assets/dungeon/models/floor_tile_extralarge_grates.gltf" id="4_w02ji"]
+
+[node name="Palette" type="Node3D"]
+
+[node name="Wall" parent="." instance=ExtResource("1_u4fnm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -8)
+
+[node name="Wall Corner" parent="." instance=ExtResource("2_yvih5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+
+[node name="floor_tile_large2" parent="." instance=ExtResource("3_iejse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
+
+[node name="floor_tile_extralarge_grates2" parent="." instance=ExtResource("4_w02ji")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -8)

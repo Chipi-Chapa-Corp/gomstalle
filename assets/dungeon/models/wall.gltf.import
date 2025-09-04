@@ -42,6 +42,12 @@ _subresources={
 "save_to_file/enabled": true,
 "save_to_file/path": "res://assets/dungeon/models/wall.mesh"
 }
+},
+"nodes": {
+"PATH:wall": {
+"generate/physics": true,
+"physics/shape_type": 1
+}
 }
 }
 gltf/naming_version=1

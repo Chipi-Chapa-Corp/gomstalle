@@ -11,20 +11,24 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var anim_tree = $AnimationTree
 @onready var model = $Rig
 
+@export var outline_material: ShaderMaterial # assign outline.tres in Inspector
+var outline_root: Node3D
+
 var camera_offset: Vector3
 
 func _on_before_spawn(data: Dictionary) -> void:
 	peer_id = data["peer_id"]
 
 func _ready() -> void:
-	# set_multiplayer_authority(peer_id)
-	# if is_multiplayer_authority():
-	camera.make_current()
-	# else:
-	# 	camera.current = false
-	# 	set_physics_process(false)
-	# 	set_process_input(false)
+	set_multiplayer_authority(peer_id)
+	if is_multiplayer_authority():
+		camera.make_current()
+	else:
+		camera.current = false
+		set_physics_process(false)
+		set_process_input(false)
 	camera_offset = camera.global_transform.origin - global_transform.origin
+	apply_outline_next_pass(model)
 
 func _physics_process(delta: float) -> void:
 	velocity.y += -gravity * delta
@@ -72,3 +76,27 @@ func _mouse_ground_hit() -> Vector3:
 	var ground := Plane(Vector3.UP, global_transform.origin.y)
 	var hit := ground.intersects_ray(ro, rd) as Vector3
 	return hit if hit != null else Vector3.INF
+
+func apply_outline_next_pass(root: Node) -> void:
+	for n in root.get_children():
+		if n is MeshInstance3D:
+			_apply_to_mesh(n)
+		if n.get_child_count() > 0:
+			apply_outline_next_pass(n)
+
+func _apply_to_mesh(mi: MeshInstance3D) -> void:
+	var surf_count := mi.mesh.get_surface_count()
+	for s in range(surf_count):
+		var mat := mi.get_surface_override_material(s)
+		if mat == null:
+			mat = mi.mesh.surface_get_material(s)
+			if mat == null:
+				continue
+		# Make unique so we don’t modify shared imported material
+		if !mat.resource_local_to_scene:
+			mat = mat.duplicate()
+			mat.resource_local_to_scene = true
+			mi.set_surface_override_material(s, mat)
+		# Don’t stack multiple times
+		if mat.next_pass == null:
+			mat.next_pass = outline_material

@@ -11,9 +11,14 @@ config_version=5
 [application]
 
 config/name="Gomstalle"
-run/main_scene="uid://cw0ja2d8khrr7"
+run/main_scene="uid://ckqporu5qgnv4"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Settings="*res://globals/Settings.gd"
+Spawner="*res://globals/Spawner.gd"
 
 [input]
 

@@ -1,9 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://cjgy5bpnusria"]
+[gd_scene load_steps=9 format=3 uid="uid://cjgy5bpnusria"]
 
 [ext_resource type="PackedScene" uid="uid://dlwfvd2ga0fun" path="res://assets/dungeon/models/wall.gltf" id="1_u4fnm"]
 [ext_resource type="PackedScene" uid="uid://c0cwvbd1spuly" path="res://assets/dungeon/models/wall_corner.gltf" id="2_yvih5"]
 [ext_resource type="PackedScene" uid="uid://bhdi2edglqhfs" path="res://assets/dungeon/models/floor_tile_large.gltf" id="3_iejse"]
 [ext_resource type="PackedScene" uid="uid://df6u8owedqkf0" path="res://assets/dungeon/models/floor_tile_extralarge_grates.gltf" id="4_w02ji"]
+[ext_resource type="PackedScene" uid="uid://berski34cld10" path="res://assets/dungeon/models/table_long_tablecloth_decorated_A.gltf" id="5_8cd00"]
+[ext_resource type="PackedScene" uid="uid://dcmyne40aw65a" path="res://assets/dungeon/models/chair.gltf" id="6_wyhkj"]
+[ext_resource type="PackedScene" uid="uid://dx6e8kohpykvl" path="res://assets/dungeon/models/stool.gltf" id="7_qmp2k"]
+[ext_resource type="PackedScene" uid="uid://dlij4rdeoid36" path="res://assets/dungeon/models/crates_stacked.gltf" id="8_p013m"]
 
 [node name="Palette" type="Node3D"]
 
@@ -18,3 +22,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
 
 [node name="floor_tile_extralarge_grates2" parent="." instance=ExtResource("4_w02ji")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -8)
+
+[node name="table_long_tablecloth_decorated_A2" parent="." instance=ExtResource("5_8cd00")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -8)
+
+[node name="chair2" parent="." instance=ExtResource("6_wyhkj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -7)
+
+[node name="stool2" parent="." instance=ExtResource("7_qmp2k")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -9)
+
+[node name="crates_stacked2" parent="." instance=ExtResource("8_p013m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -2)

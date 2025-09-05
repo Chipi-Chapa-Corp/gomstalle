@@ -18,9 +18,10 @@ var camera_offset: Vector3
 
 func _on_before_spawn(data: Dictionary) -> void:
 	peer_id = data["peer_id"]
+	set_multiplayer_authority(peer_id)
+	global_position = data["position"]
 
 func _ready() -> void:
-	set_multiplayer_authority(peer_id)
 	if is_multiplayer_authority():
 		camera.make_current()
 	else:

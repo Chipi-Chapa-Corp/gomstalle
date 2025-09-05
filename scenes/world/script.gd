@@ -30,4 +30,4 @@ func _on_peer_connected(peer_id: int) -> void:
         print("not server")
         return
     print("server spawning player ", peer_id)
-    Spawner.spawn_entity("player", {"peer_id": peer_id})
+    Spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})

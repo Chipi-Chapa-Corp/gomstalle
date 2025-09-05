@@ -7,7 +7,6 @@ var scenes: Dictionary = {
 }
 
 func _do_spawn(data: Dictionary) -> Node3D:
-	print("spawning ", data)
 	var scene = scenes[data["entity"]]
 	var entity = scene.instantiate()
 	if entity.has_method("_on_before_spawn"):

@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://baia4k0qqww23"]
+[gd_scene load_steps=19 format=3 uid="uid://baia4k0qqww23"]
 
 [ext_resource type="PackedScene" uid="uid://devbuktujmib1" path="res://assets/characters/Characters/Rogue.glb" id="1_xvkdw"]
 [ext_resource type="Script" uid="uid://dgbvrsxxd666k" path="res://scenes/player/script.gd" id="2_e4tch"]
@@ -6,83 +6,71 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xvkdw"]
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0niji"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_l3ro8"]
 animation = &"Cheer"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6ohwh"]
-animation = &"Death_A"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_e4tch"]
-animation = &"Idle"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ak5du"]
-animation = &"Walking_C"
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_0niji"]
+filter_enabled = true
+filters = ["Rig/Skeleton3D:elbowIK.l", "Rig/Skeleton3D:elbowIK.r", "Rig/Skeleton3D:hand.l", "Rig/Skeleton3D:hand.r", "Rig/Skeleton3D:handIK.l", "Rig/Skeleton3D:handIK.r", "Rig/Skeleton3D:handslot.l", "Rig/Skeleton3D:handslot.r", "Rig/Skeleton3D:lowerarm.l", "Rig/Skeleton3D:lowerarm.r", "Rig/Skeleton3D:upperarm.l", "Rig/Skeleton3D:upperarm.r"]
+fadein_time = 0.1
+fadeout_time = 0.1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_e8u37"]
-animation = &"Walking_C"
+animation = &"Jump_Full_Short"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_itrdm"]
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_itrdm"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_drsp3"]
 animation = &"Walking_Backwards"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_go6ih"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_860hg"]
 animation = &"Walking_A"
 
-[sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_l3ro8"]
-blend_point_0/node = SubResource("AnimationNodeAnimation_e4tch")
-blend_point_0/pos = Vector2(0, 0)
-blend_point_1/node = SubResource("AnimationNodeAnimation_ak5du")
-blend_point_1/pos = Vector2(-1, 0)
-blend_point_2/node = SubResource("AnimationNodeAnimation_e8u37")
-blend_point_2/pos = Vector2(1, 0)
-blend_point_3/node = SubResource("AnimationNodeAnimation_itrdm")
-blend_point_3/pos = Vector2(0, 1)
-blend_point_4/node = SubResource("AnimationNodeAnimation_go6ih")
-blend_point_4/pos = Vector2(0, -1)
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8k1dt"]
+animation = &"Walking_C"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_euyhv"]
-animation = &"Interact"
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_dwhkg"]
+animation = &"Walking_C"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_2hgy8"]
-animation = &"Lie_StandUp"
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ak5du"]
+animation = &"Idle"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_t87ks"]
-xfade_time = 0.3
-switch_mode = 2
+[sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_o81f2"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_drsp3")
+blend_point_0/pos = Vector2(0, 1)
+blend_point_1/node = SubResource("AnimationNodeAnimation_860hg")
+blend_point_1/pos = Vector2(0, -1)
+blend_point_2/node = SubResource("AnimationNodeAnimation_8k1dt")
+blend_point_2/pos = Vector2(-1, 0)
+blend_point_3/node = SubResource("AnimationNodeAnimation_dwhkg")
+blend_point_3/pos = Vector2(1, 0)
+blend_point_4/node = SubResource("AnimationNodeAnimation_ak5du")
+blend_point_4/pos = Vector2(0, 0)
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_0niji"]
-advance_mode = 2
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_t87ks"]
+graph_offset = Vector2(-489.098, 14.5995)
+nodes/Cheer_A/node = SubResource("AnimationNodeAnimation_l3ro8")
+nodes/Cheer_A/position = Vector2(-20, 280)
+nodes/Cheer_OS/node = SubResource("AnimationNodeOneShot_0niji")
+nodes/Cheer_OS/position = Vector2(140, 140)
+nodes/Jump_A/node = SubResource("AnimationNodeAnimation_e8u37")
+nodes/Jump_A/position = Vector2(320, 280)
+nodes/Jump_OS/node = SubResource("AnimationNodeOneShot_itrdm")
+nodes/Jump_OS/position = Vector2(500, 140)
+nodes/Locomotion/node = SubResource("AnimationNodeBlendSpace2D_o81f2")
+nodes/Locomotion/position = Vector2(-380, 180)
+nodes/output/position = Vector2(880, 180)
+node_connections = [&"Cheer_OS", 0, &"Locomotion", &"Cheer_OS", 1, &"Cheer_A", &"Jump_OS", 0, &"Cheer_OS", &"Jump_OS", 1, &"Jump_A", &"output", 0, &"Jump_OS"]
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_6ohwh"]
-switch_mode = 2
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_euyhv"]
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_2hgy8"]
-switch_mode = 2
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_drsp3"]
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_860hg"]
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_8k1dt"]
-switch_mode = 2
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ak5du"]
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_xvkdw"]
-states/Cheer/node = SubResource("AnimationNodeAnimation_0niji")
-states/Cheer/position = Vector2(640, 12)
-states/Death_A/node = SubResource("AnimationNodeAnimation_6ohwh")
-states/Death_A/position = Vector2(793, 100)
-states/IW/node = SubResource("AnimationNodeBlendSpace2D_l3ro8")
+states/End/position = Vector2(763, 100)
+states/IW/node = SubResource("AnimationNodeBlendTree_t87ks")
 states/IW/position = Vector2(503, 100)
-states/Interact/node = SubResource("AnimationNodeAnimation_euyhv")
-states/Interact/position = Vector2(503, 12)
-states/Lie_StandUp/node = SubResource("AnimationNodeAnimation_2hgy8")
-states/Lie_StandUp/position = Vector2(793, 210)
-transitions = ["Death_A", "Lie_StandUp", SubResource("AnimationNodeStateMachineTransition_t87ks"), "Start", "IW", SubResource("AnimationNodeStateMachineTransition_0niji"), "Interact", "IW", SubResource("AnimationNodeStateMachineTransition_6ohwh"), "IW", "Interact", SubResource("AnimationNodeStateMachineTransition_euyhv"), "Cheer", "IW", SubResource("AnimationNodeStateMachineTransition_2hgy8"), "IW", "Cheer", SubResource("AnimationNodeStateMachineTransition_drsp3"), "IW", "Death_A", SubResource("AnimationNodeStateMachineTransition_860hg"), "Lie_StandUp", "IW", SubResource("AnimationNodeStateMachineTransition_8k1dt")]
-graph_offset = Vector2(-312, -76)
+transitions = ["Start", "IW", SubResource("AnimationNodeStateMachineTransition_ak5du")]
+graph_offset = Vector2(-288, -104)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_e4tch"]
 properties/0/path = NodePath(".:position")
@@ -121,7 +109,7 @@ bones/14/position = Vector3(-1.5736e-08, 0.0961251, -0.0575)
 bones/14/rotation = Quaternion(-1.02444e-09, -4.24391e-09, 0.707107, 0.707107)
 bones/19/rotation = Quaternion(-5.8061e-11, -0.0313416, -1.88013e-09, 0.999509)
 bones/21/position = Vector3(0.170945, 0.113587, 1.59941e-08)
-bones/21/rotation = Quaternion(0.996185, 0.0479136, 0.0566427, -0.045939)
+bones/21/rotation = Quaternion(0.996186, 0.0479136, 0.0566427, -0.045939)
 bones/22/rotation = Quaternion(0.165014, 6.49414e-08, -1.11408e-07, 0.986291)
 bones/23/rotation = Quaternion(-0.533729, -0.260895, -1.72985e-05, 0.804405)
 bones/24/rotation = Quaternion(-2.32092e-08, 0.920355, -0.391084, 7.25743e-08)
@@ -197,7 +185,13 @@ shape = SubResource("CapsuleShape3D_xvkdw")
 [node name="AnimationTree" type="AnimationTree" parent="." index="3"]
 tree_root = SubResource("AnimationNodeStateMachine_xvkdw")
 anim_player = NodePath("../AnimationPlayer")
-parameters/IW/blend_position = Vector2(-0.000581741, -0.00245702)
+parameters/IW/Cheer_OS/active = false
+parameters/IW/Cheer_OS/internal_active = false
+parameters/IW/Cheer_OS/request = 0
+parameters/IW/Jump_OS/active = false
+parameters/IW/Jump_OS/internal_active = false
+parameters/IW/Jump_OS/request = 0
+parameters/IW/Locomotion/blend_position = Vector2(-0.000633299, 0)
 
 [node name="Camera3D" type="Camera3D" parent="." index="4"]
 transform = Transform3D(-1, -7.16125e-08, 5.01436e-08, 0, 0.573576, 0.819152, -8.74228e-08, 0.819152, -0.573576, 0, 11, -7)

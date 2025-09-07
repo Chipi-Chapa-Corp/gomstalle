@@ -36,6 +36,9 @@ func _physics_process(delta: float) -> void:
 	get_move_input(delta)
 	move_and_slide()
 
+	if Input.is_action_just_pressed("emote"):
+		anim_tree.set("parameters/IW/Cheer_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
 	# --- rotate the visual model ---
 	if Input.is_action_pressed("aim"): # bind RMB to "aim" in Input Map
 		var hit := _mouse_ground_hit()
@@ -64,8 +67,9 @@ func get_move_input(delta: float) -> void:
 		dir = dir.normalized()
 	velocity = lerp(velocity, dir * move_speed, acceleration * delta)
 	
-	var local_vel = model.global_transform.basis.inverse() * velocity
-	anim_tree.set("parameters/IW/blend_position", Vector2(local_vel.x, -local_vel.z) / move_speed)
+	var local_velocity = model.global_transform.basis.inverse() * velocity
+	var blend_position = Vector2(local_velocity.x, -local_velocity.z) / move_speed
+	anim_tree.set("parameters/IW/Locomotion/blend_position", blend_position)
 
 	velocity.y = vy
 	

@@ -98,7 +98,12 @@ acceleration = 5.0
 
 [node name="Label" type="Label3D" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.56348, 0)
-font_size = 40
+offset = Vector2(0, 125)
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 1, 1, 0.635294)
+font_size = 70
+outline_size = 20
 
 [node name="Skeleton3D" parent="Rig" index="0"]
 bones/1/position = Vector3(0, 0.392064, 0)
@@ -204,7 +209,7 @@ parameters/IW/Jump_OS/request = 0
 parameters/IW/Locomotion/blend_position = Vector2(-0.000633299, 0)
 
 [node name="Camera3D" type="Camera3D" parent="." index="5"]
-transform = Transform3D(-1, -7.16125e-08, 5.01436e-08, 0, 0.573576, 0.819152, -8.74228e-08, 0.819152, -0.573576, 0, 11, -7)
+transform = Transform3D(1, 0, 0, 0, 0.573576, 0.819152, 0, -0.819152, 0.573576, 0, 11, 7)
 fov = 65.1241
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." index="6"]

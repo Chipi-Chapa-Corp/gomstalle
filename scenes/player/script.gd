@@ -25,12 +25,13 @@ func _on_before_spawn(data: Dictionary) -> void:
 func _ready() -> void:
 	if is_multiplayer_authority():
 		camera.make_current()
+		label.visible = true
 	else:
+		label.text = "Player %d" % peer_id
 		camera.current = false
 		set_physics_process(false)
 		set_process_input(false)
 	camera_offset = camera.global_transform.origin - global_transform.origin
-	label.text = "Player %d" % peer_id
 
 func _physics_process(delta: float) -> void:
 	velocity.y += -gravity * delta
@@ -58,15 +59,11 @@ func _physics_process(delta: float) -> void:
 
 	camera.global_transform.origin = global_transform.origin + camera_offset
 
-	label.look_at(camera.global_transform.origin, Vector3.DOWN)
-	var label_dist = camera.global_transform.origin.distance_to(label.global_transform.origin)
-	label.scale = label_dist * 0.01 * Vector3.ONE
-
 func get_move_input(delta: float) -> void:
 	var vy = velocity.y
 	velocity.y = 0
 
-	var input_vec = Input.get_vector("move_right", "move_left", "move_backward", "move_forward")
+	var input_vec = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var dir = Vector3(input_vec.x, 0, input_vec.y)
 	if dir.length() > 1.0:
 		dir = dir.normalized()

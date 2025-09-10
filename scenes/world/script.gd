@@ -41,4 +41,8 @@ func _on_peer_connected(peer_id: int) -> void:
 		print("not server")
 		return
 	print("server spawning player ", peer_id)
+	$UI/HUD/Start.visible = true
 	Spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})
+
+func _on_start() -> void:
+	pass

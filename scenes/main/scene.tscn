@@ -8969,8 +8969,9 @@ offset_right = 236.0
 offset_bottom = 236.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("4_rjpi5")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+[node name="Main" type="VBoxContainer" parent="Panel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -8983,15 +8984,50 @@ offset_right = 20.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("4_rjpi5")
 
-[node name="Host" type="Button" parent="Panel/VBoxContainer"]
+[node name="Host" type="Button" parent="Panel/Main"]
 layout_mode = 2
 text = "Create & Host"
 
-[node name="Join" type="Button" parent="Panel/VBoxContainer"]
+[node name="Join" type="Button" parent="Panel/Main"]
 layout_mode = 2
 text = "Join"
 
-[connection signal="pressed" from="Panel/VBoxContainer/Host" to="Panel/VBoxContainer" method="_on_host_pressed"]
-[connection signal="pressed" from="Panel/VBoxContainer/Join" to="Panel/VBoxContainer" method="_on_join_pressed"]
+[node name="Join" type="VBoxContainer" parent="Panel"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Searching" type="Label" parent="Panel/Join"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Searching..."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="List" type="VBoxContainer" parent="Panel/Join"]
+layout_mode = 2
+
+[node name="Space" type="Label" parent="Panel/Join"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Back" type="Button" parent="Panel/Join"]
+layout_mode = 2
+text = "Back"
+
+[connection signal="pressed" from="Panel/Main/Host" to="Panel" method="_on_host_pressed"]
+[connection signal="pressed" from="Panel/Main/Join" to="Panel" method="_on_join_pressed"]
+[connection signal="pressed" from="Panel/Join/Back" to="Panel" method="_on_join_back_pressed"]

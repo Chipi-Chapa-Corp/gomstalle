@@ -79,9 +79,15 @@ properties/0/replication_mode = 2
 properties/1/path = NodePath("Rig:rotation")
 properties/1/spawn = false
 properties/1/replication_mode = 2
-properties/2/path = NodePath("AnimationTree:parameters/IW/blend_position")
+properties/2/path = NodePath("AnimationTree:parameters/IW/Locomotion/blend_position")
 properties/2/spawn = false
 properties/2/replication_mode = 1
+properties/3/path = NodePath("AnimationTree:parameters/IW/Cheer_OS/active")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath("AnimationTree:parameters/IW/Jump_OS/active")
+properties/4/spawn = true
+properties/4/replication_mode = 1
 
 [node name="Player" instance=ExtResource("1_xvkdw")]
 collision_layer = 2
@@ -89,6 +95,10 @@ wall_min_slide_angle = 0.174533
 script = ExtResource("2_e4tch")
 move_speed = 5.0
 acceleration = 5.0
+
+[node name="Label" type="Label3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.56348, 0)
+font_size = 40
 
 [node name="Skeleton3D" parent="Rig" index="0"]
 bones/1/position = Vector3(0, 0.392064, 0)
@@ -178,11 +188,11 @@ material_overlay = ExtResource("3_ak5du")
 [node name="Rogue_Head" parent="Rig/Skeleton3D" index="9"]
 material_overlay = ExtResource("3_ak5du")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="1"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_xvkdw")
 
-[node name="AnimationTree" type="AnimationTree" parent="." index="3"]
+[node name="AnimationTree" type="AnimationTree" parent="." index="4"]
 tree_root = SubResource("AnimationNodeStateMachine_xvkdw")
 anim_player = NodePath("../AnimationPlayer")
 parameters/IW/Cheer_OS/active = false
@@ -193,10 +203,10 @@ parameters/IW/Jump_OS/internal_active = false
 parameters/IW/Jump_OS/request = 0
 parameters/IW/Locomotion/blend_position = Vector2(-0.000633299, 0)
 
-[node name="Camera3D" type="Camera3D" parent="." index="4"]
+[node name="Camera3D" type="Camera3D" parent="." index="5"]
 transform = Transform3D(-1, -7.16125e-08, 5.01436e-08, 0, 0.573576, 0.819152, -8.74228e-08, 0.819152, -0.573576, 0, 11, -7)
 fov = 65.1241
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." index="5"]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." index="6"]
 process_mode = 4
 replication_config = SubResource("SceneReplicationConfig_e4tch")

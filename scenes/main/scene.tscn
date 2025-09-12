@@ -40,6 +40,7 @@ offset_right = 20.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 10
 
 [node name="Host" type="Button" parent="Panel/Main"]
 layout_mode = 2
@@ -52,31 +53,35 @@ text = "Join"
 [node name="Join" type="VBoxContainer" parent="Panel"]
 visible = false
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="List" type="ScrollContainer" parent="Panel/Join"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 3
+
+[node name="Scrollable" type="MarginContainer" parent="Panel/Join/List"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+
+[node name="Container" type="VBoxContainer" parent="Panel/Join/List/Scrollable"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
 
 [node name="Searching" type="Label" parent="Panel/Join"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Searching..."
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="List" type="VBoxContainer" parent="Panel/Join"]
-layout_mode = 2
-
-[node name="Space" type="Label" parent="Panel/Join"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
 horizontal_alignment = 1
 vertical_alignment = 1
 

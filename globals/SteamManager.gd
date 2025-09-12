@@ -59,7 +59,6 @@ func _check_command_line() -> void:
 		if args[0] == "+connect_lobby":
 			if int(args[1]) > 0:
 				print("Command line lobby ID: %s" % args[1])
-				# join_lobby(int(args[1]))
 
 func _on_lobby_created(lobby_connect: int, lobby_id: int) -> void:
 	if lobby_connect != 1:

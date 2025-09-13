@@ -52,6 +52,7 @@ func _listen():
 	Steam.lobby_joined.connect(_on_lobby_joined)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
 	Steam.p2p_session_request.connect(_on_p2p_session_request)
+	Steam.lobby_chat_update.connect(_on_lobby_chat_update)
 
 func _check_command_line() -> void:
 	var args := OS.get_cmdline_args()
@@ -60,6 +61,9 @@ func _check_command_line() -> void:
 			if int(args[1]) > 0:
 				print("Command line lobby ID: %s" % args[1])
 
+func _on_lobby_chat_update(lobby_id: int, chat_data: String) -> void:
+	print("Lobby chat updated: %s %s" % [lobby_id, chat_data])
+
 func _on_lobby_created(lobby_connect: int, lobby_id: int) -> void:
 	if lobby_connect != 1:
 		lobby_created.emit("Failed to create lobby: " + str(lobby_connect))
@@ -67,9 +71,9 @@ func _on_lobby_created(lobby_connect: int, lobby_id: int) -> void:
 		
 	current_lobby_id = lobby_id
 	Steam.setLobbyJoinable(lobby_id, true)
-	Steam.setLobbyData(lobby_id, "_app_id", "gomstalle")
+	Steam.setLobbyData(lobby_id, "_app_id", "gomstalle") # Dev mode only
 	Steam.setLobbyData(lobby_id, "name", "Test Name")
-	Steam.setLobbyData(lobby_id, "mode", "Test")
+	Steam.setLobbyData(lobby_id, "state", "waiting")
 
 	var set_relay := Steam.allowP2PPacketRelay(true)
 	print("Set relay: %s" % set_relay)
@@ -80,12 +84,13 @@ func _on_lobby_created(lobby_connect: int, lobby_id: int) -> void:
 func _on_lobby_match_list(lobby_ids: Array) -> void:
 	var list = lobby_ids.map(func(lobby_id: int):
 		var lobby_name := Steam.getLobbyData(lobby_id, "name")
-		var lobby_mode := Steam.getLobbyData(lobby_id, "mode")
+		var lobby_state := Steam.getLobbyData(lobby_id, "state")
 		var lobby_num_members := Steam.getNumLobbyMembers(lobby_id)
+		print("Lobby match found: %s with members %s" % [lobby_id, lobby_num_members])
 		return {
 			"id": lobby_id,
 			"name": lobby_name,
-			"mode": lobby_mode,
+			"state": lobby_state,
 			"num_members": lobby_num_members
 		}
 	)

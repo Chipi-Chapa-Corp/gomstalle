@@ -80,3 +80,13 @@ func _mouse_ground_hit() -> Vector3:
 	var ground := Plane(Vector3.UP, global_transform.origin.y)
 	var hit := ground.intersects_ray(ro, rd) as Vector3
 	return hit if hit != null else Vector3.INF
+
+func handle_interactible(body: StaticBody3D, enable: bool) -> void:
+	if body.is_in_group("interactible") and body.has_method("interact"):
+		body.interact(enable)
+
+func _on_interactor_body_entered(body: StaticBody3D) -> void:
+	handle_interactible(body, true)
+
+func _on_interactor_body_exited(body: Node3D) -> void:
+	handle_interactible(body, false)

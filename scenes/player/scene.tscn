@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://baia4k0qqww23"]
+[gd_scene load_steps=20 format=3 uid="uid://baia4k0qqww23"]
 
 [ext_resource type="PackedScene" uid="uid://devbuktujmib1" path="res://assets/characters/Characters/Rogue.glb" id="1_xvkdw"]
 [ext_resource type="Script" uid="uid://dgbvrsxxd666k" path="res://scenes/player/script.gd" id="2_e4tch"]
@@ -88,6 +88,9 @@ properties/3/replication_mode = 1
 properties/4/path = NodePath("AnimationTree:parameters/IW/Jump_OS/active")
 properties/4/spawn = true
 properties/4/replication_mode = 1
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ak5du"]
+radius = 1.9661
 
 [node name="Player" instance=ExtResource("1_xvkdw")]
 collision_layer = 2
@@ -215,3 +218,14 @@ fov = 65.1241
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." index="6"]
 process_mode = 4
 replication_config = SubResource("SceneReplicationConfig_e4tch")
+
+[node name="Interactor" type="Area3D" parent="." index="7"]
+collision_layer = 0
+collision_mask = 16
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Interactor" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.932608, 0)
+shape = SubResource("SphereShape3D_ak5du")
+
+[connection signal="body_entered" from="Interactor" to="." method="_on_interactor_body_entered"]
+[connection signal="body_exited" from="Interactor" to="." method="_on_interactor_body_exited"]

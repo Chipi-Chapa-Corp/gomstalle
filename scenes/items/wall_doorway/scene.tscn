@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://d2d5gjlemdjis"]
+
+[ext_resource type="PackedScene" uid="uid://ccplh8j2t36af" path="res://assets/dungeon/models/wall_doorway.gltf" id="1_mnbra"]
+[ext_resource type="Script" uid="uid://n02442idivhb" path="res://scenes/items/wall_doorway/script.gd" id="2_1lb5u"]
+
+[node name="wall_doorway" instance=ExtResource("1_mnbra")]
+
+[node name="StaticBody3D" parent="wall_doorway/wall_doorway_door" index="0" groups=["interactible"]]
+collision_layer = 17
+script = ExtResource("2_1lb5u")

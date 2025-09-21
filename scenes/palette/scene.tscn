@@ -17,20 +17,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -8)
 [node name="Wall Corner" parent="." instance=ExtResource("2_yvih5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
 
-[node name="floor_tile_large2" parent="." instance=ExtResource("3_iejse")]
+[node name="Floor" parent="." instance=ExtResource("3_iejse")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
 
-[node name="floor_tile_extralarge_grates2" parent="." instance=ExtResource("4_w02ji")]
+[node name="Center Floor" parent="." instance=ExtResource("4_w02ji")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -8)
 
-[node name="table_long_tablecloth_decorated_A2" parent="." instance=ExtResource("5_8cd00")]
+[node name="Table wCloth" parent="." instance=ExtResource("5_8cd00")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -8)
 
-[node name="chair2" parent="." instance=ExtResource("6_wyhkj")]
+[node name="Chair" parent="." instance=ExtResource("6_wyhkj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -7)
 
-[node name="stool2" parent="." instance=ExtResource("7_qmp2k")]
+[node name="Stool" parent="." instance=ExtResource("7_qmp2k")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -9)
 
-[node name="crates_stacked2" parent="." instance=ExtResource("8_p013m")]
+[node name="Crates" parent="." instance=ExtResource("8_p013m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -2)

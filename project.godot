@@ -21,6 +21,10 @@ Settings="*res://globals/Settings.gd"
 Spawner="*res://globals/Spawner.gd"
 SteamManager="*res://globals/SteamManager.gd"
 
+[global_group]
+
+interactible="Interactible items (doors, chairs, etc)"
+
 [input]
 
 move_forward={

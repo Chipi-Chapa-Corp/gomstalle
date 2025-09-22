@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://bafpmkm4tdjlp"]
+
+[ext_resource type="PackedScene" uid="uid://dcmyne40aw65a" path="res://assets/dungeon/models/chair.gltf" id="1_thibo"]
+[ext_resource type="Script" uid="uid://dotvh4lte2cfy" path="res://scenes/items/chair/script.gd" id="2_erf87"]
+
+[node name="Chair" instance=ExtResource("1_thibo")]
+
+[node name="StaticBody3D" parent="chair" index="0" groups=["interactible"]]
+collision_layer = 17
+script = ExtResource("2_erf87")

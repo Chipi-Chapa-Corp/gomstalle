@@ -17,6 +17,10 @@ var outline_root: Node3D
 
 var camera_offset: Vector3
 
+var interactibles: Array[StaticBody3D] = []
+var item: StaticBody3D
+var closest_item: StaticBody3D
+
 func _on_before_spawn(data: Dictionary) -> void:
 	peer_id = data["peer_id"]
 	set_multiplayer_authority(peer_id)
@@ -37,6 +41,30 @@ func _physics_process(delta: float) -> void:
 	velocity.y += -gravity * delta
 	get_move_input(delta)
 	move_and_slide()
+
+	var next_closest_item = interactibles.reduce(func(a, b):
+		var dist_a = a.global_transform.origin.distance_to(global_transform.origin)
+		var dist_b = b.global_transform.origin.distance_to(global_transform.origin)
+		return a if dist_a < dist_b else b
+	)
+	if next_closest_item != null and next_closest_item != closest_item:
+		if closest_item:
+			closest_item.notice(false)
+		closest_item = next_closest_item
+		closest_item.notice(true)
+
+	if Input.is_action_just_pressed("interact"):
+		if closest_item == null or closest_item == item:
+			return
+		var metadata = {"position": global_transform.origin}
+		if item != null:
+			item.interact(false, metadata)
+		item = closest_item
+		item.interact(true, metadata)
+		if item.is_static:
+			item = null
+		else:
+			interactibles.erase(item)
 
 	if Input.is_action_just_pressed("emote"):
 		anim_tree.set("parameters/IW/Cheer_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
@@ -82,9 +110,14 @@ func _mouse_ground_hit() -> Vector3:
 	return hit if hit != null else Vector3.INF
 
 func handle_interactible(body: StaticBody3D, enable: bool) -> void:
-	if body.is_in_group("interactible") and body.has_method("interact"):
-		var player_world_position: Vector3 = global_transform.origin
-		body.interact(enable, {"position": player_world_position})
+	if body.is_in_group("interactible"):
+		if enable and not interactibles.has(body):
+			interactibles.append(body)
+		elif not enable and interactibles.has(body):
+			interactibles.erase(body)
+			body.notice(false)
+			if body == closest_item:
+				closest_item = null
 
 func _on_interactor_body_entered(body: StaticBody3D) -> void:
 	handle_interactible(body, true)

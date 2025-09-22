@@ -36,6 +36,7 @@ _subresources={
 "nodes": {
 "PATH:chair": {
 "generate/physics": true,
+"physics/physics_material_override": null,
 "physics/shape_type": 1
 }
 }

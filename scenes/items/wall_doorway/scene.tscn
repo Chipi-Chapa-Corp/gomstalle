@@ -1,10 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://d2d5gjlemdjis"]
+[gd_scene load_steps=4 format=3 uid="uid://d2d5gjlemdjis"]
 
 [ext_resource type="PackedScene" uid="uid://ccplh8j2t36af" path="res://assets/dungeon/models/wall_doorway.gltf" id="1_mnbra"]
 [ext_resource type="Script" uid="uid://n02442idivhb" path="res://scenes/items/wall_doorway/script.gd" id="2_1lb5u"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_1lb5u"]
+size = Vector3(2, 2.64551, 0.746582)
+
 [node name="wall_doorway" instance=ExtResource("1_mnbra")]
 
-[node name="StaticBody3D" parent="wall_doorway/wall_doorway_door" index="0" groups=["interactible"]]
-collision_layer = 17
+[node name="Receiver" type="StaticBody3D" parent="." index="1" groups=["interactible"]]
+collision_layer = 16
 script = ExtResource("2_1lb5u")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Receiver" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.39757, -0.0131041)
+shape = SubResource("BoxShape3D_1lb5u")

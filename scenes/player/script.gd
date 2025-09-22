@@ -83,7 +83,8 @@ func _mouse_ground_hit() -> Vector3:
 
 func handle_interactible(body: StaticBody3D, enable: bool) -> void:
 	if body.is_in_group("interactible") and body.has_method("interact"):
-		body.interact(enable)
+		var player_world_position: Vector3 = global_transform.origin
+		body.interact(enable, {"position": player_world_position})
 
 func _on_interactor_body_entered(body: StaticBody3D) -> void:
 	handle_interactible(body, true)

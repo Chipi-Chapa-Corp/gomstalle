@@ -5,8 +5,16 @@ STRICTLY FOLLOW THESE INSTRUCTIONS:
 - Always only write what is needed right now. Keep all your edits as minimal and
   concise as possible to perform a task. Always start by a small research and
   implementation plan, proceed only after confirmation
+- Never use `cond ? expr : else-expr` syntax. Godot uses Python-like `expr if cond else else-expr` syntax
 - Never write any comments
 - Never create .md files unless explicitly requested to
 - Never bloat README with too many technical details, keep it concise and simple
 - Never use single-letter variables, instead use only descriptive names. This applies to all variables including lambda arguments
 - Never create relay/empty functions
+
+STRICTLY FOLLOW THESE COMMIT CONVENTIONS:
+- Always use `feat: message` for new features. Never add "implement" or "add", write the feature right after feat:
+- Always use `fix: message` for bug fixes. Never add "fix", write the bug right after fix:
+- Always use `chore: message` for chore updates. Never add "update", write the chore right after chore:
+- Always write short commit messages that are easy to understand and explain the changes
+- Never describe every single change in the commit message, write only a general description of all changes

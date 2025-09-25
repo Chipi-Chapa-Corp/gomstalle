@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://baia4k0qqww23"]
+[gd_scene load_steps=27 format=3 uid="uid://baia4k0qqww23"]
 
 [ext_resource type="PackedScene" uid="uid://devbuktujmib1" path="res://assets/characters/Characters/Rogue.glb" id="1_xvkdw"]
 [ext_resource type="Script" uid="uid://dgbvrsxxd666k" path="res://scenes/player/script.gd" id="2_e4tch"]
@@ -19,6 +19,35 @@ fadeout_time = 0.1
 animation = &"Jump_Full_Short"
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_itrdm"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_ak5du"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_itrdm"]
+animation = &"Idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_go6ih"]
+animation = &"Running_B"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0niji"]
+animation = &"Walking_Backwards"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6ohwh"]
+animation = &"Running_Strafe_Right"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_euyhv"]
+animation = &"Running_Strafe_Left"
+
+[sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_2hgy8"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_itrdm")
+blend_point_0/pos = Vector2(0, 0)
+blend_point_1/node = SubResource("AnimationNodeAnimation_go6ih")
+blend_point_1/pos = Vector2(0, -1)
+blend_point_2/node = SubResource("AnimationNodeAnimation_0niji")
+blend_point_2/pos = Vector2(0, 1)
+blend_point_3/node = SubResource("AnimationNodeAnimation_6ohwh")
+blend_point_3/pos = Vector2(-1, 0)
+blend_point_4/node = SubResource("AnimationNodeAnimation_euyhv")
+blend_point_4/pos = Vector2(1, 0)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_drsp3"]
 animation = &"Walking_Backwards"
@@ -48,7 +77,7 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_ak5du")
 blend_point_4/pos = Vector2(0, 0)
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_t87ks"]
-graph_offset = Vector2(-529.62, -18.7521)
+graph_offset = Vector2(-528.237, -98.8606)
 nodes/Cheer_A/node = SubResource("AnimationNodeAnimation_l3ro8")
 nodes/Cheer_A/position = Vector2(-20, 280)
 nodes/Cheer_OS/node = SubResource("AnimationNodeOneShot_0niji")
@@ -57,10 +86,14 @@ nodes/Jump_A/node = SubResource("AnimationNodeAnimation_e8u37")
 nodes/Jump_A/position = Vector2(320, 280)
 nodes/Jump_OS/node = SubResource("AnimationNodeOneShot_itrdm")
 nodes/Jump_OS/position = Vector2(500, 140)
-nodes/Locomotion/node = SubResource("AnimationNodeBlendSpace2D_o81f2")
-nodes/Locomotion/position = Vector2(-380, 180)
+nodes/MovementState/node = SubResource("AnimationNodeBlend2_ak5du")
+nodes/MovementState/position = Vector2(-240, 80)
+nodes/Run/node = SubResource("AnimationNodeBlendSpace2D_2hgy8")
+nodes/Run/position = Vector2(-480, 220)
+nodes/Walk/node = SubResource("AnimationNodeBlendSpace2D_o81f2")
+nodes/Walk/position = Vector2(-480, 0)
 nodes/output/position = Vector2(880, 180)
-node_connections = [&"Cheer_OS", 0, &"Locomotion", &"Cheer_OS", 1, &"Cheer_A", &"Jump_OS", 0, &"Cheer_OS", &"Jump_OS", 1, &"Jump_A", &"output", 0, &"Jump_OS"]
+node_connections = [&"Cheer_OS", 0, &"MovementState", &"Cheer_OS", 1, &"Cheer_A", &"Jump_OS", 0, &"Cheer_OS", &"Jump_OS", 1, &"Jump_A", &"MovementState", 0, &"Walk", &"MovementState", 1, &"Run", &"output", 0, &"Jump_OS"]
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ak5du"]
 advance_mode = 2
@@ -68,7 +101,7 @@ advance_mode = 2
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_xvkdw"]
 states/End/position = Vector2(763, 100)
 states/IW/node = SubResource("AnimationNodeBlendTree_t87ks")
-states/IW/position = Vector2(503, 100)
+states/IW/position = Vector2(502, 100)
 transitions = ["Start", "IW", SubResource("AnimationNodeStateMachineTransition_ak5du")]
 graph_offset = Vector2(-288, -104)
 
@@ -79,14 +112,14 @@ properties/0/replication_mode = 2
 properties/1/path = NodePath("Rig:rotation")
 properties/1/spawn = false
 properties/1/replication_mode = 2
-properties/2/path = NodePath("AnimationTree:parameters/IW/Locomotion/blend_position")
-properties/2/spawn = false
+properties/2/path = NodePath("AnimationTree:parameters/IW/Cheer_OS/active")
+properties/2/spawn = true
 properties/2/replication_mode = 1
-properties/3/path = NodePath("AnimationTree:parameters/IW/Cheer_OS/active")
+properties/3/path = NodePath("AnimationTree:parameters/IW/Jump_OS/active")
 properties/3/spawn = true
 properties/3/replication_mode = 1
-properties/4/path = NodePath("AnimationTree:parameters/IW/Jump_OS/active")
-properties/4/spawn = true
+properties/4/path = NodePath("AnimationTree:parameters/IW/Walk/blend_position")
+properties/4/spawn = false
 properties/4/replication_mode = 1
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_ak5du"]
@@ -96,8 +129,6 @@ radius = 1.9661
 collision_layer = 2
 wall_min_slide_angle = 0.174533
 script = ExtResource("2_e4tch")
-move_speed = 5.0
-acceleration = 5.0
 
 [node name="Label" type="Label3D" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.56348, 0)
@@ -209,7 +240,9 @@ parameters/IW/Cheer_OS/request = 0
 parameters/IW/Jump_OS/active = false
 parameters/IW/Jump_OS/internal_active = false
 parameters/IW/Jump_OS/request = 0
-parameters/IW/Locomotion/blend_position = Vector2(-0.000633299, 0)
+parameters/IW/MovementState/blend_amount = 0.0
+parameters/IW/Run/blend_position = Vector2(-0.001297, 0.00165296)
+parameters/IW/Walk/blend_position = Vector2(1.41245, -0.077686)
 
 [node name="Camera3D" type="Camera3D" parent="." index="5"]
 transform = Transform3D(1, 0, 0, 0, 0.573576, 0.819152, 0, -0.819152, 0.573576, 0, 11, 7)

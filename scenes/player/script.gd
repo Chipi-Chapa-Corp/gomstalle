@@ -2,9 +2,10 @@ extends CharacterBody3D
 
 var peer_id: int
 
-@export var move_speed = 3.0
-@export var acceleration = 3.0
-@export var rotation_speed = 12.0
+@export var base_move_speed = 6.0
+@export var run_move_speed = 8.0
+var current_move_speed = base_move_speed
+@export var rotation_speed = 8.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var camera = $Camera3D
@@ -20,6 +21,8 @@ var camera_offset: Vector3
 var interactibles: Array[StaticBody3D] = []
 var item: StaticBody3D
 var closest_item: StaticBody3D
+var animation_velocity: Vector3 = Vector3.ZERO
+var movement_state_blend: float = 0.0
 
 func _on_before_spawn(data: Dictionary) -> void:
 	peer_id = data["peer_id"]
@@ -39,7 +42,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	velocity.y += -gravity * delta
-	get_move_input(delta)
+	handle_movement(delta)
 	move_and_slide()
 
 	var next_closest_item = interactibles.reduce(func(a, b):
@@ -85,21 +88,40 @@ func _physics_process(delta: float) -> void:
 
 	camera.global_transform.origin = global_transform.origin + camera_offset
 
-func get_move_input(delta: float) -> void:
-	var vy = velocity.y
-	velocity.y = 0
 
-	var input_vec = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-	var dir = Vector3(input_vec.x, 0, input_vec.y)
-	if dir.length() > 1.0:
-		dir = dir.normalized()
-	velocity = lerp(velocity, dir * move_speed, acceleration * delta)
+func handle_movement(_delta: float) -> void:
+	var vertical_velocity = velocity.y
+	velocity.y = 0.0
+
+	var is_running = Input.is_action_pressed("run")
+	current_move_speed = run_move_speed if is_running else base_move_speed
+
+	var movement_input = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	var movement_direction = Vector3(movement_input.x, 0.0, movement_input.y)
+	if movement_direction.length() > 1.0:
+		movement_direction = movement_direction.normalized()
+
+	var horizontal_velocity = movement_direction * current_move_speed
+	velocity.x = horizontal_velocity.x
+	velocity.z = horizontal_velocity.z
+	animation_velocity = animation_velocity.lerp(horizontal_velocity, 0.15)
+
+	var local_velocity = model.global_transform.basis.inverse() * animation_velocity
+	var local_plane_velocity = Vector2(local_velocity.x, -local_velocity.z)
 	
-	var local_velocity = model.global_transform.basis.inverse() * velocity
-	var blend_position = Vector2(local_velocity.x, -local_velocity.z) / move_speed
-	anim_tree.set("parameters/IW/Locomotion/blend_position", blend_position)
+	var walk_blend_position = local_plane_velocity / base_move_speed if base_move_speed != 0.0 else Vector2.ZERO
+	walk_blend_position = walk_blend_position.limit_length(1.0)
+	anim_tree.set("parameters/IW/Walk/blend_position", walk_blend_position)
 
-	velocity.y = vy
+	var run_blend_position = local_plane_velocity / run_move_speed if run_move_speed != 0.0 else Vector2.ZERO
+	run_blend_position = run_blend_position.limit_length(1.0)
+	anim_tree.set("parameters/IW/Run/blend_position", run_blend_position)
+
+	var target_movement_state = 1.0 if is_running else 0.0
+	movement_state_blend = lerp(movement_state_blend, target_movement_state, 0.15)
+	anim_tree.set("parameters/IW/MovementState/blend_amount", movement_state_blend)
+
+	velocity.y = vertical_velocity
 	
 func _mouse_ground_hit() -> Vector3:
 	var mp := get_viewport().get_mouse_position()

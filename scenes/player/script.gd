@@ -20,8 +20,6 @@ const rotation_speed = 8.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
-var outline_root: Node3D
-
 var camera_offset: Vector3
 
 var interactibles: Array[StaticBody3D] = []
@@ -133,17 +131,18 @@ func handle_movement(delta: float) -> void:
 		stamina = max(stamina - stamina_usage * delta, 0.0)
 	elif not run_requested:
 		stamina = min(stamina + stamina_regen * delta, max_stamina)
-	stamina_bar.visible = stamina < max_stamina
-	stamina_bar.value = stamina / max_stamina * 100.0
+	if is_multiplayer_authority():
+		stamina_bar.visible = stamina < max_stamina
+		stamina_bar.value = stamina / max_stamina * 100.0
 
 	velocity.y = vertical_velocity
 	
 func _mouse_ground_hit() -> Vector3:
-	var mp := get_viewport().get_mouse_position()
-	var ro := camera.project_ray_origin(mp) as Vector3
-	var rd := camera.project_ray_normal(mp) as Vector3
+	var mouse_position := get_viewport().get_mouse_position()
+	var ray_origin: Vector3 = camera.project_ray_origin(mouse_position)
+	var ray_destination: Vector3 = camera.project_ray_normal(mouse_position)
 	var ground := Plane(Vector3.UP, global_transform.origin.y)
-	var hit := ground.intersects_ray(ro, rd) as Vector3
+	var hit: Vector3 = ground.intersects_ray(ray_origin, ray_destination)
 	return hit if hit != null else Vector3.INF
 
 func handle_interactible(body: StaticBody3D, enable: bool) -> void:

@@ -14,6 +14,10 @@ func _ready():
 	apply_outline = Interactor.init_outline(door)
 
 func interact(enable: bool, metadata: Dictionary):
+	if !multiplayer.is_server():
+		rpc_id(1, "request_interact", enable, metadata)
+		return
+
 	if not IS_STATIC:
 		apply_outline.call(false)
 	var player_position: Vector3 = metadata.get("position", Vector3.ZERO)
@@ -22,6 +26,11 @@ func interact(enable: bool, metadata: Dictionary):
 	var target := 0.0 if is_opened else signf(axis_value) * 90.0 if enable else 0.0
 	get_tree().create_tween().tween_property(door, "rotation_degrees:y", target, ANIMATION_DURATION)
 	is_opened = not is_opened
+
+@rpc("any_peer", "reliable")
+func request_interact(enable: bool, metadata: Dictionary) -> void:
+	if multiplayer.is_server():
+		interact(enable, metadata)
 
 func notice(enable: bool):
 	apply_outline.call(enable)

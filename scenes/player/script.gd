@@ -5,6 +5,7 @@ extends CharacterBody3D
 @onready var model = $Rig
 @onready var label = $Label
 @onready var stamina_bar: TextureProgressBar = $"2D/HUD/Stamina"
+@onready var cooldown_timer: Timer = $Cooldown
 
 var peer_id: int
 
@@ -61,12 +62,15 @@ func _physics_process(delta: float) -> void:
 		closest_item.notice(true)
 
 	if Input.is_action_just_pressed("interact"):
+		if cooldown_timer.time_left > 0.0:
+			return
 		if closest_item == null or closest_item == item:
 			return
 		var metadata = {"position": global_transform.origin}
 		if item != null:
 			item.interact(false, metadata)
 		item = closest_item
+		cooldown_timer.start()
 		anim_tree.set("parameters/IW/Interact_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 		item.interact(true, metadata)
 		if item.get_is_static():

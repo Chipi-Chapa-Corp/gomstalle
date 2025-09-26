@@ -1,12 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://cw0ja2d8khrr7"]
+[gd_scene load_steps=6 format=3 uid="uid://cw0ja2d8khrr7"]
 
 [ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
 [ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
 [ext_resource type="Theme" uid="uid://bufvxkr1xw0yq" path="res://assets/theme.tres" id="2_0rkgh"]
 [ext_resource type="PackedScene" uid="uid://d2d5gjlemdjis" path="res://scenes/items/wall_doorway/scene.tscn" id="4_lhsaa"]
 [ext_resource type="PackedScene" uid="uid://bafpmkm4tdjlp" path="res://scenes/items/chair/scene.tscn" id="5_qbeeu"]
-
-[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_bp46t"]
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_0rkgh")
@@ -44,14 +42,9 @@ cell_center_y = false
 cell_center_z = false
 collision_mask = 3
 data = {
-"cells": PackedInt32Array(10, 65534, 3, 65534, 65522, 1048577, 22, 10, 1441793, 22, 65522, 1, 65534, 65526, 1441792, 65534, 65530, 1441792, 2, 10, 655360, 6, 10, 655360, 10, 10, 655360, 14, 10, 655360, 18, 10, 655360, 22, 6, 1048576, 22, 2, 1048576, 22, 65530, 1048576, 22, 65526, 1048576, 18, 65522, 0, 14, 65522, 0, 6, 65522, 0, 2, 65522, 0, 4, 65532, 2, 4, 0, 2, 0, 0, 2, 0, 65532, 2, 12, 4, 2, 8, 4, 2, 4, 4, 2, 0, 4, 2, 4, 8, 2, 8, 8, 2, 12, 8, 2, 0, 8, 2, 0, 65528, 2, 0, 65524, 2, 4, 65528, 2, 4, 65524, 2, 8, 65524, 2, 12, 65524, 2, 16, 65524, 2, 20, 65524, 2, 20, 65528, 2, 20, 65532, 2, 20, 0, 2, 16, 0, 2, 16, 65528, 2, 8, 65528, 2, 20, 8, 2, 16, 8, 2, 16, 4, 2, 20, 4, 2, 16, 65532, 2, 12, 65528, 2, 65534, 65534, 1441792, 65534, 2, 1441792, 65534, 6, 1441792, 65534, 10, 655361, 2, 5, 4, 20, 65525, 7)
+"cells": PackedInt32Array(10, 65534, 3, 65534, 65522, 1048577, 22, 10, 1441793, 22, 65522, 1, 65534, 65526, 1441792, 65534, 65530, 1441792, 2, 10, 655360, 6, 10, 655360, 10, 10, 655360, 14, 10, 655360, 18, 10, 655360, 22, 6, 1048576, 22, 2, 1048576, 22, 65530, 1048576, 22, 65526, 1048576, 18, 65522, 0, 14, 65522, 0, 6, 65522, 0, 2, 65522, 0, 4, 65532, 2, 4, 0, 2, 0, 0, 2, 0, 65532, 2, 12, 4, 2, 8, 4, 2, 4, 4, 2, 0, 4, 2, 4, 8, 2, 8, 8, 2, 12, 8, 2, 0, 8, 2, 8, 65524, 2, 12, 65524, 2, 16, 65524, 2, 20, 65524, 2, 20, 65528, 2, 20, 65532, 2, 20, 0, 2, 16, 0, 2, 16, 65528, 2, 8, 65528, 2, 20, 8, 2, 16, 8, 2, 16, 4, 2, 20, 4, 2, 16, 65532, 2, 12, 65528, 2, 65534, 65534, 1441792, 65534, 2, 1441792, 65534, 6, 1441792, 65534, 10, 655361, 2, 5, 4, 20, 65525, 7, 4, 65528, 1048578, 0, 65528, 1048578, 0, 65524, 1048578, 4, 65524, 1048578)
 }
-
-[node name="Floor" type="StaticBody3D" parent="."]
-collision_mask = 3
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
-shape = SubResource("WorldBoundaryShape3D_bp46t")
+metadata/_editor_floor_ = Vector3(0, 0, 0)
 
 [node name="Interactibles" type="Node" parent="."]
 

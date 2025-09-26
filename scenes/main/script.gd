@@ -17,7 +17,7 @@ func _on_host_pressed() -> void:
 	Settings.is_host = true
 	var on_created = func(error):
 		if error:
-			print("Failed to create lobby: %s" % error)
+			push_error("Failed to create lobby: %s" % error)
 			return
 		_on_start()
 
@@ -28,7 +28,7 @@ func _on_join_room_pressed(room) -> void:
 	Settings.is_host = false
 	var on_join_reply = func(error):
 		if error:
-			print("Failed to join lobby: %s" % error)
+			push_error("Failed to join lobby: %s" % error)
 			_on_join_back_pressed()
 			return
 		_on_start()

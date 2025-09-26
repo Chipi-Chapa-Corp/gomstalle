@@ -15,7 +15,7 @@ func is_ready() -> bool:
 	return _ready_ok
 
 func join_lobby(lobby_id: int) -> void:
-	print("Attempting to join lobby %s" % lobby_id)
+	print_debug("Attempting to join lobby %s" % lobby_id)
 	Steam.joinLobby(lobby_id)
 
 func create_lobby() -> void:
@@ -29,9 +29,8 @@ func refresh_lobby_list() -> void:
 
 func _ready() -> void:
 	if not Steam:
-		push_error("Steam singleton not found")
+		push_error("Steam singleton not found. You need `SteamGodot SteamMultiplayerPeer` version of editor.")
 		return
-	print("Steam singleton Found")
 	
 	var ok = Steam.steamInit()
 	if ok:
@@ -39,9 +38,9 @@ func _ready() -> void:
 		_check_command_line()
 		set_process(true)
 		_ready_ok = true
-		print("Steam API initialized as user " + Steam.getPersonaName())
+		print_debug("Steam API initialized as user " + Steam.getPersonaName())
 	else:
-		push_error("Error: Failed to initialize Steam API")
+		push_error("Error: Failed to initialize Steam. Is Steam app running and logged in?")
 
 func _process(_delta: float) -> void:
 	if Steam and Steam.has_method("run_callbacks"):
@@ -52,17 +51,13 @@ func _listen():
 	Steam.lobby_joined.connect(_on_lobby_joined)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
 	Steam.p2p_session_request.connect(_on_p2p_session_request)
-	Steam.lobby_chat_update.connect(_on_lobby_chat_update)
 
 func _check_command_line() -> void:
 	var args := OS.get_cmdline_args()
 	if args.size() > 0:
 		if args[0] == "+connect_lobby":
 			if int(args[1]) > 0:
-				print("Command line lobby ID: %s" % args[1])
-
-func _on_lobby_chat_update(lobby_id: int, chat_data: String) -> void:
-	print("Lobby chat updated: %s %s" % [lobby_id, chat_data])
+				print_debug("Command line lobby ID: %s" % args[1])
 
 func _on_lobby_created(lobby_connect: int, lobby_id: int) -> void:
 	if lobby_connect != 1:
@@ -75,10 +70,9 @@ func _on_lobby_created(lobby_connect: int, lobby_id: int) -> void:
 	Steam.setLobbyData(lobby_id, "name", "Test Name")
 	Steam.setLobbyData(lobby_id, "state", "waiting")
 
-	var set_relay := Steam.allowP2PPacketRelay(true)
-	print("Set relay: %s" % set_relay)
+	Steam.allowP2PPacketRelay(true)
 
-	print("Lobby created: %s" % lobby_id)
+	print_debug("Lobby created: %s" % lobby_id)
 	lobby_created.emit(null)
 
 func _on_lobby_match_list(lobby_ids: Array) -> void:
@@ -86,7 +80,7 @@ func _on_lobby_match_list(lobby_ids: Array) -> void:
 		var lobby_name := Steam.getLobbyData(lobby_id, "name")
 		var lobby_state := Steam.getLobbyData(lobby_id, "state")
 		var lobby_num_members := Steam.getNumLobbyMembers(lobby_id)
-		print("Lobby match found: %s with members %s" % [lobby_id, lobby_num_members])
+		print_debug("Lobby match found: %s with members %s" % [lobby_id, lobby_num_members])
 		return {
 			"id": lobby_id,
 			"name": lobby_name,
@@ -101,9 +95,9 @@ func _on_lobby_joined(lobby_id: int, _permissions: int, _locked: bool, response:
 		current_lobby_id = lobby_id
 		_make_p2p_handshake()
 		lobby_joined.emit(null)
-		print("Lobby joined (should've): %s" % lobby_id)
+		print_debug("Lobby joined (should've): %s" % lobby_id)
 	else:
-		print("Failed to join lobby: %s" % response)
+		push_error("Failed to join lobby: %s" % response)
 		var fail_reason: String
 
 		match response:
@@ -123,9 +117,9 @@ func _on_lobby_joined(lobby_id: int, _permissions: int, _locked: bool, response:
 
 func _make_p2p_handshake() -> void:
 	var host_id := Steam.getLobbyOwner(current_lobby_id)
-	print("Sending P2P handshake to the lobby %s to %s" % [current_lobby_id, host_id])
+	print_debug("Sending P2P handshake to the lobby %s to %s" % [current_lobby_id, host_id])
 	Steam.sendP2PPacket(host_id, PackedByteArray([1]), Steam.P2P_SEND_RELIABLE, 0)
 
 func _on_p2p_session_request(peer_id: int, _session_request_flags: int) -> void:
-	print("Accepted P2P handshake to the lobby from %s" % peer_id)
+	print_debug("Accepted P2P handshake to the lobby from %s" % peer_id)
 	Steam.acceptP2PSessionWithUser(peer_id)

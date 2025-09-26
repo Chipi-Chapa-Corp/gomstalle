@@ -2,10 +2,11 @@ extends CharacterBody3D
 
 var peer_id: int
 
-@export var base_move_speed = 6.0
-@export var run_move_speed = 8.0
+const base_move_speed = 6.0
+const run_move_speed = 8.0
+
 var current_move_speed = base_move_speed
-@export var rotation_speed = 8.0
+const rotation_speed = 8.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var camera = $Camera3D
@@ -13,7 +14,6 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var model = $Rig
 @onready var label = $Label
 
-@export var outline_material: ShaderMaterial
 var outline_root: Node3D
 
 var camera_offset: Vector3
@@ -64,7 +64,7 @@ func _physics_process(delta: float) -> void:
 			item.interact(false, metadata)
 		item = closest_item
 		item.interact(true, metadata)
-		if item.is_static:
+		if item.IS_STATIC:
 			item = null
 		else:
 			interactibles.erase(item)

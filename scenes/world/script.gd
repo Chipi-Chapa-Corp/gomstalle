@@ -4,11 +4,11 @@ const MAX_CLIENTS := 4
 
 func _ready():
 	if Settings.is_host:
-		print("starting server")
+		print_debug("Starting server [HOST]")
 		multiplayer.peer_connected.connect(_on_peer_connected)
 		_start_server(func(): _on_peer_connected(multiplayer.get_unique_id()))
 	else:
-		print("connecting to server")
+		print_debug("Connecting to server [PEER]")
 		_connect_to_server()
 
 func _start_server(cb: Callable):
@@ -30,6 +30,6 @@ func _connect_to_server():
 	multiplayer.multiplayer_peer = peer
 
 func _on_peer_connected(peer_id: int) -> void:
-	print("server spawning player ", peer_id)
+	print_debug("Server spawning player ", peer_id)
 	$UI/HUD/Start.visible = true
 	Spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})

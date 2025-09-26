@@ -67,6 +67,7 @@ func _physics_process(delta: float) -> void:
 		if item != null:
 			item.interact(false, metadata)
 		item = closest_item
+		anim_tree.set("parameters/IW/Interact_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 		item.interact(true, metadata)
 		if item.get_is_static():
 			item = null

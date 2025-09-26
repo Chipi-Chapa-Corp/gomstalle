@@ -1,17 +1,11 @@
-extends StaticBody3D
+extends Interactable
 
-var apply_outline: Callable
-
-func _ready():
-	# apply_outline = Interactor.init_outline(get_parent())
-	pass
-
-func interact(_enable: bool, _meta: Dictionary):
+func perform_interact(_enable: bool, _meta: Dictionary):
 	if not get_is_static():
-		apply_outline.call(false)
+		set_show_outline(false)
 
-func notice(enable: bool):
-	apply_outline.call(enable)
+func get_outline_target() -> MeshInstance3D:
+	return get_parent()
 
 func get_is_static() -> bool:
 	return false

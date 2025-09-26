@@ -1,6 +1,8 @@
 extends Node3D
 
 const MAX_CLIENTS := 4
+@export var player_spawn_center: Vector3 = Vector3.ZERO
+@export var player_spawn_radius: float = 4.0
 
 func _ready():
 	if Settings.is_host:
@@ -33,3 +35,43 @@ func _on_peer_connected(peer_id: int) -> void:
 	print_debug("Server spawning player ", peer_id)
 	$UI/HUD/Start.visible = true
 	Spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})
+
+func _on_start_pressed():
+	if not Settings.is_host:
+		return
+	GameState.sync_connected_peers(multiplayer)
+	var peers := GameState.connected_peer_ids
+	if peers.is_empty():
+		return
+	var random_index := randi() % peers.size()
+	var hunter_peer_id := peers[random_index]
+	rpc("_notify_game_start", hunter_peer_id, peers)
+	_apply_game_start(hunter_peer_id, peers)
+
+@rpc("any_peer")
+func _notify_game_start(hunter_peer_id: int, peer_ids: Array) -> void:
+	GameState.set_connected_peers(peer_ids)
+	_apply_game_start(hunter_peer_id, peer_ids)
+
+func _apply_game_start(hunter_peer_id: int, peer_ids: Array) -> void:
+	GameState.mark_started(hunter_peer_id)
+	var players := _get_players()
+	if players.is_empty():
+		return
+	var circle_count = max(peer_ids.size(), 1)
+	var angle_step = TAU / circle_count
+	var player_index := 0
+	for player in players:
+		if player.peer_id == hunter_peer_id:
+			player.global_position = player_spawn_center
+		else:
+			var angle = angle_step * player_index
+			var new_position = player_spawn_center + Vector3(cos(angle), 0.0, sin(angle)) * player_spawn_radius
+			player.global_position = new_position
+			player_index += 1
+
+func _get_players() -> Array:
+	var player_nodes: Array = []
+	for player_node in get_tree().get_nodes_in_group("players"):
+		player_nodes.append(player_node)
+	return player_nodes

@@ -43,6 +43,9 @@ func _ready() -> void:
 		camera.current = false
 		set_physics_process(false)
 		set_process_input(false)
+	GameState.started.connect(_on_game_state_started)
+	if GameState.game_started:
+		_on_game_state_started(GameState.hunter_peer_id)
 	camera_offset = camera.global_transform.origin - global_transform.origin
 
 func _physics_process(delta: float) -> void:
@@ -165,3 +168,11 @@ func _on_interactor_body_entered(body: StaticBody3D) -> void:
 
 func _on_interactor_body_exited(body: Node3D) -> void:
 	handle_interactible(body, false)
+
+func _exit_tree() -> void:
+	if GameState.started.is_connected(_on_game_state_started):
+		GameState.started.disconnect(_on_game_state_started)
+
+func _on_game_state_started(hunter_peer_id: int) -> void:
+	if peer_id == hunter_peer_id:
+		label.text = "Hunter %d" % peer_id

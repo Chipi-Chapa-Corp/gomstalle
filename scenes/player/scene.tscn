@@ -1,8 +1,9 @@
-[gd_scene load_steps=27 format=3 uid="uid://baia4k0qqww23"]
+[gd_scene load_steps=28 format=3 uid="uid://baia4k0qqww23"]
 
 [ext_resource type="PackedScene" uid="uid://devbuktujmib1" path="res://assets/characters/Characters/Rogue.glb" id="1_xvkdw"]
 [ext_resource type="Script" uid="uid://dgbvrsxxd666k" path="res://scenes/player/script.gd" id="2_e4tch"]
 [ext_resource type="Material" uid="uid://dv7jqwtmnjk2v" path="res://materials/pre_depth.tres" id="3_ak5du"]
+[ext_resource type="Texture2D" uid="uid://c7duugha7sfp1" path="res://assets/UI/stamina-full.png" id="4_e8u37"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xvkdw"]
 
@@ -259,6 +260,34 @@ collision_mask = 16
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Interactor" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.932608, 0)
 shape = SubResource("SphereShape3D_ak5du")
+
+[node name="2D" type="CanvasLayer" parent="." index="8"]
+
+[node name="HUD" type="Control" parent="2D" index="0"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Stamina" type="TextureProgressBar" parent="2D/HUD" index="0"]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.45
+anchor_top = 0.5
+anchor_right = 0.45
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+fill_mode = 5
+texture_progress = ExtResource("4_e8u37")
+metadata/_edit_use_anchors_ = true
 
 [connection signal="body_entered" from="Interactor" to="." method="_on_interactor_body_entered"]
 [connection signal="body_exited" from="Interactor" to="." method="_on_interactor_body_exited"]

@@ -1,18 +1,24 @@
 extends CharacterBody3D
 
-var peer_id: int
-
-const base_move_speed = 6.0
-const run_move_speed = 8.0
-
-var current_move_speed = base_move_speed
-const rotation_speed = 8.0
-
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var camera = $Camera3D
 @onready var anim_tree = $AnimationTree
 @onready var model = $Rig
 @onready var label = $Label
+@onready var stamina_bar: TextureProgressBar = $"2D/HUD/Stamina"
+
+var peer_id: int
+
+const base_move_speed = 6.0
+const run_move_speed = 8.0
+const max_stamina = 50
+const stamina_usage = 10
+const stamina_regen = 5
+
+var current_move_speed = base_move_speed
+var stamina = max_stamina
+const rotation_speed = 8.0
+
+var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var outline_root: Node3D
 
@@ -89,17 +95,19 @@ func _physics_process(delta: float) -> void:
 	camera.global_transform.origin = global_transform.origin + camera_offset
 
 
-func handle_movement(_delta: float) -> void:
+func handle_movement(delta: float) -> void:
 	var vertical_velocity = velocity.y
 	velocity.y = 0.0
 
-	var is_running = Input.is_action_pressed("run")
-	current_move_speed = run_move_speed if is_running else base_move_speed
-
+	var run_requested = Input.is_action_pressed("run")
 	var movement_input = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var movement_direction = Vector3(movement_input.x, 0.0, movement_input.y)
 	if movement_direction.length() > 1.0:
 		movement_direction = movement_direction.normalized()
+	var is_moving = movement_direction.length() > 0.0
+	var has_stamina = stamina > 0.0
+	var is_running = run_requested and has_stamina and is_moving
+	current_move_speed = run_move_speed if is_running else base_move_speed
 
 	var horizontal_velocity = movement_direction * current_move_speed
 	velocity.x = horizontal_velocity.x
@@ -120,6 +128,13 @@ func handle_movement(_delta: float) -> void:
 	var target_movement_state = 1.0 if is_running else 0.0
 	movement_state_blend = lerp(movement_state_blend, target_movement_state, 0.15)
 	anim_tree.set("parameters/IW/MovementState/blend_amount", movement_state_blend)
+
+	if is_running:
+		stamina = max(stamina - stamina_usage * delta, 0.0)
+	elif not run_requested:
+		stamina = min(stamina + stamina_regen * delta, max_stamina)
+	stamina_bar.visible = stamina < max_stamina
+	stamina_bar.value = stamina / max_stamina * 100.0
 
 	velocity.y = vertical_velocity
 	

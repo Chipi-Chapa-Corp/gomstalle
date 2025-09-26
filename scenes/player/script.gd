@@ -64,7 +64,7 @@ func _physics_process(delta: float) -> void:
 			item.interact(false, metadata)
 		item = closest_item
 		item.interact(true, metadata)
-		if item.IS_STATIC:
+		if item.get_is_static():
 			item = null
 		else:
 			interactibles.erase(item)

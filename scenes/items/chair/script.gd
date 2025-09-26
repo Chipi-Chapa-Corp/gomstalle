@@ -1,14 +1,17 @@
 extends StaticBody3D
 
-const IS_STATIC = false
 var apply_outline: Callable
 
 func _ready():
-	apply_outline = Interactor.init_outline(get_parent())
+	# apply_outline = Interactor.init_outline(get_parent())
+	pass
 
 func interact(_enable: bool, _meta: Dictionary):
-	if not IS_STATIC:
+	if not get_is_static():
 		apply_outline.call(false)
 
 func notice(enable: bool):
 	apply_outline.call(enable)
+
+func get_is_static() -> bool:
+	return false

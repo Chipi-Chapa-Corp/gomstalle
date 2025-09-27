@@ -6,6 +6,10 @@ extends CharacterBody3D
 @onready var label = $Label
 @onready var stamina_bar: TextureProgressBar = $"2D/HUD/Stamina"
 @onready var cooldown_timer: Timer = $Cooldown
+@onready var player_name = Steam.getPersonaName()
+
+@export var hunter_color: Color = Color(1, 0, 0, 1)
+@export var hider_color: Color = Color(0, 0, 1, 1)
 
 var peer_id: int
 
@@ -37,12 +41,14 @@ func _on_before_spawn(data: Dictionary) -> void:
 func _ready() -> void:
 	if is_multiplayer_authority():
 		camera.make_current()
-		label.visible = true
+		label.visible = false
 	else:
-		label.text = "Player %d" % peer_id
+		label.text = player_name
 		camera.current = false
 		set_physics_process(false)
 		set_process_input(false)
+
+	GameState.started.connect(_on_game_started)
 	camera_offset = camera.global_transform.origin - global_transform.origin
 
 func _physics_process(delta: float) -> void:
@@ -165,3 +171,16 @@ func _on_interactor_body_entered(body: StaticBody3D) -> void:
 
 func _on_interactor_body_exited(body: Node3D) -> void:
 	handle_interactible(body, false)
+
+func _exit_tree() -> void:
+	if GameState.started.is_connected(_on_game_started):
+		GameState.started.disconnect(_on_game_started)
+
+func _on_game_started(hunter_peer_id: int) -> void:
+	if peer_id == hunter_peer_id:
+		label.modulate = hunter_color
+	else:
+		label.modulate = hider_color
+	if is_multiplayer_authority():
+		var target_position = GameState.start_positions.get(peer_id, global_position)
+		global_position = target_position

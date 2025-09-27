@@ -71,3 +71,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 6)
 
 [node name="Chair2" parent="Interactibles/Chairs" instance=ExtResource("5_qbeeu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 8)
+
+[connection signal="pressed" from="UI/HUD/Start" to="." method="_on_start_pressed"]

@@ -1,8 +1,9 @@
-[gd_scene load_steps=31 format=3 uid="uid://baia4k0qqww23"]
+[gd_scene load_steps=32 format=3 uid="uid://baia4k0qqww23"]
 
 [ext_resource type="PackedScene" uid="uid://devbuktujmib1" path="res://assets/characters/Characters/Rogue.glb" id="1_xvkdw"]
 [ext_resource type="Script" uid="uid://dgbvrsxxd666k" path="res://scenes/player/script.gd" id="2_e4tch"]
 [ext_resource type="Material" uid="uid://dv7jqwtmnjk2v" path="res://materials/pre_depth.tres" id="3_ak5du"]
+[ext_resource type="FontFile" uid="uid://c160touvmrhvm" path="res://assets/UI/MedievalSharp/MedievalSharp-Regular.ttf" id="3_itrdm"]
 [ext_resource type="Texture2D" uid="uid://c7duugha7sfp1" path="res://assets/UI/stamina-full.png" id="4_e8u37"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xvkdw"]
@@ -154,9 +155,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.56348, 0)
 offset = Vector2(0, 125)
 billboard = 1
 no_depth_test = true
-modulate = Color(1, 1, 1, 0.635294)
+modulate = Color(0, 0, 0, 1)
+outline_modulate = Color(1, 1, 1, 1)
+text = "Player"
+font = ExtResource("3_itrdm")
 font_size = 70
-outline_size = 20
+outline_size = 7
 
 [node name="Skeleton3D" parent="Rig" index="0"]
 bones/1/position = Vector3(0, 0.392064, 0)

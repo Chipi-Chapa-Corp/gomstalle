@@ -16,6 +16,7 @@ STRICTLY FOLLOW THESE INSTRUCTIONS:
 - Never bloat README with too many technical details, keep it concise and simple
 - Never use single-letter variables, instead use only descriptive names. This applies to all variables including lambda arguments
 - Never create relay/empty functions
+- Never write "just in case" code which is not necessary (such as extra nullifying)
 
 STRICTLY FOLLOW THESE COMMIT CONVENTIONS:
 - Always use `feat: message` for new features. Never add "implement" or "add", write the feature right after feat:

@@ -8,6 +8,7 @@ extends CharacterBody3D
 @onready var stamina_bar: TextureProgressBar = $"2D/HUD/Stamina"
 @onready var cooldown_timer: Timer = $Cooldown
 @onready var player_name = Steam.getPersonaName()
+@onready var hand = $Rig/Skeleton3D/Item_Handle
 
 @export var hunter_color: Color = Color(1, 0, 0, 1)
 @export var hider_color: Color = Color(0, 0, 1, 1)
@@ -36,8 +37,8 @@ var INTERACT_MASK := 1 << (interact_on_layer - 1)
 var interact_shape := SphereShape3D.new()
 var interact_query_params := PhysicsShapeQueryParameters3D.new()
 
-var item: StaticBody3D
-var closest_item: StaticBody3D
+var item: PhysicsBody3D
+var closest_item: PhysicsBody3D
 var animation_velocity: Vector3 = Vector3.ZERO
 var movement_state_blend: float = 0.0
 
@@ -91,13 +92,32 @@ func _physics_process(delta: float) -> void:
 	camera.global_transform.origin = global_transform.origin + camera_offset
 
 func handle_interactables() -> void:
-	var next_closest_item: StaticBody3D = null
+	if Input.is_action_just_pressed("interact") and cooldown_timer.time_left <= 0.0:
+		var forward_direction: Vector3 = model.global_transform.basis.z.normalized()
+		var metadata = {"position": global_transform.origin, "hand": hand, "direction": forward_direction}
+
+		if item != null:
+			item.interact(false, metadata)
+			item = null
+			anim_tree.set("parameters/IW/Hold_B/blend_amount", 0.0)
+		elif closest_item != null:
+			cooldown_timer.start()
+			anim_tree.set("parameters/IW/Interact_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			closest_item.interact(true, metadata)
+			if not closest_item.get_is_static():
+				item = closest_item
+				anim_tree.set("parameters/IW/Hold_B/blend_amount", 1.0)
+
+	if item != null:
+		return
+
+	var next_closest_item: PhysicsBody3D = null
 	interact_query_params.transform = Transform3D(Basis(), global_transform.origin)
 	var hits := space.intersect_shape(interact_query_params, max_interact_results)
 	var best_distance := INF
 	var seen_bodies := {}
 	for hit in hits:
-		var collider: StaticBody3D = hit.get("collider")
+		var collider: PhysicsBody3D = hit.get("collider")
 		if collider == null or seen_bodies.has(collider):
 			continue
 		seen_bodies[collider] = true
@@ -115,20 +135,6 @@ func handle_interactables() -> void:
 		closest_item = next_closest_item
 		if closest_item:
 			closest_item.notice(true)
-
-	if Input.is_action_just_pressed("interact"):
-		if cooldown_timer.time_left > 0.0 or closest_item == null or closest_item == item:
-			return
-		var metadata = {"position": global_transform.origin}
-		if item != null:
-			item.interact(false, metadata)
-			print("Interacting", item)
-		item = closest_item
-		cooldown_timer.start()
-		anim_tree.set("parameters/IW/Interact_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		item.interact(true, metadata)
-		if item.get_is_static():
-			item = null
 
 func handle_movement(delta: float) -> void:
 	var vertical_velocity = velocity.y

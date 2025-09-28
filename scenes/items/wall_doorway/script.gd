@@ -7,6 +7,12 @@ var is_opened = false
 
 @onready var door := $"../wall_doorway/wall_doorway_door"
 
+func get_outline_target() -> MeshInstance3D:
+	return door
+
+func get_is_static() -> bool:
+	return true
+
 func perform_interact(enable: bool, metadata: Dictionary) -> void:
 	var player_position: Vector3 = metadata.get("position", Vector3.ZERO)
 	var door_position: Vector3 = door.global_transform.origin
@@ -14,9 +20,3 @@ func perform_interact(enable: bool, metadata: Dictionary) -> void:
 	var target: float = 0.0 if is_opened else signf(axis_value) * 90.0 if enable else 0.0
 	get_tree().create_tween().tween_property(door, "rotation_degrees:y", target, ANIMATION_DURATION)
 	is_opened = not is_opened
-
-func get_outline_target() -> MeshInstance3D:
-	return door
-
-func get_is_static() -> bool:
-	return true

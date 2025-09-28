@@ -21,14 +21,12 @@ func perform_interact(enable: bool, metadata: Dictionary):
 	var chair: RigidBody3D = _chair
 	
 	if enable:
-		var t := global_transform
 		get_parent().remove_child(self)
 		hand.add_child(self)
-		global_transform = t
+		transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
 		if chair is RigidBody3D:
 			chair.freeze = true
 			chair.collision_layer = 0
-			chair.global_transform.basis = Basis(hand.global_transform.basis.x, hand.global_transform.basis.y, hand.global_transform.basis.z)
 	else:
 		var world := get_tree().current_scene
 		var t := global_transform

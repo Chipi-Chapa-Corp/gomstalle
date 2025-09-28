@@ -148,6 +148,7 @@ radius = 1.9661
 [node name="Player" instance=ExtResource("1_xvkdw")]
 collision_layer = 2
 wall_min_slide_angle = 0.174533
+floor_constant_speed = true
 script = ExtResource("2_e4tch")
 
 [node name="Label" type="Label3D" parent="." index="0"]

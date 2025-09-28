@@ -1,5 +1,6 @@
 extends CharacterBody3D
 
+@onready var space := get_world_3d().direct_space_state
 @onready var camera = $Camera3D
 @onready var anim_tree = $AnimationTree
 @onready var model = $Rig
@@ -10,6 +11,9 @@ extends CharacterBody3D
 
 @export var hunter_color: Color = Color(1, 0, 0, 1)
 @export var hider_color: Color = Color(0, 0, 1, 1)
+@export var interact_on_layer: int = 5
+@export var interact_radius: float = 1.6
+@export var max_interact_results: int = 8
 
 var peer_id: int
 
@@ -27,7 +31,11 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var camera_offset: Vector3
 
-var interactibles: Array[StaticBody3D] = []
+var INTERACT_MASK := 1 << (interact_on_layer - 1)
+
+var interact_shape := SphereShape3D.new()
+var interact_query_params := PhysicsShapeQueryParameters3D.new()
+
 var item: StaticBody3D
 var closest_item: StaticBody3D
 var animation_velocity: Vector3 = Vector3.ZERO
@@ -50,39 +58,18 @@ func _ready() -> void:
 
 	GameState.started.connect(_on_game_started)
 	camera_offset = camera.global_transform.origin - global_transform.origin
+	interact_shape.radius = interact_radius
+	interact_query_params.shape = interact_shape
+	interact_query_params.collision_mask = INTERACT_MASK
+	interact_query_params.collide_with_bodies = true
+	interact_query_params.collide_with_areas = false
+	interact_query_params.exclude = [self]
 
 func _physics_process(delta: float) -> void:
 	velocity.y += -gravity * delta
 	handle_movement(delta)
+	handle_interactables()
 	move_and_slide()
-
-	var next_closest_item = interactibles.reduce(func(a, b):
-		var dist_a = a.global_transform.origin.distance_to(global_transform.origin)
-		var dist_b = b.global_transform.origin.distance_to(global_transform.origin)
-		return a if dist_a < dist_b else b
-	)
-	if next_closest_item != null and next_closest_item != closest_item:
-		if closest_item:
-			closest_item.notice(false)
-		closest_item = next_closest_item
-		closest_item.notice(true)
-
-	if Input.is_action_just_pressed("interact"):
-		if cooldown_timer.time_left > 0.0:
-			return
-		if closest_item == null or closest_item == item:
-			return
-		var metadata = {"position": global_transform.origin}
-		if item != null:
-			item.interact(false, metadata)
-		item = closest_item
-		cooldown_timer.start()
-		anim_tree.set("parameters/IW/Interact_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		item.interact(true, metadata)
-		if item.get_is_static():
-			item = null
-		else:
-			interactibles.erase(item)
 
 	if Input.is_action_just_pressed("emote"):
 		anim_tree.set("parameters/IW/Cheer_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
@@ -103,6 +90,45 @@ func _physics_process(delta: float) -> void:
 
 	camera.global_transform.origin = global_transform.origin + camera_offset
 
+func handle_interactables() -> void:
+	var next_closest_item: StaticBody3D = null
+	interact_query_params.transform = Transform3D(Basis(), global_transform.origin)
+	var hits := space.intersect_shape(interact_query_params, max_interact_results)
+	var best_distance := INF
+	var seen_bodies := {}
+	for hit in hits:
+		var collider: StaticBody3D = hit.get("collider")
+		if collider == null or seen_bodies.has(collider):
+			continue
+		seen_bodies[collider] = true
+		var point: Vector3 = hit.get("point", Vector3.ZERO)
+		if point == Vector3.ZERO:
+			point = collider.global_transform.origin
+		var distance := global_transform.origin.distance_squared_to(point)
+		if distance < best_distance:
+			best_distance = distance
+			next_closest_item = collider
+
+	if next_closest_item != closest_item:
+		if closest_item:
+			closest_item.notice(false)
+		closest_item = next_closest_item
+		if closest_item:
+			closest_item.notice(true)
+
+	if Input.is_action_just_pressed("interact"):
+		if cooldown_timer.time_left > 0.0 or closest_item == null or closest_item == item:
+			return
+		var metadata = {"position": global_transform.origin}
+		if item != null:
+			item.interact(false, metadata)
+			print("Interacting", item)
+		item = closest_item
+		cooldown_timer.start()
+		anim_tree.set("parameters/IW/Interact_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		item.interact(true, metadata)
+		if item.get_is_static():
+			item = null
 
 func handle_movement(delta: float) -> void:
 	var vertical_velocity = velocity.y
@@ -125,7 +151,7 @@ func handle_movement(delta: float) -> void:
 
 	var local_velocity = model.global_transform.basis.inverse() * animation_velocity
 	var local_plane_velocity = Vector2(local_velocity.x, -local_velocity.z)
-	
+
 	var walk_blend_position = local_plane_velocity / base_move_speed if base_move_speed != 0.0 else Vector2.ZERO
 	walk_blend_position = walk_blend_position.limit_length(1.0)
 	anim_tree.set("parameters/IW/Walk/blend_position", walk_blend_position)
@@ -147,7 +173,7 @@ func handle_movement(delta: float) -> void:
 		stamina_bar.value = stamina / max_stamina * 100.0
 
 	velocity.y = vertical_velocity
-	
+
 func _mouse_ground_hit() -> Vector3:
 	var mouse_position := get_viewport().get_mouse_position()
 	var ray_origin: Vector3 = camera.project_ray_origin(mouse_position)
@@ -155,22 +181,6 @@ func _mouse_ground_hit() -> Vector3:
 	var ground := Plane(Vector3.UP, global_transform.origin.y)
 	var hit: Vector3 = ground.intersects_ray(ray_origin, ray_destination)
 	return hit if hit != null else Vector3.INF
-
-func handle_interactible(body: StaticBody3D, enable: bool) -> void:
-	if body.is_in_group("interactible"):
-		if enable and not interactibles.has(body):
-			interactibles.append(body)
-		elif not enable and interactibles.has(body):
-			interactibles.erase(body)
-			body.notice(false)
-			if body == closest_item:
-				closest_item = null
-
-func _on_interactor_body_entered(body: StaticBody3D) -> void:
-	handle_interactible(body, true)
-
-func _on_interactor_body_exited(body: Node3D) -> void:
-	handle_interactible(body, false)
 
 func _exit_tree() -> void:
 	if GameState.started.is_connected(_on_game_started):

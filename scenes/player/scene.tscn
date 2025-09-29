@@ -40,6 +40,8 @@ fadeout_time = 0.1
 animation = &"Jump_Full_Short"
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_itrdm"]
+fadein_time = 0.1
+fadeout_time = 0.1
 
 [sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_ak5du"]
 
@@ -98,7 +100,7 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_ak5du")
 blend_point_4/pos = Vector2(0, 0)
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_t87ks"]
-graph_offset = Vector2(288.63, 36.2751)
+graph_offset = Vector2(242.747, 27.7297)
 nodes/Cheer_A/node = SubResource("AnimationNodeAnimation_l3ro8")
 nodes/Cheer_A/position = Vector2(-20, 280)
 nodes/Cheer_OS/node = SubResource("AnimationNodeOneShot_0niji")

@@ -15,6 +15,7 @@ extends CharacterBody3D
 @export var interact_on_layer: int = 5
 @export var interact_radius: float = 1.6
 @export var max_interact_results: int = 8
+@export var jump_height: int = 5
 
 var peer_id: int
 
@@ -26,6 +27,7 @@ const stamina_regen = 5
 
 var current_move_speed = base_move_speed
 var stamina = max_stamina
+var stunned := false
 const rotation_speed = 8.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -68,9 +70,19 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	velocity.y += -gravity * delta
+
+	if not is_instance_valid(item):
+		item = null
+
 	handle_movement(delta)
 	handle_interactables()
 	move_and_slide()
+
+	if Input.is_action_just_pressed("jump"):
+		if not is_on_floor():
+			return
+		velocity.y = jump_height
+		anim_tree.set("parameters/IW/Jump_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 	if Input.is_action_just_pressed("emote"):
 		anim_tree.set("parameters/IW/Cheer_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
@@ -136,7 +148,22 @@ func handle_interactables() -> void:
 		if closest_item:
 			closest_item.notice(true)
 
+func stun(timeout: float) -> void:
+	stunned = true
+	await get_tree().create_timer(timeout).timeout
+	stunned = false
+
 func handle_movement(delta: float) -> void:
+	for i in range(get_slide_collision_count()):
+		var collider = get_slide_collision(i).get_collider()
+		if collider.is_in_group("stunning") and collider.get_can_stun():
+			stun(collider.ally_stun_time if peer_id == GameState.hunter_peer_id else collider.enemy_stun_time)
+			collider.on_stun()
+
+	if stunned:
+		velocity = Vector3.ZERO
+		return
+	
 	var vertical_velocity = velocity.y
 	velocity.y = 0.0
 

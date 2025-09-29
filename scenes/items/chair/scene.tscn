@@ -49,7 +49,7 @@ shadow_mesh = SubResource("ArrayMesh_2i8x0")
 
 [node name="Chair" type="Node3D"]
 
-[node name="RigidBody3D" type="RigidBody3D" parent="." groups=["interactible"]]
+[node name="RigidBody3D" type="RigidBody3D" parent="." groups=["interactible", "stunning"]]
 collision_layer = 17
 script = ExtResource("2_erf87")
 

@@ -27,7 +27,7 @@ const stamina_regen = 5
 
 var current_move_speed = base_move_speed
 var stamina = max_stamina
-var stunned := false
+var is_stunned := false
 const rotation_speed = 8.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -149,9 +149,9 @@ func handle_interactables() -> void:
 			closest_item.notice(true)
 
 func stun(timeout: float) -> void:
-	stunned = true
+	is_stunned = true
 	await get_tree().create_timer(timeout).timeout
-	stunned = false
+	is_stunned = false
 
 func handle_movement(delta: float) -> void:
 	for i in range(get_slide_collision_count()):
@@ -160,7 +160,7 @@ func handle_movement(delta: float) -> void:
 			stun(collider.ally_stun_time if peer_id == GameState.hunter_peer_id else collider.enemy_stun_time)
 			collider.on_stun()
 
-	if stunned:
+	if is_stunned:
 		velocity = Vector3.ZERO
 		return
 	

@@ -8,6 +8,8 @@ points = PackedVector3Array(0.357499, 0.299903, 0.375008, 0.207514, 0.299903, 0.
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_47myc"]
 resource_name = "texture"
+transparency = 1
+depth_draw_mode = 1
 albedo_texture = ExtResource("1_erf87")
 roughness = 0.45
 

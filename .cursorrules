@@ -10,6 +10,7 @@ STRICTLY FOLLOW THESE INSTRUCTIONS:
 - Always only write what is needed right now. Keep all your edits as minimal and
   concise as possible to perform a task. Always start by a small research and
   implementation plan, proceed only after confirmation
+- Never write your plan when requested to do something, do it right away
 - Never use `cond ? expr : else-expr` syntax. Godot uses Python-like `expr if cond else else-expr` syntax
 - Never write any comments
 - Never create .md files unless explicitly requested to

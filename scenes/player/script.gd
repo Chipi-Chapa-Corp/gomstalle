@@ -13,6 +13,7 @@ extends CharacterBody3D
 @onready var attack_cooldown_timer: Timer = $AttackCooldown
 @onready var hand = $Rig/Skeleton3D/Hider/Item_Handle
 @onready var attack_hitbox = $Rig/AttackHitbox
+@onready var stun_effect = $StunEffect
 
 @onready var space := get_world_3d().direct_space_state
 @onready var player_name = Steam.getPersonaName()
@@ -56,7 +57,7 @@ var movement_state_blend: float = 0.0
 func _on_before_spawn(data: Dictionary) -> void:
 	peer_id = data["peer_id"]
 	set_multiplayer_authority(peer_id)
-	global_position = data["position"]
+	position = data["position"]
 
 func _ready() -> void:
 	if is_multiplayer_authority():
@@ -144,8 +145,9 @@ func handle_interactables() -> void:
 			closest_item.notice(true)
 
 func stun(timeout: float) -> void:
-	if is_dead:
+	if is_dead or is_stunned:
 		return
+	stun_effect.play()
 	is_stunned = true
 	anim_tree.set("parameters/IW/Walk/blend_position", Vector2.ZERO)
 	anim_tree.set("parameters/IW/Run/blend_position", Vector2.ZERO)
@@ -157,7 +159,7 @@ func stun(timeout: float) -> void:
 func handle_movement(delta: float) -> void:
 	for i in range(get_slide_collision_count()):
 		var collider = get_slide_collision(i).get_collider()
-		if collider.is_in_group("stunning") and collider.get_can_stun():
+		if collider != null and collider.is_in_group("stunning") and collider.get_can_stun():
 			stun(collider.ally_stun_time if peer_id == GameState.hunter_peer_id else collider.enemy_stun_time)
 			collider.on_stun()
 
@@ -209,6 +211,8 @@ func handle_movement(delta: float) -> void:
 	velocity.y = vertical_velocity
 
 func jump() -> void:
+	if not is_on_floor():
+		return
 	velocity.y += jump_height
 	anim_tree.set("parameters/IW/Jump_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 

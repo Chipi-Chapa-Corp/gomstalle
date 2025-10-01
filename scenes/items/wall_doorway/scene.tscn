@@ -17,7 +17,7 @@ properties/1/replication_mode = 1
 [node name="wall_doorway" instance=ExtResource("1_mnbra")]
 
 [node name="Receiver" type="StaticBody3D" parent="." index="1" groups=["interactible"]]
-collision_layer = 16
+collision_layer = 17
 script = ExtResource("2_1lb5u")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Receiver" index="0"]

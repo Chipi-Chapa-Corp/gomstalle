@@ -43,6 +43,7 @@ const rotation_speed = 8.0
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var camera_offset: Vector3
+var camera_yaw_offset: float = 0.0
 
 var INTERACT_MASK := 1 << (interact_on_layer - 1)
 
@@ -60,6 +61,8 @@ func _on_before_spawn(data: Dictionary) -> void:
 	position = data["position"]
 
 func _ready() -> void:
+	var rotation_angle = deg_to_rad(45.0)
+	camera_yaw_offset = rotation_angle
 	if is_multiplayer_authority():
 		camera.make_current()
 		label.visible = false
@@ -74,6 +77,8 @@ func _ready() -> void:
 
 	GameState.started.connect(_on_game_started)
 	camera_offset = camera.global_transform.origin - global_transform.origin
+	camera_offset = camera_offset.rotated(Vector3.UP, camera_yaw_offset)
+	camera.rotation.y = camera_yaw_offset
 	interact_shape.radius = interact_radius
 	interact_query_params.shape = interact_shape
 	interact_query_params.collision_mask = INTERACT_MASK
@@ -172,7 +177,10 @@ func handle_movement(delta: float) -> void:
 
 	var run_requested = Input.is_action_pressed("run")
 	var movement_input = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-	var movement_direction = Vector3(movement_input.x, 0.0, movement_input.y)
+	var movement_direction = Vector3.ZERO
+	if movement_input != Vector2.ZERO:
+		var input_vector = Vector3(movement_input.x, 0.0, movement_input.y)
+		movement_direction = input_vector.rotated(Vector3.UP, camera_yaw_offset)
 	if movement_direction.length() > 1.0:
 		movement_direction = movement_direction.normalized()
 	var is_moving = movement_direction.length() > 0.0

@@ -1,14 +1,21 @@
 extends CharacterBody3D
 
-@onready var space := get_world_3d().direct_space_state
+@onready var hider_parts = $Rig/Skeleton3D/Hider
+@onready var monster_skeleton_parts = $Rig/Skeleton3D/MonsterSkeleton
+
 @onready var camera = $Camera3D
 @onready var anim_tree = $AnimationTree
+@onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 @onready var model = $Rig
 @onready var label = $Label
 @onready var stamina_bar: TextureProgressBar = $"2D/HUD/Stamina"
 @onready var cooldown_timer: Timer = $Cooldown
+@onready var attack_cooldown_timer: Timer = $AttackCooldown
+@onready var hand = $Rig/Skeleton3D/Hider/Item_Handle
+@onready var attack_hitbox = $Rig/AttackHitbox
+
+@onready var space := get_world_3d().direct_space_state
 @onready var player_name = Steam.getPersonaName()
-@onready var hand = $Rig/Skeleton3D/Item_Handle
 
 @export var hunter_color: Color = Color(1, 0, 0, 1)
 @export var hider_color: Color = Color(0, 0, 1, 1)
@@ -18,6 +25,7 @@ extends CharacterBody3D
 @export var jump_height: int = 5
 
 var peer_id: int
+var is_hunter := false
 
 const base_move_speed = 6.0
 const run_move_speed = 8.0
@@ -28,6 +36,7 @@ const stamina_regen = 5
 var current_move_speed = base_move_speed
 var stamina = max_stamina
 var is_stunned := false
+var is_dead := false
 const rotation_speed = 8.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -59,6 +68,9 @@ func _ready() -> void:
 		set_physics_process(false)
 		set_process_input(false)
 
+	attack_hitbox.monitoring = false
+	attack_cooldown_timer.connect("timeout", func(): attack_hitbox.monitoring = false)
+
 	GameState.started.connect(_on_game_started)
 	camera_offset = camera.global_transform.origin - global_transform.origin
 	interact_shape.radius = interact_radius
@@ -76,34 +88,14 @@ func _physics_process(delta: float) -> void:
 
 	handle_movement(delta)
 	handle_interactables()
+	handle_actions(delta)
 	move_and_slide()
-
-	if Input.is_action_just_pressed("jump"):
-		if not is_on_floor():
-			return
-		velocity.y = jump_height
-		anim_tree.set("parameters/IW/Jump_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-
-	if Input.is_action_just_pressed("emote"):
-		anim_tree.set("parameters/IW/Cheer_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-
-	if Input.is_action_pressed("aim"):
-		var hit := _mouse_ground_hit()
-		if hit != Vector3.INF:
-			var to := hit - model.global_transform.origin as Vector3
-			to.y = 0.0
-			if to.length() > 0.001:
-				var target_yaw := atan2(-to.x, -to.z) + PI
-				model.rotation.y = lerp_angle(model.rotation.y, target_yaw, rotation_speed * delta)
-	else:
-		if velocity.length() > 0.1:
-			var h := velocity; h.y = 0.0
-			var target_yaw := atan2(-h.x, -h.z) + PI
-			model.rotation.y = lerp_angle(model.rotation.y, target_yaw, rotation_speed * delta)
 
 	camera.global_transform.origin = global_transform.origin + camera_offset
 
 func handle_interactables() -> void:
+	if is_dead:
+		return
 	if Input.is_action_just_pressed("interact") and cooldown_timer.time_left <= 0.0:
 		var forward_direction: Vector3 = model.global_transform.basis.z.normalized()
 		var metadata = {"position": global_transform.origin, "hand": hand, "direction": forward_direction}
@@ -130,7 +122,10 @@ func handle_interactables() -> void:
 	var seen_bodies := {}
 	for hit in hits:
 		var collider: PhysicsBody3D = hit.get("collider")
-		if collider == null or seen_bodies.has(collider):
+		var is_collider_valid = collider != null and not seen_bodies.has(collider)
+		var is_collider_interactible = collider.is_in_group("interactible")
+		var is_collider_accessible = not is_hunter or (is_collider_interactible and collider.get_hunter_can_interact())
+		if not is_collider_valid or not is_collider_interactible or not is_collider_accessible:
 			continue
 		seen_bodies[collider] = true
 		var point: Vector3 = hit.get("point", Vector3.ZERO)
@@ -149,7 +144,13 @@ func handle_interactables() -> void:
 			closest_item.notice(true)
 
 func stun(timeout: float) -> void:
+	if is_dead:
+		return
 	is_stunned = true
+	anim_tree.set("parameters/IW/Walk/blend_position", Vector2.ZERO)
+	anim_tree.set("parameters/IW/Run/blend_position", Vector2.ZERO)
+	anim_tree.set("parameters/IW/MovementState/blend_amount", 0.0)
+	anim_tree.set("parameters/IW/Stun_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	await get_tree().create_timer(timeout).timeout
 	is_stunned = false
 
@@ -160,7 +161,7 @@ func handle_movement(delta: float) -> void:
 			stun(collider.ally_stun_time if peer_id == GameState.hunter_peer_id else collider.enemy_stun_time)
 			collider.on_stun()
 
-	if is_stunned:
+	if is_stunned or is_dead:
 		velocity = Vector3.ZERO
 		return
 	
@@ -207,6 +208,43 @@ func handle_movement(delta: float) -> void:
 
 	velocity.y = vertical_velocity
 
+func jump() -> void:
+	velocity.y += jump_height
+	anim_tree.set("parameters/IW/Jump_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+func attack() -> void:
+	attack_hitbox.monitoring = true
+	anim_tree.set("parameters/IW/Attack_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+func handle_actions(delta: float) -> void:
+	if is_dead:
+		return
+
+	if Input.is_action_just_pressed("jump"):
+		if is_hunter:
+			if attack_cooldown_timer.time_left <= 0.0:
+				attack()
+				attack_cooldown_timer.start()
+		else:
+			jump()
+
+	if Input.is_action_just_pressed("emote"):
+		anim_tree.set("parameters/IW/Cheer_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+	if Input.is_action_pressed("aim"):
+		var hit := _mouse_ground_hit()
+		if hit != Vector3.INF:
+			var to := hit - model.global_transform.origin as Vector3
+			to.y = 0.0
+			if to.length() > 0.001:
+				var target_yaw := atan2(-to.x, -to.z) + PI
+				model.rotation.y = lerp_angle(model.rotation.y, target_yaw, rotation_speed * delta)
+	else:
+		var horizontal_velocity_vector := Vector3(velocity.x, 0.0, velocity.z)
+		if horizontal_velocity_vector.length() > 0.1:
+			var target_yaw := atan2(-horizontal_velocity_vector.x, -horizontal_velocity_vector.z) + PI
+			model.rotation.y = lerp_angle(model.rotation.y, target_yaw, rotation_speed * delta)
+
 func _mouse_ground_hit() -> Vector3:
 	var mouse_position := get_viewport().get_mouse_position()
 	var ray_origin: Vector3 = camera.project_ray_origin(mouse_position)
@@ -219,11 +257,31 @@ func _exit_tree() -> void:
 	if GameState.started.is_connected(_on_game_started):
 		GameState.started.disconnect(_on_game_started)
 
-func _on_game_started(hunter_peer_id: int) -> void:
-	if peer_id == hunter_peer_id:
-		label.modulate = hunter_color
+func _set_player_skin() -> void:
+	var new_parts = monster_skeleton_parts if is_hunter else hider_parts
+	var old_parts = monster_skeleton_parts if not is_hunter else hider_parts
+	old_parts.visible = false
+	new_parts.visible = true
+	label.modulate = hunter_color if is_hunter else hider_color
+
+func set_dead(state: bool) -> void:
+	is_dead = state
+	if is_dead:
+		playback.travel("Death_A", true)
 	else:
-		label.modulate = hider_color
+		playback.travel("Ressurrect_A", true)
+		await get_tree().create_timer(0.6).timeout
+
+func _on_game_started(hunter_peer_id: int) -> void:
+	is_hunter = peer_id == hunter_peer_id
+	_set_player_skin()
+
 	if is_multiplayer_authority():
 		var target_position = GameState.start_positions.get(peer_id, global_position)
 		global_position = target_position
+
+func _on_attacked(body: Node3D) -> void:
+	if is_dead or is_hunter:
+		return
+	if body is CharacterBody3D:
+		body.set_dead(true)

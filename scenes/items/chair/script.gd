@@ -6,8 +6,8 @@ extends Interactable
 @onready var chair: RigidBody3D = _chair
 
 @export var min_stun_speed: float = 2
-@export var ally_stun_time: float = 0.1
-@export var enemy_stun_time: float = 0.3
+@export var ally_stun_time: float = 0.2
+@export var enemy_stun_time: float = 1.0
 
 const THROW_SPEED := 12.0
 var can_stun := false
@@ -16,6 +16,9 @@ func get_outline_target() -> MeshInstance3D:
 	return mesh
 
 func get_is_static() -> bool:
+	return false
+
+func get_hunter_can_interact() -> bool:
 	return false
 
 func get_can_stun() -> bool:

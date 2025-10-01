@@ -13,6 +13,9 @@ func get_outline_target() -> MeshInstance3D:
 func get_is_static() -> bool:
 	return true
 
+func get_hunter_can_interact() -> bool:
+	return true
+
 func perform_interact(enable: bool, metadata: Dictionary) -> void:
 	var player_position: Vector3 = metadata.get("position", Vector3.ZERO)
 	var door_position: Vector3 = door.global_transform.origin

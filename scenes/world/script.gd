@@ -1,5 +1,7 @@
 extends Node3D
 
+@onready var start_button = $UI/HUD/Start
+
 const MAX_CLIENTS := 4
 @export var player_spawn_center: Vector3 = Vector3.ZERO
 @export var player_spawn_radius: float = 4.0
@@ -33,12 +35,14 @@ func _connect_to_server():
 
 func _on_peer_connected(peer_id: int) -> void:
 	print_debug("Server spawning player ", peer_id)
-	$UI/HUD/Start.visible = true
+	if multiplayer.is_server():
+		start_button.visible = true
 	Spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})
 
 func _on_start_pressed():
 	if not Settings.is_host:
 		return
+	start_button.visible = false
 	var peers := GameState.sync_connected_peers(multiplayer)
 	if peers.is_empty():
 		return

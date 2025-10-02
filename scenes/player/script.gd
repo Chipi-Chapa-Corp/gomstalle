@@ -104,7 +104,7 @@ func handle_interactables() -> void:
 		return
 	if Input.is_action_just_pressed("interact") and cooldown_timer.time_left <= 0.0:
 		var forward_direction: Vector3 = model.global_transform.basis.z.normalized()
-		var metadata = {"position": global_transform.origin, "hand": hand, "direction": forward_direction, "target": self, "peer_id": peer_id}
+		var metadata = {"position": global_transform.origin, "hand": hand, "direction": forward_direction, "target": self}
 
 		if item != null:
 			item.interact(false, metadata)
@@ -164,7 +164,7 @@ func stun(timeout: float) -> void:
 func handle_movement(delta: float) -> void:
 	for i in range(get_slide_collision_count()):
 		var collider = get_slide_collision(i).get_collider()
-		if collider != null and collider.is_in_group("stunning") and collider.get_can_stun(peer_id):
+		if collider != null and collider.is_in_group("stunning") and collider.get_can_stun(self):
 			stun(collider.ally_stun_time if peer_id == GameState.hunter_peer_id else collider.enemy_stun_time)
 			collider.on_stun()
 

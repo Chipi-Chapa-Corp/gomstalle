@@ -35,10 +35,15 @@ func _physics_process(_delta: float) -> void:
 	if chair.linear_velocity.length() < min_stun_speed and can_stun:
 		can_stun = false
 
+func _get_node(object):
+	if object is EncodedObjectAsID:
+		return instance_from_id(object.object_id)
+	return object
+
 # Enable = pick up, Disable = throw
 func perform_interact(enable: bool, metadata: Dictionary):
-	var hand: Node3D = metadata.get("hand")
-	var target: CharacterBody3D = metadata.get("target")
+	var hand: BoneAttachment3D = _get_node(metadata.get("hand"))
+	var target: CharacterBody3D = _get_node(metadata.get("target"))
 	if hand == null:
 		return
 

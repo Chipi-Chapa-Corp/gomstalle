@@ -16,7 +16,7 @@ extends CharacterBody3D
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 
 @onready var space := get_world_3d().direct_space_state
-@onready var player_name = Steam.getPersonaName()
+@onready var player_name = "Unknown Player"
 
 @export var hunter_color: Color = Color(1, 0, 0, 1)
 @export var hider_color: Color = Color(0, 0, 1, 1)
@@ -65,6 +65,7 @@ func _ready() -> void:
 	camera_yaw_offset = rotation_angle
 	if is_multiplayer_authority():
 		camera.make_current()
+		player_name = Steam.getPersonaName()
 		label.visible = false
 	else:
 		label.text = player_name

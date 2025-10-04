@@ -63,6 +63,9 @@ properties/3/replication_mode = 2
 properties/4/path = NodePath("RigidBody3D:can_stun")
 properties/4/spawn = true
 properties/4/replication_mode = 2
+properties/5/path = NodePath("RigidBody3D:position")
+properties/5/spawn = true
+properties/5/replication_mode = 1
 
 [node name="Chair" type="Node3D"]
 

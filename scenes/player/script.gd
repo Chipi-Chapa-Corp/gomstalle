@@ -1,19 +1,19 @@
 extends CharacterBody3D
 
-@onready var hider_parts = $Rig/Skeleton3D/Hider
-@onready var monster_skeleton_parts = $Rig/Skeleton3D/MonsterSkeleton
+@export var hider_parts: Node3D
+@export var hunter_parts: Node3D
+@export var hand: BoneAttachment3D
+@export var camera: Camera3D
+@export var anim_tree: AnimationTree
+@export var model: Node3D
+@export var label: Label3D
+@export var stamina_bar: TextureProgressBar
+@export var cooldown_timer: Timer
+@export var attack_cooldown_timer: Timer
+@export var attack_hitbox: Area3D
+@export var stun_effect: Sprite3D
 
-@onready var camera = $Camera3D
-@onready var anim_tree = $AnimationTree
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
-@onready var model = $Rig
-@onready var label = $Label
-@onready var stamina_bar: TextureProgressBar = $"2D/HUD/Stamina"
-@onready var cooldown_timer: Timer = $Cooldown
-@onready var attack_cooldown_timer: Timer = $AttackCooldown
-@onready var hand = $Rig/Skeleton3D/Hider/Item_Handle
-@onready var attack_hitbox = $Rig/AttackHitbox
-@onready var stun_effect = $StunEffect
 
 @onready var space := get_world_3d().direct_space_state
 @onready var player_name = Steam.getPersonaName()
@@ -270,8 +270,8 @@ func _exit_tree() -> void:
 		GameState.started.disconnect(_on_game_started)
 
 func _set_player_skin() -> void:
-	var new_parts = monster_skeleton_parts if is_hunter else hider_parts
-	var old_parts = monster_skeleton_parts if not is_hunter else hider_parts
+	var new_parts = hunter_parts if is_hunter else hider_parts
+	var old_parts = hunter_parts if not is_hunter else hider_parts
 	old_parts.visible = false
 	new_parts.visible = true
 	label.modulate = hunter_color if is_hunter else hider_color

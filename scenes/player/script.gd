@@ -159,6 +159,12 @@ func handle_interactables() -> void:
 func stun(timeout: float) -> void:
 	if is_dead or is_stunned:
 		return
+	rpc("sync_stun", timeout)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_stun(timeout: float) -> void:
+	if is_dead or is_stunned:
+		return
 	stun_effect.play()
 	is_stunned = true
 	anim_tree.set("parameters/IW/Walk/blend_position", Vector2.ZERO)

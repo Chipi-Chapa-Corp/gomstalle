@@ -31,6 +31,10 @@ func get_can_stun(target: CharacterBody3D) -> bool:
 	return can_stun and crash_speed.length() >= min_stun_speed
 
 func on_stun() -> void:
+	rpc("sync_on_stun")
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_on_stun() -> void:
 	queue_free()
 
 func _physics_process(_delta: float) -> void:
@@ -63,7 +67,6 @@ func sync_interaction(enable: bool, metadata: Dictionary) -> void:
 		return
 	var target: CharacterBody3D = _resolve_node(metadata.get("target"))
 	_apply_interaction(enable, hand, target, metadata)
-
 func _apply_interaction(enable: bool, hand: RemoteTransform3D, target: CharacterBody3D, metadata: Dictionary) -> void:
 	var chair_transform: Transform3D = metadata.get("transform", chair.global_transform)
 	chair.global_transform = chair_transform

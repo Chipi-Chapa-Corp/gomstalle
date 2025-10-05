@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 @export var hider_parts: Node3D
 @export var hunter_parts: Node3D
-@export var hand: BoneAttachment3D
+@export var hand: RemoteTransform3D
 @export var camera: Camera3D
 @export var anim_tree: AnimationTree
 @export var model: Node3D
@@ -61,6 +61,7 @@ func _on_before_spawn(data: Dictionary) -> void:
 	position = data["position"]
 
 func _ready() -> void:
+	hand.transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
 	var rotation_angle = deg_to_rad(45.0)
 	camera_yaw_offset = rotation_angle
 	if is_multiplayer_authority():
@@ -105,7 +106,12 @@ func handle_interactables() -> void:
 		return
 	if Input.is_action_just_pressed("interact") and cooldown_timer.time_left <= 0.0:
 		var forward_direction: Vector3 = model.global_transform.basis.z.normalized()
-		var metadata = {"position": global_transform.origin, "hand": hand, "direction": forward_direction, "target": self}
+		var metadata = {
+			"position": global_transform.origin,
+			"hand": hand.get_path(),
+			"target": self.get_path(),
+			"direction": forward_direction,
+		}
 
 		if item != null:
 			item.interact(false, metadata)

@@ -35,7 +35,7 @@ func on_stun() -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func sync_on_stun() -> void:
-	queue_free()
+	get_parent().queue_free()
 
 func _physics_process(_delta: float) -> void:
 	if chair.linear_velocity.length() < min_stun_speed and can_stun:

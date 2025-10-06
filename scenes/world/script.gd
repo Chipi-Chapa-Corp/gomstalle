@@ -1,18 +1,18 @@
 extends Node3D
 
-@onready var start_button = $UI/HUD/Start
-
-const MAX_CLIENTS := 4
+@export var start_button: Button
+@export var menu: Control
+@export var hud: Control
 @export var player_spawn_center: Vector3 = Vector3.ZERO
 @export var player_spawn_radius: float = 4.0
 
+const MAX_CLIENTS := 4
+
 func _ready():
 	if Settings.is_host:
-		print_debug("Starting server [HOST]")
 		multiplayer.peer_connected.connect(_on_peer_connected)
 		_start_server(func(): _on_peer_connected(multiplayer.get_unique_id()))
 	else:
-		print_debug("Connecting to server [PEER]")
 		_connect_to_server()
 
 func _start_server(cb: Callable):
@@ -34,7 +34,6 @@ func _connect_to_server():
 	multiplayer.multiplayer_peer = peer
 
 func _on_peer_connected(peer_id: int) -> void:
-	print_debug("Server spawning player ", peer_id)
 	if multiplayer.is_server():
 		start_button.visible = true
 	Spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})
@@ -86,3 +85,9 @@ func _get_local_player() -> Node3D:
 		if player.is_multiplayer_authority():
 			return player
 	return null
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("menu"):
+		menu.visible = not menu.visible
+		hud.visible = not hud.visible
+		GameState.set_local_paused(menu.visible)

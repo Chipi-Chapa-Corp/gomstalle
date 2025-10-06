@@ -1,6 +1,7 @@
 extends Node
 
 signal started(hunter_peer_id: int)
+signal local_paused(is_paused: bool)
 
 var connected_peer_ids: Array[int] = []
 var hunter_peer_id: int = 0
@@ -31,3 +32,6 @@ func reset() -> void:
 	hunter_peer_id = 0
 	game_state = "lobby"
 	start_positions.clear()
+
+func set_local_paused(is_paused: bool) -> void:
+	local_paused.emit(is_paused)

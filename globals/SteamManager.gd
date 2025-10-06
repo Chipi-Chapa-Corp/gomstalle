@@ -15,7 +15,6 @@ func is_ready() -> bool:
 	return _ready_ok
 
 func join_lobby(lobby_id: int) -> void:
-	print_debug("Attempting to join lobby %s" % lobby_id)
 	Steam.joinLobby(lobby_id)
 
 func create_lobby() -> void:
@@ -38,7 +37,6 @@ func _ready() -> void:
 		_check_command_line()
 		set_process(true)
 		_ready_ok = true
-		print_debug("Steam API initialized as user " + Steam.getPersonaName())
 	else:
 		push_error("Error: Failed to initialize Steam. Is Steam app running and logged in?")
 
@@ -72,7 +70,6 @@ func _on_lobby_created(lobby_connect: int, lobby_id: int) -> void:
 
 	Steam.allowP2PPacketRelay(true)
 
-	print_debug("Lobby created: %s" % lobby_id)
 	lobby_created.emit(null)
 
 func _on_lobby_match_list(lobby_ids: Array) -> void:
@@ -80,7 +77,6 @@ func _on_lobby_match_list(lobby_ids: Array) -> void:
 		var lobby_name := Steam.getLobbyData(lobby_id, "name")
 		var lobby_state := Steam.getLobbyData(lobby_id, "state")
 		var lobby_num_members := Steam.getNumLobbyMembers(lobby_id)
-		print_debug("Lobby match found: %s with members %s" % [lobby_id, lobby_num_members])
 		return {
 			"id": lobby_id,
 			"name": lobby_name,
@@ -95,7 +91,6 @@ func _on_lobby_joined(lobby_id: int, _permissions: int, _locked: bool, response:
 		current_lobby_id = lobby_id
 		_make_p2p_handshake()
 		lobby_joined.emit(null)
-		print_debug("Lobby joined (should've): %s" % lobby_id)
 	else:
 		push_error("Failed to join lobby: %s" % response)
 		var fail_reason: String
@@ -117,9 +112,7 @@ func _on_lobby_joined(lobby_id: int, _permissions: int, _locked: bool, response:
 
 func _make_p2p_handshake() -> void:
 	var host_id := Steam.getLobbyOwner(current_lobby_id)
-	print_debug("Sending P2P handshake to the lobby %s to %s" % [current_lobby_id, host_id])
 	Steam.sendP2PPacket(host_id, PackedByteArray([1]), Steam.P2P_SEND_RELIABLE, 0)
 
 func _on_p2p_session_request(peer_id: int, _session_request_flags: int) -> void:
-	print_debug("Accepted P2P handshake to the lobby from %s" % peer_id)
 	Steam.acceptP2PSessionWithUser(peer_id)

@@ -1,5 +1,6 @@
 extends CharacterBody3D
 
+@export var wall_through_material_override: Material
 @export var hider_parts: Node3D
 @export var hunter_parts: Node3D
 @export var hand: RemoteTransform3D
@@ -86,6 +87,20 @@ func _ready() -> void:
 	interact_query_params.collide_with_bodies = true
 	interact_query_params.collide_with_areas = false
 	interact_query_params.exclude = [self]
+
+	_enable_wall_highlights(hunter_parts)
+	_enable_wall_highlights(hider_parts)
+
+func _enable_wall_highlights(parts: Node3D) -> void:
+	if is_multiplayer_authority():
+		for part in parts.get_children():
+			if part is MeshInstance3D:
+				var override = part.get_active_material(0).duplicate() as BaseMaterial3D
+				override.next_pass = wall_through_material_override
+				override.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS
+				part.set_surface_override_material(0, override)
+			elif part is BoneAttachment3D:
+				_enable_wall_highlights(part)
 
 func _physics_process(delta: float) -> void:
 	velocity.y += -gravity * delta

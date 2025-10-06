@@ -21,10 +21,12 @@ extends CharacterBody3D
 
 @export var hunter_color: Color = Color(1, 0, 0, 1)
 @export var hider_color: Color = Color(0, 0, 1, 1)
+@export var dead_color: Color = Color(0, 0, 0, 1)
 @export var interact_on_layer: int = 5
 @export var interact_radius: float = 1.6
 @export var max_interact_results: int = 8
 @export var jump_height: int = 5
+@export var attack_time: float = 0.82
 
 var peer_id: int
 var is_hunter := false
@@ -75,7 +77,6 @@ func _ready() -> void:
 		set_process_input(false)
 
 	attack_hitbox.monitoring = false
-	attack_cooldown_timer.connect("timeout", func(): attack_hitbox.monitoring = false)
 
 	GameState.started.connect(_on_game_started)
 	camera_offset = camera.global_transform.origin - global_transform.origin
@@ -256,6 +257,8 @@ func jump() -> void:
 func attack() -> void:
 	attack_hitbox.monitoring = true
 	anim_tree.set("parameters/IW/Attack_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	await get_tree().create_timer(attack_time).timeout
+	attack_hitbox.monitoring = false
 
 func handle_actions(delta: float) -> void:
 	if is_dead:

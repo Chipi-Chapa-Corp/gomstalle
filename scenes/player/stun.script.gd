@@ -6,7 +6,6 @@ extends Sprite3D
 @export var duration_out_delay: float = 0.3
 @export var offset_max: float = 1.5
 
-@onready var original_position := position
 var random := RandomNumberGenerator.new()
 
 var textures = [
@@ -21,10 +20,6 @@ func _ready():
 
 func play():
 	texture = textures[random.randi_range(0, textures.size() - 1)]
-	var offset_x = random.randf_range(-offset_max, offset_max)
-	var offset_y = random.randf_range(-offset_max, offset_max)
-	var offset_vector = Vector3(offset_x, offset_y, 0.0)
-	position = original_position + offset_vector
 
 	var tween = create_tween()
 	tween.tween_property(self, "scale", Vector3.ONE * scale_to, duration_in).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -35,4 +30,3 @@ func play():
 func reset():
 	scale = Vector3.ZERO
 	modulate.a = 0.0
-	position = original_position

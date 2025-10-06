@@ -9,7 +9,7 @@ extends Interactable
 @onready var _chair = self
 @onready var chair: RigidBody3D = _chair
 
-@export var min_stun_speed: float = 10
+@export var min_stun_impact: float = 6.0
 @export var ally_stun_time: float = 0.2
 @export var enemy_stun_time: float = 1.0
 
@@ -25,10 +25,10 @@ func get_is_static() -> bool:
 func get_hunter_can_interact() -> bool:
 	return false
 
-func get_can_stun(target: CharacterBody3D) -> bool:
-	var crash_speed := chair.linear_velocity - target.velocity
-	print("Crash speed: ", crash_speed.length())
-	return can_stun and crash_speed.length() >= min_stun_speed
+func get_can_stun(target: CharacterBody3D, normal: Vector3) -> bool:
+	var relative_velocity = chair.linear_velocity - target.velocity
+	var impact = relative_velocity.dot(normal.normalized())
+	return impact >= min_stun_impact
 
 func on_stun() -> void:
 	rpc("sync_on_stun")
@@ -38,7 +38,7 @@ func sync_on_stun() -> void:
 	get_parent().queue_free()
 
 func _physics_process(_delta: float) -> void:
-	if chair.linear_velocity.length() < min_stun_speed and can_stun:
+	if chair.linear_velocity.length() < min_stun_impact and can_stun:
 		can_stun = false
 
 func perform_interact(enable: bool, metadata: Dictionary):
@@ -67,6 +67,7 @@ func sync_interaction(enable: bool, metadata: Dictionary) -> void:
 		return
 	var target: CharacterBody3D = _resolve_node(metadata.get("target"))
 	_apply_interaction(enable, hand, target, metadata)
+
 func _apply_interaction(enable: bool, hand: RemoteTransform3D, target: CharacterBody3D, metadata: Dictionary) -> void:
 	var chair_transform: Transform3D = metadata.get("transform", chair.global_transform)
 	chair.global_transform = chair_transform

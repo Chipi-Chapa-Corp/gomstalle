@@ -175,8 +175,10 @@ func sync_stun(timeout: float) -> void:
 
 func handle_movement(delta: float) -> void:
 	for i in range(get_slide_collision_count()):
-		var collider = get_slide_collision(i).get_collider()
-		if collider != null and collider.is_in_group("stunning") and collider.get_can_stun(self):
+		var collision = get_slide_collision(i)
+		var collider = collision.get_collider()
+		var normal = collision.get_normal()
+		if collider != null and collider.is_in_group("stunning") and collider.get_can_stun(self, normal):
 			stun(collider.ally_stun_time if peer_id == GameState.hunter_peer_id else collider.enemy_stun_time)
 			collider.on_stun()
 

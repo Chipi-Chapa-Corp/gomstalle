@@ -81,7 +81,6 @@ script = ExtResource("2_erf87")
 mesh = NodePath("Mesh")
 transformer = NodePath("RemoteTransform3D")
 collision_shape = NodePath("CollisionShape3D")
-min_stun_speed = 8.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
 shape = SubResource("ConvexPolygonShape3D_ew5sd")

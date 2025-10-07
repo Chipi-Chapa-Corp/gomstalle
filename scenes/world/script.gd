@@ -5,6 +5,7 @@ extends Node3D
 @export var hud: Control
 @export var player_spawn_center: Vector3 = Vector3.ZERO
 @export var player_spawn_radius: float = 4.0
+@export var main_scene: PackedScene
 
 const MAX_CLIENTS := 4
 
@@ -87,7 +88,12 @@ func _get_local_player() -> Node3D:
 	return null
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("menu"):
+	if GameState.game_state != "idle" and event.is_action_pressed("menu"):
 		menu.visible = not menu.visible
 		hud.visible = not hud.visible
 		GameState.set_local_paused(menu.visible)
+
+func _on_quit_pressed() -> void:
+	GameState.quit()
+	await get_tree().create_timer(0.1).timeout
+	get_tree().change_scene_to_packed(main_scene)

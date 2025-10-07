@@ -17,6 +17,9 @@ func is_ready() -> bool:
 func join_lobby(lobby_id: int) -> void:
 	Steam.joinLobby(lobby_id)
 
+func leave_lobby() -> void:
+	Steam.leaveLobby(GameState.room_id)
+
 func create_lobby() -> void:
 	Steam.createLobby(Steam.LOBBY_TYPE_PUBLIC, MAX_MEMBERS)
 

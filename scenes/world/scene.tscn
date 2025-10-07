@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://cw0ja2d8khrr7"]
+[gd_scene load_steps=10 format=3 uid="uid://cw0ja2d8khrr7"]
 
 [ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
 [ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
 [ext_resource type="Theme" uid="uid://bufvxkr1xw0yq" path="res://assets/theme.tres" id="2_0rkgh"]
+[ext_resource type="PackedScene" uid="uid://ckqporu5qgnv4" path="res://scenes/main/scene.tscn" id="2_hi41q"]
 [ext_resource type="StyleBox" uid="uid://cylhfv6vpd0qo" path="res://theme/button/hover-dangerous.tres" id="3_bl2r1"]
 [ext_resource type="StyleBox" uid="uid://liox5pylg8l3" path="res://theme/button/pressed-dangerous.tres" id="4_hi41q"]
 [ext_resource type="PackedScene" uid="uid://d2d5gjlemdjis" path="res://scenes/items/wall_doorway/scene.tscn" id="4_lhsaa"]
@@ -14,6 +15,7 @@ script = ExtResource("1_0rkgh")
 start_button = NodePath("UI/HUD/Start")
 menu = NodePath("UI/Menu")
 hud = NodePath("UI/HUD")
+main_scene = ExtResource("2_hi41q")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -50,7 +52,7 @@ offset_bottom = 34.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Button" type="Button" parent="UI/Menu/VBoxContainer"]
+[node name="Quit" type="Button" parent="UI/Menu/VBoxContainer"]
 layout_mode = 2
 theme_override_styles/hover = ExtResource("3_bl2r1")
 theme_override_styles/pressed = ExtResource("4_hi41q")
@@ -118,4 +120,5 @@ transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 
 [node name="Chair2" parent="Interactibles/Chairs" instance=ExtResource("5_qbeeu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75302, 0, 7.89422)
 
+[connection signal="pressed" from="UI/Menu/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="UI/HUD/Start" to="." method="_on_start_pressed"]

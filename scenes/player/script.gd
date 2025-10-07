@@ -126,7 +126,3 @@ func _on_game_started(hunter_peer_id: int) -> void:
 
 func _on_attacked(body: Node3D) -> void:
 	actions.handle_attacked_body(body)
-
-func _exit_tree() -> void:
-	if GameState.started.is_connected(_on_game_started):
-		GameState.started.disconnect(_on_game_started)

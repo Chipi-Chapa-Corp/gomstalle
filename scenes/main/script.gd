@@ -1,6 +1,6 @@
 extends NinePatchRect
 
-@onready var world_scene: PackedScene = preload("res://scenes/world/scene.tscn")
+@export var world_scene: PackedScene
 
 @onready var MainSection = $Main
 @onready var JoinSection = $Join
@@ -33,6 +33,7 @@ func _on_join_room_pressed(room) -> void:
 			return
 		_on_start()
 
+	GameState.room_id = room.id
 	SteamManager.lobby_joined.connect(on_join_reply)
 	SteamManager.join_lobby(room.id)
 
@@ -55,4 +56,5 @@ func _set_rooms(rooms: Array) -> void:
 		JoinLobbyList.add_child(button)
 
 func _on_start() -> void:
+	GameState.enter_lobby()
 	get_tree().change_scene_to_packed(world_scene)

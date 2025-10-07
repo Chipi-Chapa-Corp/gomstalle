@@ -1,9 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://cw0ja2d8khrr7"]
+[gd_scene load_steps=9 format=3 uid="uid://cw0ja2d8khrr7"]
 
 [ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
 [ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
 [ext_resource type="Theme" uid="uid://bufvxkr1xw0yq" path="res://assets/theme.tres" id="2_0rkgh"]
-[ext_resource type="PackedScene" uid="uid://ckqporu5qgnv4" path="res://scenes/main/scene.tscn" id="2_hi41q"]
 [ext_resource type="StyleBox" uid="uid://cylhfv6vpd0qo" path="res://theme/button/hover-dangerous.tres" id="3_bl2r1"]
 [ext_resource type="StyleBox" uid="uid://liox5pylg8l3" path="res://theme/button/pressed-dangerous.tres" id="4_hi41q"]
 [ext_resource type="PackedScene" uid="uid://d2d5gjlemdjis" path="res://scenes/items/wall_doorway/scene.tscn" id="4_lhsaa"]
@@ -15,7 +14,7 @@ script = ExtResource("1_0rkgh")
 start_button = NodePath("UI/HUD/Start")
 menu = NodePath("UI/Menu")
 hud = NodePath("UI/HUD")
-main_scene = ExtResource("2_hi41q")
+main_scene = "res://scenes/main/scene.tscn"
 
 [node name="UI" type="CanvasLayer" parent="."]
 

@@ -5,7 +5,7 @@ extends Node3D
 @export var hud: Control
 @export var player_spawn_center: Vector3 = Vector3.ZERO
 @export var player_spawn_radius: float = 4.0
-@export var main_scene: PackedScene
+@export var main_scene: String
 
 const MAX_CLIENTS := 4
 
@@ -96,4 +96,4 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_quit_pressed() -> void:
 	GameState.quit()
 	await get_tree().create_timer(0.1).timeout
-	get_tree().change_scene_to_packed(main_scene)
+	get_tree().change_scene_to_file(main_scene)

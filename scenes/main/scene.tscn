@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://ckqporu5qgnv4"]
+[gd_scene load_steps=4 format=3 uid="uid://ckqporu5qgnv4"]
 
 [ext_resource type="Theme" uid="uid://bufvxkr1xw0yq" path="res://assets/theme.tres" id="1_3el6l"]
 [ext_resource type="Texture2D" uid="uid://dygxnsl1jt84a" path="res://assets/UI/main.png" id="2_8kd4r"]
-[ext_resource type="PackedScene" uid="uid://cw0ja2d8khrr7" path="res://scenes/world/scene.tscn" id="4_f86sw"]
 [ext_resource type="Script" uid="uid://b8em5wwdvvyev" path="res://scenes/main/script.gd" id="4_rjpi5"]
 
 [node name="Main" type="Control"]
@@ -37,7 +36,7 @@ grow_horizontal = 2
 theme_override_font_sizes/font_size = 200
 text = "Gömställe"
 
-[node name="Panel" type="NinePatchRect" parent="."]
+[node name="Panel" type="NinePatchRect" parent="." node_paths=PackedStringArray("main_section", "join_section", "join_lobby_list", "join_label", "lobby_fetch_timer")]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -51,7 +50,11 @@ offset_bottom = 236.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_rjpi5")
-world_scene = ExtResource("4_f86sw")
+main_section = NodePath("Main")
+join_section = NodePath("Join")
+join_lobby_list = NodePath("Join/List/Scrollable/Container")
+join_label = NodePath("Join/Join Hint")
+lobby_fetch_timer = NodePath("../LobbyFetchTimer")
 
 [node name="Main" type="VBoxContainer" parent="Panel"]
 layout_mode = 1
@@ -104,16 +107,19 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 10
 
-[node name="Searching" type="Label" parent="Panel/Join"]
+[node name="Join Hint" type="Label" parent="Panel/Join"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
-text = "Searching..."
+text = "Waiting for public rooms..."
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Back" type="Button" parent="Panel/Join"]
 layout_mode = 2
 text = "Back"
+
+[node name="LobbyFetchTimer" type="Timer" parent="."]
+autostart = true
 
 [connection signal="pressed" from="Panel/Main/Host" to="Panel" method="_on_host_pressed"]
 [connection signal="pressed" from="Panel/Main/Join" to="Panel" method="_on_join_pressed"]

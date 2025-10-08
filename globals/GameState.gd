@@ -1,54 +1,109 @@
 extends Node
 
-signal started(hunter_peer_id: int)
-signal local_paused(is_paused: bool)
+@onready var world_scene := "res://scenes/world/scene.tscn"
+@onready var main_scene := "res://scenes/main/scene.tscn"
 
-var connected_peer_ids: Array[int] = []
+const player_spawn_center: Vector3 = Vector3.ZERO
+const player_spawn_radius: float = 4.0
+
+signal state_changed(state: StringName)
+
+var is_paused: bool = false
+
 var hunter_peer_id: int = 0
 var room_id: int = 0
-
 var game_state: StringName = "idle"
 var start_positions: Dictionary = {}
 
-func sync_connected_peers(multiplayer_api: MultiplayerAPI) -> Array[int]:
-	var peer_ids: Array[int] = []
-	peer_ids.append(multiplayer_api.get_unique_id())
-	var remote_peers := multiplayer_api.get_peers()
-	for peer_id in remote_peers:
-		peer_ids.append(peer_id)
-	set_connected_peers(peer_ids)
-	return connected_peer_ids
+# func reset() -> void:
+# 	connected_peer_ids.clear()
+# 	hunter_peer_id = 0
+# 	game_state = "lobby"
+# 	start_positions.clear()
 
-func set_connected_peers(peer_ids: Array[int]) -> void:
-	connected_peer_ids = peer_ids.duplicate()
+# func quit() -> void:
+# 	SteamManager.leave_lobby()
+# 	game_state = "idle"
+# 	for connection in started.get_connections():
+# 		started.disconnect(connection.callable)
+# 	for connection in local_paused.get_connections():
+# 		local_paused.disconnect(connection.callable)
+# 	connected_peer_ids.clear()
+# 	hunter_peer_id = 0
+# 	room_id = 0
+# 	start_positions.clear()
+
+# --------- PUBLIC API ---------
+func create_and_join_lobby(callback: Callable) -> void:
+	MultiplayerManager.is_host = true
+	SteamManager.lobby_created.connect(func(error):
+		if error:
+			push_error("Failed to create lobby: %s" % error)
+			callback.call(false)
+			return
+		callback.call(true))
+	SteamManager.create_lobby()
+
+func join_lobby(lobby_id: int, callback: Callable) -> void:
+	MultiplayerManager.is_host = false
+	GameState.room_id = lobby_id
+	SteamManager.lobby_joined.connect(func(error):
+		if error:
+			push_error("Failed to join lobby: %s" % error)
+			callback.call(false)
+			return
+		callback.call(true))
+	SteamManager.join_lobby(lobby_id)
 
 func enter_lobby() -> void:
-	if game_state == "idle":
-		game_state = "lobby"
+	get_tree().change_scene_to_file(world_scene)
+	_set_state("lobby")
 
-func start(selected_hunter_peer_id: int, positions: Dictionary) -> void:
-	hunter_peer_id = selected_hunter_peer_id
-	start_positions = positions.duplicate()
-	game_state = "started"
-	started.emit(hunter_peer_id)
-
-func reset() -> void:
-	connected_peer_ids.clear()
-	hunter_peer_id = 0
-	game_state = "lobby"
-	start_positions.clear()
+func start_game() -> Error:
+	if MultiplayerManager.connected_peer_ids.is_empty():
+		return FAILED
+	var index = randi() % MultiplayerManager.connected_peer_ids.size()
+	hunter_peer_id = MultiplayerManager.connected_peer_ids[index]
+	_calculate_positions()
+	rpc("_notify_game_start", hunter_peer_id, start_positions)
+	_apply_game_start(hunter_peer_id, start_positions)
+	return OK
 
 func quit() -> void:
 	SteamManager.leave_lobby()
-	game_state = "idle"
-	for connection in started.get_connections():
-		started.disconnect(connection.callable)
-	for connection in local_paused.get_connections():
-		local_paused.disconnect(connection.callable)
-	connected_peer_ids.clear()
-	hunter_peer_id = 0
-	room_id = 0
+	MultiplayerManager.reset()
+	_set_state("idle")
 	start_positions.clear()
+	get_tree().change_scene_to_file(main_scene)
 
-func set_local_paused(is_paused: bool) -> void:
-	local_paused.emit(is_paused)
+func set_local_paused(new_is_paused: bool) -> void:
+	is_paused = new_is_paused
+
+# --------- UTILS ---------
+func _set_state(state: StringName) -> void:
+	game_state = state
+	state_changed.emit(game_state)
+
+@rpc("any_peer")
+func _notify_game_start(new_hunter_peer_id: int, new_positions: Dictionary) -> void:
+	_apply_game_start(new_hunter_peer_id, new_positions)
+
+func _apply_game_start(new_hunter_peer_id: int, new_positions: Dictionary) -> void:
+	hunter_peer_id = new_hunter_peer_id
+	start_positions = new_positions
+	_set_state("started")
+
+func _calculate_positions() -> Dictionary:
+	start_positions.clear()
+	start_positions[hunter_peer_id] = player_spawn_center
+	var hider_ids: Array[int] = MultiplayerManager.connected_peer_ids.filter(func(id): return id != hunter_peer_id)
+	var hider_count := hider_ids.size()
+	if hider_count == 0:
+		return start_positions
+	var angle_step := TAU / float(hider_count)
+	for index in hider_count:
+		var peer_id := hider_ids[index]
+		var angle := angle_step * index
+		var player_position := player_spawn_center + Vector3(cos(angle), 0.0, sin(angle)) * player_spawn_radius
+		start_positions[peer_id] = player_position
+	return start_positions

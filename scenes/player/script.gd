@@ -47,7 +47,6 @@ var current_move_speed = base_move_speed
 var stamina = max_stamina
 var is_stunned := false
 var is_dead := false
-var is_paused := false
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -84,8 +83,7 @@ func _ready() -> void:
 
 	attack_hitbox.monitoring = false
 
-	GameState.local_paused.connect(func(state: bool): is_paused = state)
-	GameState.started.connect(_on_game_started)
+	GameState.state_changed.connect(_on_game_state_changed)
 
 	camera_offset = camera.global_transform.origin - global_transform.origin
 	camera_offset = camera_offset.rotated(Vector3.UP, camera_yaw_offset)
@@ -105,7 +103,7 @@ func _physics_process(delta: float) -> void:
 		item = null
 
 	forces.handle(delta)
-	if not is_stunned and not is_dead and not is_paused:
+	if not is_stunned and not is_dead and not GameState.is_paused:
 		movement.handle(delta)
 		interactions.handle(delta)
 		actions.handle(delta)
@@ -115,6 +113,10 @@ func _physics_process(delta: float) -> void:
 
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)
+
+func _on_game_state_changed(state: StringName) -> void:
+	if state == "started":
+		_on_game_started(GameState.hunter_peer_id)
 
 func _on_game_started(hunter_peer_id: int) -> void:
 	is_hunter = peer_id == hunter_peer_id
@@ -126,3 +128,6 @@ func _on_game_started(hunter_peer_id: int) -> void:
 
 func _on_attacked(body: Node3D) -> void:
 	actions.handle_attacked_body(body)
+
+func _exit_tree() -> void:
+	GameState.state_changed.disconnect(_on_game_state_changed)

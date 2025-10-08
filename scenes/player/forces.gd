@@ -35,7 +35,7 @@ func _sync_stun(timeout: float) -> void:
 	character.anim_tree.set("parameters/IW/Run/blend_position", Vector2.ZERO)
 	character.anim_tree.set("parameters/IW/MovementState/blend_amount", 0.0)
 	character.anim_tree.set("parameters/IW/Stun_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	await get_tree().create_timer(timeout).timeout
+	await character.get_tree().create_timer(timeout).timeout
 	character.is_stunned = false
 
 func set_dead(state: bool) -> void:
@@ -44,4 +44,4 @@ func set_dead(state: bool) -> void:
 		character.playback.travel("Death_A", true)
 	else:
 		character.playback.travel("Ressurrect_A", true)
-		await get_tree().create_timer(0.6).timeout
+		await character.get_tree().create_timer(0.6).timeout

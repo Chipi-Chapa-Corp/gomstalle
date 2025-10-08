@@ -28,11 +28,11 @@ func handle_jump() -> void:
 
 func handle_attack() -> void:
 	if character.attack_cooldown_timer.time_left <= 0.0:
+		character.attack_cooldown_timer.start()
 		character.attack_hitbox.monitoring = true
 		character.anim_tree.set("parameters/IW/Attack_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-		await get_tree().create_timer(character.attack_time).timeout
+		await character.get_tree().create_timer(character.attack_time).timeout
 		character.attack_hitbox.monitoring = false
-		character.attack_cooldown_timer.start()
 
 func handle_emote() -> void:
 	if Input.is_action_just_pressed("emote"):

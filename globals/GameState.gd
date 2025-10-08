@@ -15,24 +15,6 @@ var room_id: int = 0
 var game_state: StringName = "idle"
 var start_positions: Dictionary = {}
 
-# func reset() -> void:
-# 	connected_peer_ids.clear()
-# 	hunter_peer_id = 0
-# 	game_state = "lobby"
-# 	start_positions.clear()
-
-# func quit() -> void:
-# 	SteamManager.leave_lobby()
-# 	game_state = "idle"
-# 	for connection in started.get_connections():
-# 		started.disconnect(connection.callable)
-# 	for connection in local_paused.get_connections():
-# 		local_paused.disconnect(connection.callable)
-# 	connected_peer_ids.clear()
-# 	hunter_peer_id = 0
-# 	room_id = 0
-# 	start_positions.clear()
-
 # --------- PUBLIC API ---------
 func create_and_join_lobby(callback: Callable) -> void:
 	MultiplayerManager.is_host = true
@@ -41,7 +23,7 @@ func create_and_join_lobby(callback: Callable) -> void:
 			push_error("Failed to create lobby: %s" % error)
 			callback.call(false)
 			return
-		callback.call(true))
+		callback.call(true), Object.CONNECT_ONE_SHOT)
 	SteamManager.create_lobby()
 
 func join_lobby(lobby_id: int, callback: Callable) -> void:
@@ -52,7 +34,7 @@ func join_lobby(lobby_id: int, callback: Callable) -> void:
 			push_error("Failed to join lobby: %s" % error)
 			callback.call(false)
 			return
-		callback.call(true))
+		callback.call(true), Object.CONNECT_ONE_SHOT)
 	SteamManager.join_lobby(lobby_id)
 
 func enter_lobby() -> void:
@@ -69,12 +51,15 @@ func start_game() -> Error:
 	_apply_game_start(hunter_peer_id, start_positions)
 	return OK
 
-func quit() -> void:
+func quit(multiplayer_api: MultiplayerAPI) -> void:
 	SteamManager.leave_lobby()
-	MultiplayerManager.reset()
-	_set_state("idle")
+	MultiplayerManager.reset(multiplayer_api)
+	is_paused = false
 	start_positions.clear()
+	hunter_peer_id = 0
+	room_id = 0
 	get_tree().change_scene_to_file(main_scene)
+	_set_state("idle")
 
 func set_local_paused(new_is_paused: bool) -> void:
 	is_paused = new_is_paused

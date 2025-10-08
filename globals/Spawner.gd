@@ -24,3 +24,6 @@ func spawn_entity(entity_name: StringName, data: Dictionary) -> void:
 		"entity": entity_name,
 		"data": data,
 	})
+
+func set_path(path: NodePath) -> void:
+	SpawnerNode.spawn_path = path

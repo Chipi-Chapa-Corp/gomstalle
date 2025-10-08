@@ -81,6 +81,8 @@ func _ready() -> void:
 		set_physics_process(false)
 		set_process_input(false)
 
+	print("player ready, process %s" % is_physics_processing())
+
 	attack_hitbox.monitoring = false
 
 	GameState.state_changed.connect(_on_game_state_changed)

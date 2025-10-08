@@ -49,3 +49,6 @@ func _set_rooms(rooms: Array) -> void:
 
 func _on_start() -> void:
 	GameState.enter_lobby()
+
+func _exit_tree() -> void:
+	SteamManager.lobby_match_list_updated.disconnect(_set_rooms)

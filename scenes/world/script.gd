@@ -29,10 +29,13 @@ func _on_start_pressed():
 		# TODO: Show error
 
 func _unhandled_input(event: InputEvent) -> void:
-	if GameState.game_state != "idle" and event.is_action_pressed("menu"):
+	if GameState.game_state != GameState.State.IDLE and event.is_action_pressed("menu"):
 		menu.visible = not menu.visible
 		hud.visible = not hud.visible
 		GameState.set_local_paused(menu.visible)
 
 func _on_quit_pressed() -> void:
 	GameState.quit(multiplayer)
+
+func _exit_tree() -> void:
+	MultiplayerManager.peer_connected.disconnect(_on_peer_connected)

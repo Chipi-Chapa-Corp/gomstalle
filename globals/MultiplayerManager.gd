@@ -15,7 +15,7 @@ func join_multiplayer(multiplayer_api: MultiplayerAPI) -> Error:
 	return _create_server(multiplayer_api) if is_host else _connect_to_server(multiplayer_api)
 
 func _create_server(multiplayer_api: MultiplayerAPI) -> Error:
-	multiplayer_api.peer_connected.connect(func(peer_id: int): peer_connected.emit(peer_id))
+	multiplayer_api.peer_connected.connect(_on_peer_connected)
 	var peer = SteamMultiplayerPeer.new()
 	var result := peer.host_with_lobby(SteamManager.current_lobby_id)
 	if result == OK:
@@ -25,6 +25,9 @@ func _create_server(multiplayer_api: MultiplayerAPI) -> Error:
 	else:
 		push_error("Error: Failed to host with lobby")
 		return FAILED
+
+func _on_peer_connected(peer_id: int) -> void:
+	peer_connected.emit(peer_id)
 
 func _connect_to_server(multiplayer_api: MultiplayerAPI) -> Error:
 	var peer = SteamMultiplayerPeer.new()
@@ -43,3 +46,6 @@ func sync_connected_peers(multiplayer_api: MultiplayerAPI) -> Array[int]:
 	for peer_id in remote_peers:
 		connected_peer_ids.append(peer_id)
 	return connected_peer_ids
+
+func _exit_tree() -> void:
+	peer_connected.disconnect(_on_peer_connected)

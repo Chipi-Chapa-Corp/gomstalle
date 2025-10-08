@@ -10,9 +10,15 @@ signal state_changed(state: StringName)
 
 var is_paused: bool = false
 
+enum State {
+	IDLE,
+	LOBBY,
+	STARTED,
+}
+
 var hunter_peer_id: int = 0
 var room_id: int = 0
-var game_state: StringName = "idle"
+var game_state: State = State.IDLE
 var start_positions: Dictionary = {}
 
 # --------- PUBLIC API ---------
@@ -39,7 +45,7 @@ func join_lobby(lobby_id: int, callback: Callable) -> void:
 
 func enter_lobby() -> void:
 	get_tree().change_scene_to_file(world_scene)
-	_set_state("lobby")
+	_set_state(State.LOBBY)
 
 func start_game() -> Error:
 	if MultiplayerManager.connected_peer_ids.is_empty():
@@ -51,21 +57,25 @@ func start_game() -> Error:
 	_apply_game_start(hunter_peer_id, start_positions)
 	return OK
 
-func quit(multiplayer_api: MultiplayerAPI) -> void:
-	SteamManager.leave_lobby()
-	MultiplayerManager.reset(multiplayer_api)
+func reset(state: State) -> void:
 	is_paused = false
 	start_positions.clear()
 	hunter_peer_id = 0
 	room_id = 0
+	_set_state(state)
+
+func quit(multiplayer_api: MultiplayerAPI) -> void:
+	SteamManager.leave_lobby()
+	MultiplayerManager.reset(multiplayer_api)
+	reset(State.IDLE)
 	get_tree().change_scene_to_file(main_scene)
-	_set_state("idle")
+	_set_state(State.IDLE)
 
 func set_local_paused(new_is_paused: bool) -> void:
 	is_paused = new_is_paused
 
 # --------- UTILS ---------
-func _set_state(state: StringName) -> void:
+func _set_state(state: State) -> void:
 	game_state = state
 	state_changed.emit(game_state)
 
@@ -76,7 +86,7 @@ func _notify_game_start(new_hunter_peer_id: int, new_positions: Dictionary) -> v
 func _apply_game_start(new_hunter_peer_id: int, new_positions: Dictionary) -> void:
 	hunter_peer_id = new_hunter_peer_id
 	start_positions = new_positions
-	_set_state("started")
+	_set_state(State.STARTED)
 
 func _calculate_positions() -> Dictionary:
 	start_positions.clear()

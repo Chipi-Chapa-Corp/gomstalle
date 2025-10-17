@@ -6,7 +6,7 @@ extends Node
 const player_spawn_center: Vector3 = Vector3.ZERO
 const player_spawn_radius: float = 4.0
 
-signal state_changed(state: StringName)
+signal state_changed(state: State)
 
 var is_paused: bool = false
 

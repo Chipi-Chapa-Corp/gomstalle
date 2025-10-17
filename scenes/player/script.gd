@@ -116,8 +116,8 @@ func _physics_process(delta: float) -> void:
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)
 
-func _on_game_state_changed(state: StringName) -> void:
-	if state == "started":
+func _on_game_state_changed(state: GameState.State) -> void:
+	if state == GameState.State.STARTED:
 		_on_game_started(GameState.hunter_peer_id)
 
 func _on_game_started(hunter_peer_id: int) -> void:

@@ -11,9 +11,12 @@ config_version=5
 [application]
 
 config/name="Gomstalle"
+config/version="0.1s.0"
 run/main_scene="uid://ckqporu5qgnv4"
 config/features=PackedStringArray("4.5", "Forward Plus")
-config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0, 0, 0, 1)
+config/icon="uid://5xo3cogw5psb"
+config/windows_native_icon="res://icon.ico"
 
 [autoload]
 

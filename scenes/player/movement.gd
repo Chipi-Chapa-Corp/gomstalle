@@ -24,6 +24,9 @@ func handle(delta: float) -> void:
 	character.current_move_speed = character.run_move_speed if is_running else character.base_move_speed
 
 	var horizontal_velocity = movement_direction * character.current_move_speed
+	var dash_dir = movement_direction.normalized() if is_moving else character.model.global_transform.basis.z.normalized()
+	horizontal_velocity += dash_dir * character.dash
+
 	character.velocity.x = horizontal_velocity.x
 	character.velocity.z = horizontal_velocity.z
 	character.animation_velocity = character.animation_velocity.lerp(horizontal_velocity, 0.15)
@@ -51,4 +54,5 @@ func handle(delta: float) -> void:
 		character.stamina_bar.visible = character.stamina < character.max_stamina
 		character.stamina_bar.value = character.stamina / character.max_stamina * 100.0
 
+	character.dash = max(character.dash - (character.dash_speed / character.dash_duration) * delta, 0.0)
 	character.velocity.y = vertical_velocity

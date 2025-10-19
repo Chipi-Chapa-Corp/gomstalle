@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://c05xs4dhrmial"]
+
+[ext_resource type="PackedScene" uid="uid://exbxlt8rlb1e" path="res://assets/dungeon/models/wall_doorway_scaffold.gltf" id="1_ns5n4"]
+[ext_resource type="Script" uid="uid://dq7r7t6qpr3jj" path="res://scenes/door_scaffold/script.gd" id="2_1lb5u"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8gxsu"]
+size = Vector3(2, 2.64551, 1.49847)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_h7n2b"]
+
+[node name="Door Scaffold" instance=ExtResource("1_ns5n4")]
+
+[node name="Receiver" type="StaticBody3D" parent="." index="1" node_paths=PackedStringArray("door") groups=["interactible"]]
+collision_layer = 16
+script = ExtResource("2_1lb5u")
+door = NodePath("../wall_doorway_scaffold/wall_doorway_scaffold_door")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Receiver" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.39757, 0.00840136)
+shape = SubResource("BoxShape3D_8gxsu")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." index="2"]
+replication_config = SubResource("SceneReplicationConfig_h7n2b")

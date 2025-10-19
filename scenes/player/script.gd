@@ -31,8 +31,10 @@ extends CharacterBody3D
 @export var interact_on_layer: int = 5
 @export var interact_radius: float = 1.6
 @export var max_interact_results: int = 8
-@export var jump_height: int = 5
-@export var attack_time: float = 0.82
+
+var attack_time: float = 0.82
+var dash_speed: float = 15.0
+var dash_duration: float = 2
 
 var peer_id: int
 var is_hunter := false
@@ -43,6 +45,7 @@ const max_stamina = 50
 const stamina_usage = 10
 const stamina_regen = 5
 
+var dash := 0.0
 var current_move_speed = base_move_speed
 var stamina = max_stamina
 var is_stunned := false

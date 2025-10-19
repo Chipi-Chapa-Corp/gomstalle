@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cjgy5bpnusria"]
+[gd_scene load_steps=18 format=3 uid="uid://cjgy5bpnusria"]
 
 [ext_resource type="PackedScene" uid="uid://pjtst0cxbmja" path="res://scenes/wall/scene.tscn" id="1_qmp2k"]
 [ext_resource type="PackedScene" uid="uid://bhdi2edglqhfs" path="res://assets/dungeon/models/floor_tile_large.gltf" id="3_iejse"]
@@ -12,6 +12,11 @@
 [ext_resource type="PackedScene" uid="uid://dnx16a7poakch" path="res://assets/dungeon/models/floor_wood_large_dark.gltf" id="10_qmp2k"]
 [ext_resource type="PackedScene" uid="uid://fd8f7q2av28j" path="res://scenes/wall_cross/scene.tscn" id="11_p013m"]
 [ext_resource type="PackedScene" uid="uid://xooghyjbo1pg" path="res://scenes/wall_t/scene.tscn" id="12_g7ect"]
+[ext_resource type="PackedScene" uid="uid://b7im0qmx3134w" path="res://assets/dungeon/models/floor_wood_large.gltf" id="13_a0oiv"]
+[ext_resource type="PackedScene" uid="uid://ds6c5sj7ojqj4" path="res://scenes/floor_dirt/scene.tscn" id="14_35kah"]
+[ext_resource type="PackedScene" uid="uid://bupx2gmx1fjo2" path="res://scenes/floor_dirt_rocky/floor_dirt_rocky.tscn" id="15_73pke"]
+[ext_resource type="PackedScene" uid="uid://civ11oy1cy657" path="res://assets/dungeon/models/wall_open_scaffold.gltf" id="16_73pke"]
+[ext_resource type="PackedScene" uid="uid://bklyfy8b16bv3" path="res://assets/dungeon/models/wall_half_endcap_sloped.gltf" id="17_4kw1w"]
 
 [node name="Palette" type="Node3D"]
 
@@ -21,8 +26,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -5)
 [node name="Wall Corner" parent="." instance=ExtResource("10_p013m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 2)
 
-[node name="Floor" parent="." instance=ExtResource("3_iejse")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
+[node name="Floor Wood Bright" parent="." instance=ExtResource("13_a0oiv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 0, 0)
 
 [node name="Center Floor" parent="." instance=ExtResource("4_w02ji")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -8)
@@ -50,3 +55,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -16)
 
 [node name="Wall T" parent="." instance=ExtResource("12_g7ect")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -24)
+
+[node name="Floor" parent="." instance=ExtResource("3_iejse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
+
+[node name="Floor Dirt" parent="." instance=ExtResource("14_35kah")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 6)
+
+[node name="Floor Dirt Rocky" parent="." instance=ExtResource("15_73pke")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, 6)
+
+[node name="Scaffold" parent="." instance=ExtResource("16_73pke")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -16)
+
+[node name="Endcap" parent="." instance=ExtResource("17_4kw1w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -20)

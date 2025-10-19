@@ -3,6 +3,8 @@ class_name CharacterActions
 
 var character: CharacterBody3D
 
+var is_jumping := false
+
 const ROTATION_SPEED = 8.0
 
 func _init(node: CharacterBody3D) -> void:
@@ -12,6 +14,15 @@ func handle(delta: float) -> void:
 	handle_active_action()
 	handle_emote()
 	handle_rotation(delta)
+	handle_skill_1()
+
+func handle_skill_1() -> void:
+	if character.is_hunter:
+		return
+	if Input.is_action_just_pressed("skill_1"):
+		character.dash = character.dash_speed
+		character.anim_tree.set("parameters/IW/Roll_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		await character.get_tree().create_timer(1.5).timeout
 
 func handle_active_action() -> void:
 	if Input.is_action_just_pressed("jump"):
@@ -21,10 +32,12 @@ func handle_active_action() -> void:
 			handle_jump()
 
 func handle_jump() -> void:
-	if not character.is_on_floor():
+	if is_jumping:
 		return
-	character.velocity.y += character.jump_height
+	is_jumping = true
 	character.anim_tree.set("parameters/IW/Jump_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	await character.get_tree().create_timer(1.3).timeout
+	is_jumping = false
 
 func handle_attack() -> void:
 	if character.attack_cooldown_timer.time_left <= 0.0:

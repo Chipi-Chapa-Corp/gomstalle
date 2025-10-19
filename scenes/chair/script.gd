@@ -3,6 +3,7 @@ extends Interactable
 @export var mesh: MeshInstance3D
 @export var transformer: RemoteTransform3D
 @export var collision_shape: CollisionShape3D
+@export var destroy_effect: GPUParticles3D
 
 @onready var collision_shadow: CollisionShape3D = collision_shape.duplicate()
 @onready var collision_layer_enabled := collision_layer
@@ -35,6 +36,17 @@ func on_stun() -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func sync_on_stun() -> void:
+	get_parent().queue_free()
+
+func on_attacked() -> void:
+	rpc("sync_on_attacked")
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_on_attacked() -> void:
+	destroy_effect.emitting = true
+	collision_shape.disabled = true
+	mesh.visible = false
+	await get_tree().create_timer(destroy_effect.lifetime).timeout
 	get_parent().queue_free()
 
 func _physics_process(_delta: float) -> void:

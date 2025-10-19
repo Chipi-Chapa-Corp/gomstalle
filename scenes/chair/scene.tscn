@@ -1,7 +1,7 @@
-[gd_scene load_steps=8 format=4 uid="uid://bafpmkm4tdjlp"]
+[gd_scene load_steps=11 format=4 uid="uid://bafpmkm4tdjlp"]
 
 [ext_resource type="Texture2D" uid="uid://bena86s0iwihb" path="res://assets/dungeon/models/dungeon_texture.png" id="1_erf87"]
-[ext_resource type="Script" path="res://scenes/chair/script.gd" id="2_erf87"]
+[ext_resource type="Script" uid="uid://dotvh4lte2cfy" path="res://scenes/chair/script.gd" id="2_erf87"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ew5sd"]
 points = PackedVector3Array(0.357499, 0.299903, 0.375008, 0.207514, 0.299903, 0.375008, 0.329381, 2.98023e-08, 0.337492, 0.338778, 2.98023e-08, 0.328095, 0.37622, 0.474947, 0.356213, 0.357499, 0.474947, 0.374934, 0.352507, 1.07775, 0.374934, -0.354986, 0.299903, 0.368694, -0.326869, 2.98023e-08, 0.337492, 0.177561, 1.07775, 0.374934, -0.354986, 0.474947, 0.374934, 0.338778, 2.98023e-08, -0.328167, 0.376293, 0.474947, -0.356285, 0.352507, 1.20766, 0.00308436, 0.352507, 1.17764, 0.189046, 0.177561, 1.19649, 0.178107, 0.177561, 1.09648, 0.356213, -0.373707, 0.474947, 0.356213, -0.336266, 2.98023e-08, 0.328095, 0.152527, 1.07775, 0.356213, -0.354986, 0.499919, 0.356213, 0.329381, 2.98023e-08, -0.337564, 0.357499, 0.299903, -0.368765, 0.357499, 0.474947, -0.375006, 0.352507, 0.852647, -0.375006, 0.352507, 1.07775, -0.368765, 0.352507, 1.17764, -0.182877, 0.177561, 1.22651, -7.25091e-05, 0.152527, 1.17764, 0.178107, 0.152527, 1.20766, -7.25091e-05, -0.373707, 0.474947, -0.356285, -0.336266, 2.98023e-08, -0.328167, -0.167486, 0.299903, -0.375006, -0.326869, 2.98023e-08, -0.337564, 0.177561, 1.07775, -0.375006, 0.177561, 1.09648, -0.356285, 0.177561, 1.19649, -0.178179, 0.152527, 1.17764, -0.178179, -0.354986, 0.499919, -0.356285, -0.354986, 0.474947, -0.375006, -0.354986, 0.299903, -0.375006, 0.152527, 1.07775, -0.356285)
@@ -71,14 +71,32 @@ properties/7/path = NodePath("RigidBody3D:rotation")
 properties/7/spawn = true
 properties/7/replication_mode = 1
 
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_61buv"]
+emission_shape_scale = Vector3(0.5, 0.5, 0.8)
+emission_shape = 3
+emission_box_extents = Vector3(1, 1, 1)
+angle_min = -89.99999
+angle_max = 90.000015
+gravity = Vector3(0, -20, 0)
+scale_min = 0.19999999
+scale_max = 0.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_61buv"]
+albedo_color = Color(0.5687746, 0.37526083, 0.33199772, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_61buv"]
+material = SubResource("StandardMaterial3D_61buv")
+size = Vector3(1, 2, 0.3)
+
 [node name="Chair" type="Node3D"]
 
-[node name="RigidBody3D" type="RigidBody3D" parent="." node_paths=PackedStringArray("mesh", "transformer", "collision_shape") groups=["interactible", "stunning"]]
-collision_layer = 17
+[node name="RigidBody3D" type="RigidBody3D" parent="." node_paths=PackedStringArray("mesh", "transformer", "collision_shape", "destroy_effect") groups=["attackable", "interactible", "stunning"]]
+collision_layer = 19
 script = ExtResource("2_erf87")
 mesh = NodePath("Mesh")
 transformer = NodePath("RemoteTransform3D")
 collision_shape = NodePath("CollisionShape3D")
+destroy_effect = NodePath("../GPUParticles3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
 shape = SubResource("ConvexPolygonShape3D_ew5sd")
@@ -91,3 +109,14 @@ skeleton = NodePath("")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_erf87")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0.034826398, 0.66528, 0)
+emitting = false
+amount = 10
+lifetime = 0.3
+one_shot = true
+explosiveness = 1.0
+randomness = 1.0
+process_material = SubResource("ParticleProcessMaterial_61buv")
+draw_pass_1 = SubResource("BoxMesh_61buv")

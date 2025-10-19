@@ -83,7 +83,9 @@ func _mouse_ground_hit() -> Vector3:
 	return hit if hit != null else Vector3.INF
 
 func handle_attacked_body(body: Node3D) -> void:
-	if character.is_dead or character.is_hunter:
+	if character.is_dead or not character.is_hunter:
 		return
-	if body is CharacterBody3D:
+	if body is CharacterBody3D and not body.is_hunter:
 		body.set_dead(true)
+	elif body.is_in_group("attackable"):
+		body.on_attacked()

@@ -30,6 +30,7 @@ MultiplayerManager="*res://globals/MultiplayerManager.gd"
 
 interactible="Interactible items (doors, chairs, etc)"
 stunning="Items which could stun. Must have `sleeping`"
+attackable="Nodes which can be attacked by hunter"
 
 [input]
 

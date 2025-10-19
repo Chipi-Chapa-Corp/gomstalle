@@ -24,8 +24,12 @@ func handle(delta: float) -> void:
 	character.current_move_speed = character.run_move_speed if is_running else character.base_move_speed
 
 	var horizontal_velocity = movement_direction * character.current_move_speed
-	var dash_dir = movement_direction.normalized() if is_moving else character.model.global_transform.basis.z.normalized()
-	horizontal_velocity += dash_dir * character.dash
+	if character.dash > 0.0:
+		var dash_dir = movement_direction if is_moving else character.model.global_transform.basis.z
+		dash_dir.y = 0.0
+		dash_dir = dash_dir.normalized()
+		var new_velocity = horizontal_velocity + dash_dir * character.dash
+		horizontal_velocity = new_velocity.limit_length(character.dash_speed)
 
 	character.velocity.x = horizontal_velocity.x
 	character.velocity.z = horizontal_velocity.z

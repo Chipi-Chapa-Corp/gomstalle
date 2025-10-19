@@ -17,8 +17,11 @@ extends CharacterBody3D
 @export var stamina_bar: TextureProgressBar
 @export var cooldown_timer: Timer
 @export var attack_cooldown_timer: Timer
+@export var ability_cooldown_timer: Timer
 @export var attack_hitbox: Area3D
 @export var stun_effect: Sprite3D
+@export var regular_collider: CollisionShape3D
+@export var dash_collider: CollisionShape3D
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 
@@ -33,8 +36,9 @@ extends CharacterBody3D
 @export var max_interact_results: int = 8
 
 var attack_time: float = 0.82
-var dash_speed: float = 15.0
+var dash_speed: float = 8.0
 var dash_duration: float = 2
+var dash_height: float = 6.0
 
 var peer_id: int
 var is_hunter := false

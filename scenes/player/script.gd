@@ -36,6 +36,7 @@ extends CharacterBody3D
 @export var max_interact_results: int = 8
 
 var attack_time: float = 0.82
+var jump_height: float = 6.0
 var dash_speed: float = 8.0
 var dash_duration: float = 2
 var dash_height: float = 6.0

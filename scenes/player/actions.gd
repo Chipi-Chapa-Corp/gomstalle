@@ -12,7 +12,8 @@ func _init(node: CharacterBody3D) -> void:
 	character = node
 
 func handle(delta: float) -> void:
-	handle_active_action()
+	handle_attack()
+	handle_jump()
 	handle_emote()
 	handle_rotation(delta)
 	handle_ability()
@@ -34,22 +35,19 @@ func handle_ability() -> void:
 		character.dash_collider.disabled = true
 		is_using_ability = false
 
-func handle_active_action() -> void:
-	if Input.is_action_just_pressed("jump"):
-		if character.is_hunter:
-			handle_attack()
-		else:
-			handle_jump()
-
 func handle_jump() -> void:
-	if is_jumping:
+	if not Input.is_action_just_pressed("jump") or is_jumping:
 		return
 	is_jumping = true
 	character.anim_tree.set("parameters/IW/Jump_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	await character.get_tree().create_timer(0.2).timeout
+	character.velocity.y = character.jump_height
 	await character.get_tree().create_timer(1.3).timeout
 	is_jumping = false
 
 func handle_attack() -> void:
+	if not character.is_hunter or not Input.is_action_just_pressed("attack"):
+		return
 	if character.attack_cooldown_timer.time_left <= 0.0:
 		character.attack_cooldown_timer.start()
 		character.attack_hitbox.monitoring = true

@@ -48,10 +48,11 @@ func enter_lobby() -> void:
 	_set_state(State.LOBBY)
 
 func start_game() -> Error:
-	if MultiplayerManager.connected_peer_ids.is_empty():
+	var peer_ids := MultiplayerManager.get_connected_peer_ids()
+	if peer_ids.is_empty():
 		return FAILED
-	var index = randi() % MultiplayerManager.connected_peer_ids.size()
-	hunter_peer_id = MultiplayerManager.connected_peer_ids[index]
+	var index = randi() % peer_ids.size()
+	hunter_peer_id = peer_ids[index]
 	_calculate_positions()
 	rpc("_notify_game_start", hunter_peer_id, start_positions)
 	_apply_game_start(hunter_peer_id, start_positions)
@@ -91,7 +92,7 @@ func _apply_game_start(new_hunter_peer_id: int, new_positions: Dictionary) -> vo
 func _calculate_positions() -> Dictionary:
 	start_positions.clear()
 	start_positions[hunter_peer_id] = player_spawn_center
-	var hider_ids: Array[int] = MultiplayerManager.connected_peer_ids.filter(func(id): return id != hunter_peer_id)
+	var hider_ids: Array[int] = MultiplayerManager.get_connected_peer_ids().filter(func(id): return id != hunter_peer_id)
 	var hider_count := hider_ids.size()
 	if hider_count == 0:
 		return start_positions

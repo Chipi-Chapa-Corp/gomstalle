@@ -4,10 +4,15 @@ extends Node3D
 @export var menu: Control
 @export var hud: Control
 @export var player_container: Node
+@export var player_list: VBoxContainer
+@export var player_list_item_sample: Control
+@onready var player_list_item_sample_persistent: Control = player_list_item_sample.duplicate()
 
 func _ready():
+	player_list_item_sample_persistent.visible = true
 	Spawner.set_path(player_container.get_path())
 	MultiplayerManager.peer_connected.connect(_on_peer_connected)
+	MultiplayerManager.peer_list_changed.connect(_on_peer_list_changed)
 	var result := MultiplayerManager.join_multiplayer(multiplayer)
 	if result != OK:
 		push_error("Error: Failed to create or connect to server")
@@ -17,6 +22,14 @@ func _on_peer_connected(peer_id: int) -> void:
 	if multiplayer.is_server():
 		start_button.visible = true
 	Spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})
+
+func _on_peer_list_changed(peers: Array[Dictionary]) -> void:
+	for child in player_list.get_children():
+		player_list.remove_child(child)
+	for peer in peers:
+		var item = player_list_item_sample_persistent.duplicate()
+		item.get_node("Container/Label").text = peer["name"]
+		player_list.add_child(item)
 
 func _on_start_pressed():
 	if not MultiplayerManager.is_host:
@@ -39,3 +52,4 @@ func _on_quit_pressed() -> void:
 
 func _exit_tree() -> void:
 	MultiplayerManager.peer_connected.disconnect(_on_peer_connected)
+	MultiplayerManager.peer_list_changed.disconnect(_on_peer_list_changed)

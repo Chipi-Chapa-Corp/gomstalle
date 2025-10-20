@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cw0ja2d8khrr7"]
+[gd_scene load_steps=12 format=3 uid="uid://cw0ja2d8khrr7"]
 
 [ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
 [ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
@@ -7,15 +7,30 @@
 [ext_resource type="StyleBox" uid="uid://liox5pylg8l3" path="res://theme/button/pressed-dangerous.tres" id="4_hi41q"]
 [ext_resource type="StyleBox" uid="uid://n6ia02gel5tb" path="res://theme/button/regular-dangerous.tres" id="5_a8a3a"]
 [ext_resource type="PackedScene" uid="uid://bafpmkm4tdjlp" path="res://scenes/chair/scene.tscn" id="5_qbeeu"]
+[ext_resource type="Texture2D" uid="uid://b2ep5xgsi5c8e" path="res://assets/static/plate.png" id="6_a8a3a"]
 [ext_resource type="PackedScene" uid="uid://d2d5gjlemdjis" path="res://scenes/door/scene.tscn" id="8_hi41q"]
 [ext_resource type="PackedScene" uid="uid://c05xs4dhrmial" path="res://scenes/door_scaffold/scene.tscn" id="9_hi41q"]
 
-[node name="World" type="Node3D" node_paths=PackedStringArray("start_button", "menu", "hud", "player_container")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8a3a"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[node name="World" type="Node3D" node_paths=PackedStringArray("start_button", "menu", "hud", "player_container", "player_list", "player_list_item_sample")]
 script = ExtResource("1_0rkgh")
 start_button = NodePath("UI/HUD/Start")
 menu = NodePath("UI/Menu")
 hud = NodePath("UI/HUD")
 player_container = NodePath("Players")
+player_list = NodePath("UI/HUD/Player List")
+player_list_item_sample = NodePath("UI/HUD/Player List/Sample")
 
 [node name="Players" type="Node" parent="."]
 
@@ -72,7 +87,6 @@ size_flags_vertical = 4
 theme = ExtResource("2_0rkgh")
 
 [node name="Start" type="Button" parent="UI/HUD"]
-visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -85,6 +99,44 @@ offset_right = 44.0
 grow_horizontal = 2
 grow_vertical = 0
 text = "Start"
+
+[node name="Player List" type="VBoxContainer" parent="UI/HUD"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 1
+anchors_preset = -1
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 261.0
+offset_bottom = 66.0
+alignment = 1
+
+[node name="Sample" type="PanelContainer" parent="UI/HUD/Player List"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_a8a3a")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="UI/HUD/Player List/Sample"]
+layout_mode = 2
+texture = ExtResource("6_a8a3a")
+region_rect = Rect2(0, 0, 218, 80)
+patch_margin_left = 28
+patch_margin_top = 12
+patch_margin_right = 36
+patch_margin_bottom = 20
+
+[node name="Container" type="MarginContainer" parent="UI/HUD/Player List/Sample"]
+layout_mode = 2
+theme_override_constants/margin_left = 29
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 37
+theme_override_constants/margin_bottom = 18
+
+[node name="Label" type="Label" parent="UI/HUD/Player List/Sample/Container"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 30
+text = "Sack of Bones"
 
 [node name="GridMap" type="GridMap" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 2)

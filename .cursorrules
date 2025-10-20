@@ -4,7 +4,8 @@ PROJECT DESCRIPTION
 - Hide & Seek game
 
 STRICTLY FOLLOW THESE INSTRUCTIONS:
-- Always use latest Godot 4.4 syntax
+- Always use latest Godot syntax
+- Always use a single tab for indentation
 - Always do minimal changes to the codebase to achieve the task
 - Always write production-grade code
 - Always only write what is needed right now. Keep all your edits as minimal and

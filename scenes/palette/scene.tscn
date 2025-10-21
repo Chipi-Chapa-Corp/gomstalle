@@ -1,7 +1,6 @@
-[gd_scene load_steps=33 format=4 uid="uid://cjgy5bpnusria"]
+[gd_scene load_steps=34 format=4 uid="uid://cjgy5bpnusria"]
 
 [ext_resource type="PackedScene" uid="uid://pjtst0cxbmja" path="res://scenes/wall/scene.tscn" id="1_qmp2k"]
-[ext_resource type="PackedScene" uid="uid://bhdi2edglqhfs" path="res://assets/dungeon/models/floor_tile_large.gltf" id="3_iejse"]
 [ext_resource type="PackedScene" uid="uid://df6u8owedqkf0" path="res://assets/dungeon/models/floor_tile_extralarge_grates.gltf" id="4_w02ji"]
 [ext_resource type="PackedScene" uid="uid://berski34cld10" path="res://assets/dungeon/models/table_long_tablecloth_decorated_A.gltf" id="5_8cd00"]
 [ext_resource type="PackedScene" uid="uid://dcmyne40aw65a" path="res://assets/dungeon/models/chair.gltf" id="6_wyhkj"]
@@ -12,14 +11,19 @@
 [ext_resource type="PackedScene" uid="uid://dnx16a7poakch" path="res://assets/dungeon/models/floor_wood_large_dark.gltf" id="10_qmp2k"]
 [ext_resource type="PackedScene" uid="uid://fd8f7q2av28j" path="res://scenes/wall_cross/scene.tscn" id="11_p013m"]
 [ext_resource type="PackedScene" uid="uid://xooghyjbo1pg" path="res://scenes/wall_t/scene.tscn" id="12_g7ect"]
+[ext_resource type="ArrayMesh" uid="uid://bmp5iks3qv48k" path="res://assets/dungeon/models/floor_large.mesh" id="13_73pke"]
 [ext_resource type="PackedScene" uid="uid://b7im0qmx3134w" path="res://assets/dungeon/models/floor_wood_large.gltf" id="13_a0oiv"]
 [ext_resource type="PackedScene" uid="uid://ds6c5sj7ojqj4" path="res://scenes/floor_dirt/scene.tscn" id="14_35kah"]
 [ext_resource type="PackedScene" uid="uid://bupx2gmx1fjo2" path="res://scenes/floor_dirt_rocky/floor_dirt_rocky.tscn" id="15_73pke"]
 [ext_resource type="Texture2D" uid="uid://bena86s0iwihb" path="res://assets/dungeon/models/dungeon_texture.png" id="16_2o87a"]
 
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_xmmnd"]
+points = PackedVector3Array(-2, -0.10000001, -2, -2, -0.10000001, 2, -2, 0.049985334, -2, 2, -0.10000001, -2, -2, 0.049985334, 2, 2, -0.10000001, 2, 0, 0.050000012, 0, 2, 0.049985334, -2, 2, 0.049985334, 2)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4dh1k"]
 resource_name = "texture"
 albedo_texture = ExtResource("16_2o87a")
+metallic_specular = 0.2
 roughness = 0.45
 stencil_mode = 3
 stencil_flags = 2
@@ -62,6 +66,7 @@ data = PackedVector3Array(-2, 0, -0.49999997, -1.85, 0.25, -0.49999997, -2, 0.25
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4kw1w"]
 resource_name = "texture"
 albedo_texture = ExtResource("16_2o87a")
+metallic_specular = 0.2
 roughness = 0.45
 stencil_mode = 3
 stencil_flags = 2
@@ -104,6 +109,7 @@ data = PackedVector3Array(-0.3, 0.5, 0.15, -0.3, 1.4000001, -0.15, -0.3, 0.5, -0
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73pke"]
 resource_name = "texture"
 albedo_texture = ExtResource("16_2o87a")
+metallic_specular = 0.2
 roughness = 0.45
 stencil_mode = 3
 stencil_flags = 2
@@ -146,6 +152,7 @@ data = PackedVector3Array(-0.8693428, 1.077064, -0.25, 2, 0.5, -0.25, 0.86935586
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2o87a"]
 resource_name = "texture"
 albedo_texture = ExtResource("16_2o87a")
+metallic_specular = 0.2
 roughness = 0.45
 stencil_mode = 3
 stencil_flags = 2
@@ -223,8 +230,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -16)
 [node name="Wall T" parent="." instance=ExtResource("12_g7ect")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -24)
 
-[node name="Floor" parent="." instance=ExtResource("3_iejse")]
+[node name="Floor" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
+
+[node name="floor_tile_large" type="MeshInstance3D" parent="Floor"]
+mesh = ExtResource("13_73pke")
+skeleton = NodePath("")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Floor/floor_tile_large"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/floor_tile_large/StaticBody3D"]
+shape = SubResource("ConvexPolygonShape3D_xmmnd")
 
 [node name="Floor Dirt" parent="." instance=ExtResource("14_35kah")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 6)

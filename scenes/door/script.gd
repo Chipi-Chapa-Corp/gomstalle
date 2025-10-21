@@ -7,6 +7,7 @@ var is_opened = false
 
 @export var mesh: MeshInstance3D
 @export var body: AnimatableBody3D
+@export var audio_player: AudioStreamPlayer3D
 
 func get_outline_target() -> MeshInstance3D:
 	return mesh
@@ -23,6 +24,8 @@ func perform_interact(enable: bool, metadata: Dictionary) -> void:
 	var axis_value: float = (player_position.z - door_position.z) if ORIENTATION == "horizontal" else (player_position.x - door_position.x)
 	var target: float = 0.0 if is_opened else signf(axis_value) * 90.0 if enable else 0.0
 	
+	audio_player.play()
+
 	var tween := get_tree().create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	tween.tween_property(body, "rotation_degrees:y", target, ANIMATION_DURATION)
 	is_opened = not is_opened

@@ -49,6 +49,7 @@ func handle_attack() -> void:
 	if not character.is_hunter or not Input.is_action_just_pressed("attack"):
 		return
 	if character.attack_cooldown_timer.time_left <= 0.0:
+		character.attack_audio_player.play()
 		character.attack_cooldown_timer.start()
 		character.attack_hitbox.monitoring = true
 		character.anim_tree.set("parameters/IW/Attack_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)

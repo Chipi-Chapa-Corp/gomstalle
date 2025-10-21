@@ -35,7 +35,6 @@ func _on_start_pressed():
 	if not MultiplayerManager.is_host:
 		return
 	start_button.visible = false
-	MultiplayerManager.sync_connected_peers(multiplayer)
 	var result := GameState.start_game()
 	if result != OK:
 		push_error("Error: Failed to start game")

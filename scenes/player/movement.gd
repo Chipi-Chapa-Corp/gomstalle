@@ -2,9 +2,41 @@ extends Node
 class_name CharacterMovement
 
 var character: CharacterBody3D
+var _step_time := 0.0
+const STEP_INTERVAL_WALK := 0.58
+const STEP_INTERVAL_RUN := 0.5
+
+var _was_moving := false
+var _was_grounded := false
 
 func _init(node: CharacterBody3D) -> void:
 	character = node
+
+func _update_footsteps(delta: float, is_moving: bool, is_running: bool) -> void:
+	var grounded := character.is_on_floor()
+
+	if !grounded or !is_moving:
+		_step_time = 0.0
+		_was_moving = is_moving
+		_was_grounded = grounded
+		return
+
+	var interval := STEP_INTERVAL_RUN if is_running else STEP_INTERVAL_WALK
+
+	var just_started := is_moving and !_was_moving
+	var just_landed := grounded and !_was_grounded
+
+	if just_started or just_landed:
+		character.movement_audio_player.play()
+		_step_time = 0.0
+	else:
+		_step_time += delta
+		if _step_time >= interval:
+			_step_time = 0.0
+			character.movement_audio_player.play()
+
+	_was_moving = is_moving
+	_was_grounded = grounded
 
 func handle(delta: float) -> void:
 	var vertical_velocity = character.velocity.y
@@ -18,7 +50,7 @@ func handle(delta: float) -> void:
 		movement_direction = input_vector.rotated(Vector3.UP, character.camera_yaw_offset)
 	if movement_direction.length() > 1.0:
 		movement_direction = movement_direction.normalized()
-	var is_moving = movement_direction.length() > 0.0
+	var is_moving := movement_direction.length() > 0.0
 	var has_stamina = character.stamina > 0.0
 	var is_running = run_requested and has_stamina and is_moving
 	character.current_move_speed = character.run_move_speed if is_running else character.base_move_speed
@@ -60,3 +92,5 @@ func handle(delta: float) -> void:
 
 	character.dash = max(character.dash - (character.dash_speed / character.dash_duration) * delta, 0.0)
 	character.velocity.y = vertical_velocity
+
+	_update_footsteps(delta, is_moving, is_running)

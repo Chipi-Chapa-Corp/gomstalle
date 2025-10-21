@@ -22,6 +22,8 @@ extends CharacterBody3D
 @export var stun_effect: Sprite3D
 @export var regular_collider: CollisionShape3D
 @export var dash_collider: CollisionShape3D
+@export var movement_audio_player: AudioStreamPlayer3D
+@export var attack_audio_player: AudioStreamPlayer3D
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 

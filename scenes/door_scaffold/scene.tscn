@@ -1,11 +1,13 @@
-[gd_scene load_steps=13 format=4 uid="uid://c05xs4dhrmial"]
+[gd_scene load_steps=14 format=4 uid="uid://c05xs4dhrmial"]
 
 [ext_resource type="Script" uid="uid://dq7r7t6qpr3jj" path="res://scenes/door_scaffold/script.gd" id="2_1lb5u"]
 [ext_resource type="Texture2D" uid="uid://bena86s0iwihb" path="res://assets/dungeon/models/dungeon_texture.png" id="2_h7n2b"]
+[ext_resource type="AudioStream" uid="uid://byng1qs4qxbqa" path="res://assets/sounds/door.mp3" id="3_h7n2b"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_h6uua"]
 resource_name = "texture"
 albedo_texture = ExtResource("2_h7n2b")
+metallic_specular = 0.2
 roughness = 0.45
 stencil_mode = 3
 stencil_flags = 2
@@ -115,15 +117,22 @@ shape = SubResource("ConvexPolygonShape3D_5qwue")
 mesh = SubResource("ArrayMesh_h6uua")
 skeleton = NodePath("")
 
-[node name="Receiver" type="StaticBody3D" parent="." node_paths=PackedStringArray("mesh", "body") groups=["interactible"]]
+[node name="Receiver" type="StaticBody3D" parent="." node_paths=PackedStringArray("mesh", "body", "audio_player") groups=["interactible"]]
 collision_layer = 16
 script = ExtResource("2_1lb5u")
 mesh = NodePath("../wall_doorway_scaffold/StaticBody3D2/wall_doorway_scaffold_door")
 body = NodePath("../wall_doorway_scaffold/StaticBody3D2")
+audio_player = NodePath("../AudioStreamPlayer3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Receiver"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.39757, 0.00840136)
 shape = SubResource("BoxShape3D_8gxsu")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_h7n2b")
+volume_db = -10.0
+unit_size = 5.0
+max_distance = 20.0
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_h7n2b")

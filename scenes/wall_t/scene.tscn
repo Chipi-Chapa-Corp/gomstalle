@@ -6,6 +6,7 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pkjpt"]
 resource_name = "texture"
 albedo_texture = ExtResource("2_2e537")
+metallic_specular = 0.2
 roughness = 0.45
 stencil_mode = 3
 stencil_flags = 2

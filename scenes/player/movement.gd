@@ -2,15 +2,18 @@ extends Node
 class_name CharacterMovement
 
 var character: CharacterBody3D
+
 var _step_time := 0.0
 const STEP_INTERVAL_WALK := 0.58
 const STEP_INTERVAL_RUN := 0.5
 
 var _was_moving := false
 var _was_grounded := false
+var _is_landing := false
 
 func _init(node: CharacterBody3D) -> void:
 	character = node
+	character.jump_landing_timer.timeout.connect(func(): _is_landing = false)
 
 func _update_footsteps(delta: float, is_moving: bool, is_running: bool) -> void:
 	var grounded := character.is_on_floor()
@@ -69,6 +72,26 @@ func handle(delta: float) -> void:
 
 	var local_velocity = character.model.global_transform.basis.inverse() * character.animation_velocity
 	var local_plane_velocity = Vector2(local_velocity.x, -local_velocity.z)
+
+	var surface = character.surface_ray.get_collision_point()
+	var surface_distance = snapped(abs(surface.y - character.global_position.y), 0.1)
+	var falling_speed = snapped(vertical_velocity, 0.1)
+
+	var landing_height = 1
+
+	if surface_distance != 0:
+		if surface_distance >= 1 or (falling_speed < -0.2 and surface_distance > landing_height):
+			character.anim_tree.set("parameters/IW/Falling_B/blend_amount", 1.0)
+		else:
+			if surface_distance <= landing_height and falling_speed < -0.2 and not _is_landing:
+				_is_landing = true
+				character.jump_landing_timer.start()
+				character.anim_tree.set("parameters/IW/Land_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+	else:
+		_is_landing = false
+		character.anim_tree.set("parameters/IW/Falling_B/blend_amount", 0.0)
+		character.jump_landing_timer.stop()
 
 	var walk_blend_position = local_plane_velocity / character.base_move_speed if character.base_move_speed != 0.0 else Vector2.ZERO
 	walk_blend_position = walk_blend_position.limit_length(1.0)

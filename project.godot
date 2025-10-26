@@ -99,3 +99,4 @@ skill_1={
 [physics]
 
 3d/physics_engine="Jolt Physics"
+3d/default_gravity=12.0

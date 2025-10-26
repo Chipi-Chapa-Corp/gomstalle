@@ -18,12 +18,14 @@ extends CharacterBody3D
 @export var cooldown_timer: Timer
 @export var attack_cooldown_timer: Timer
 @export var ability_cooldown_timer: Timer
+@export var jump_landing_timer: Timer
 @export var attack_hitbox: Area3D
 @export var stun_effect: Sprite3D
 @export var regular_collider: CollisionShape3D
 @export var dash_collider: CollisionShape3D
 @export var movement_audio_player: AudioStreamPlayer3D
 @export var attack_audio_player: AudioStreamPlayer3D
+@export var surface_ray: RayCast3D
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 

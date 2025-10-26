@@ -80,7 +80,7 @@ func _mouse_ground_hit() -> Vector3:
 	var ray_origin: Vector3 = character.camera.project_ray_origin(mouse_position)
 	var ray_destination: Vector3 = character.camera.project_ray_normal(mouse_position)
 	var ground := Plane(Vector3.UP, character.global_transform.origin.y)
-	var hit: Vector3 = ground.intersects_ray(ray_origin, ray_destination)
+	var hit = ground.intersects_ray(ray_origin, ray_destination)
 	return hit if hit != null else Vector3.INF
 
 func handle_attacked_body(body: Node3D) -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cw0ja2d8khrr7"]
+[gd_scene load_steps=13 format=3 uid="uid://cw0ja2d8khrr7"]
 
 [ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
 [ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://b2ep5xgsi5c8e" path="res://assets/static/plate.png" id="6_a8a3a"]
 [ext_resource type="PackedScene" uid="uid://d2d5gjlemdjis" path="res://scenes/door/scene.tscn" id="8_hi41q"]
 [ext_resource type="PackedScene" uid="uid://c05xs4dhrmial" path="res://scenes/door_scaffold/scene.tscn" id="9_hi41q"]
+[ext_resource type="PackedScene" uid="uid://dqjnxacyt7dau" path="res://scenes/collider/scene.tscn" id="11_4is4o"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8a3a"]
 content_margin_left = 0.0
@@ -477,6 +478,737 @@ transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 
 
 [node name="Chair2" parent="Interactibles/Chairs" instance=ExtResource("5_qbeeu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.75302, 0, 7.89422)
+
+[node name="Invisible Walls" type="Node" parent="."]
+
+[node name="Collider" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8, 4, 82)
+
+[node name="Collider4" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8, 4, 78)
+
+[node name="Collider5" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8, 4, 74)
+
+[node name="Collider6" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8, 4, 70)
+
+[node name="Collider2" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8, 4, 86)
+
+[node name="Collider3" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8, 4, 90)
+
+[node name="Collider46" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20, 4, 90)
+
+[node name="Collider52" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 90)
+
+[node name="Collider53" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 86)
+
+[node name="Collider54" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 82)
+
+[node name="Collider55" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 78)
+
+[node name="Collider56" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 78)
+
+[node name="Collider57" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 74)
+
+[node name="Collider58" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 70)
+
+[node name="Collider59" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 66)
+
+[node name="Collider60" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 62)
+
+[node name="Collider61" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 58)
+
+[node name="Collider62" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 54)
+
+[node name="Collider63" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 50)
+
+[node name="Collider64" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 50)
+
+[node name="Collider65" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 46)
+
+[node name="Collider66" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 42)
+
+[node name="Collider67" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 38)
+
+[node name="Collider68" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 34)
+
+[node name="Collider192" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24, 4, 34)
+
+[node name="Collider193" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24, 4, 30)
+
+[node name="Collider194" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24, 4, 26)
+
+[node name="Collider195" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24, 4, 22)
+
+[node name="Collider196" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24, 4, 38)
+
+[node name="Collider197" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24, 4, 42)
+
+[node name="Collider69" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 30)
+
+[node name="Collider70" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 26)
+
+[node name="Collider71" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 22)
+
+[node name="Collider72" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 18)
+
+[node name="Collider73" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 14)
+
+[node name="Collider74" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 10)
+
+[node name="Collider75" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 6)
+
+[node name="Collider76" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, 2)
+
+[node name="Collider77" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, -2)
+
+[node name="Collider92" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, -2)
+
+[node name="Collider93" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 2)
+
+[node name="Collider96" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 6)
+
+[node name="Collider97" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 10)
+
+[node name="Collider98" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 14)
+
+[node name="Collider99" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 18)
+
+[node name="Collider94" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, -6)
+
+[node name="Collider95" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, -10)
+
+[node name="Collider78" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, -6)
+
+[node name="Collider79" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -36, 4, -10)
+
+[node name="Collider80" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -34, 4, -12)
+
+[node name="Collider81" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -30, 4, -12)
+
+[node name="Collider87" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -30, 4, 4)
+
+[node name="Collider88" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -34, 4, 4)
+
+[node name="Collider89" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -22, 4, 4)
+
+[node name="Collider90" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -18, 4, 4)
+
+[node name="Collider100" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -18, 4, 20)
+
+[node name="Collider101" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -14, 4, 20)
+
+[node name="Collider120" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10, 4, 20)
+
+[node name="Collider121" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -6, 4, 20)
+
+[node name="Collider122" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2, 4, 20)
+
+[node name="Collider123" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2, 4, 20)
+
+[node name="Collider124" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 4, 20)
+
+[node name="Collider125" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10, 4, 20)
+
+[node name="Collider126" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14, 4, 20)
+
+[node name="Collider127" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18, 4, 20)
+
+[node name="Collider128" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 22, 4, 20)
+
+[node name="Collider129" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 26, 4, 20)
+
+[node name="Collider130" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 30, 4, 20)
+
+[node name="Collider239" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 30, 4, 12)
+
+[node name="Collider240" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 34, 4, 12)
+
+[node name="Collider241" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 38, 4, 12)
+
+[node name="Collider242" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 42, 4, 12)
+
+[node name="Collider243" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 46, 4, 12)
+
+[node name="Collider131" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 34, 4, 20)
+
+[node name="Collider132" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 38, 4, 20)
+
+[node name="Collider133" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 42, 4, 20)
+
+[node name="Collider134" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 46, 4, 20)
+
+[node name="Collider135" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 46, 4, 32)
+
+[node name="Collider136" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 42, 4, 32)
+
+[node name="Collider137" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 38, 4, 32)
+
+[node name="Collider138" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 30, 4, 32)
+
+[node name="Collider140" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 26, 4, 32)
+
+[node name="Collider141" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 22, 4, 32)
+
+[node name="Collider142" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18, 4, 32)
+
+[node name="Collider143" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14, 4, 32)
+
+[node name="Collider144" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10, 4, 32)
+
+[node name="Collider145" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 4, 32)
+
+[node name="Collider146" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2, 4, 32)
+
+[node name="Collider147" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2, 4, 32)
+
+[node name="Collider148" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -6, 4, 32)
+
+[node name="Collider149" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10, 4, 32)
+
+[node name="Collider150" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 34)
+
+[node name="Collider151" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 38)
+
+[node name="Collider152" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 42)
+
+[node name="Collider153" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 46)
+
+[node name="Collider154" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 50)
+
+[node name="Collider155" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 54)
+
+[node name="Collider156" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 58)
+
+[node name="Collider157" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 62)
+
+[node name="Collider198" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 36, 4, 62)
+
+[node name="Collider199" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 36, 4, 66)
+
+[node name="Collider200" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 36, 4, 58)
+
+[node name="Collider201" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 36, 4, 54)
+
+[node name="Collider202" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 36, 4, 50)
+
+[node name="Collider203" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 36, 4, 46)
+
+[node name="Collider204" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 46)
+
+[node name="Collider210" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 42)
+
+[node name="Collider211" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 38)
+
+[node name="Collider212" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 34)
+
+[node name="Collider213" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 34)
+
+[node name="Collider214" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 30)
+
+[node name="Collider215" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 26)
+
+[node name="Collider216" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 22)
+
+[node name="Collider217" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 18)
+
+[node name="Collider218" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 14)
+
+[node name="Collider219" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 10)
+
+[node name="Collider220" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 6)
+
+[node name="Collider221" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 2)
+
+[node name="Collider222" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, -2)
+
+[node name="Collider223" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, -6)
+
+[node name="Collider224" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, -10)
+
+[node name="Collider205" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 50)
+
+[node name="Collider206" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 54)
+
+[node name="Collider207" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 58)
+
+[node name="Collider208" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 62)
+
+[node name="Collider209" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 48, 4, 66)
+
+[node name="Collider158" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -12, 4, 66)
+
+[node name="Collider139" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 34, 4, 32)
+
+[node name="Collider102" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -22, 4, 20)
+
+[node name="Collider103" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -26, 4, 20)
+
+[node name="Collider104" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -30, 4, 20)
+
+[node name="Collider105" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -34, 4, 20)
+
+[node name="Collider91" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -14, 4, 4)
+
+[node name="Collider82" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -26, 4, -12)
+
+[node name="Collider83" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -22, 4, -12)
+
+[node name="Collider84" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -18, 4, -12)
+
+[node name="Collider85" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -14, 4, -12)
+
+[node name="Collider86" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10, 4, -12)
+
+[node name="Collider106" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -6, 4, -12)
+
+[node name="Collider107" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2, 4, -12)
+
+[node name="Collider108" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2, 4, -12)
+
+[node name="Collider109" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 4, -12)
+
+[node name="Collider110" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10, 4, -12)
+
+[node name="Collider179" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 2)
+
+[node name="Collider183" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 10)
+
+[node name="Collider234" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 28, 4, 18)
+
+[node name="Collider235" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 28, 4, 14)
+
+[node name="Collider236" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 28, 4, 10)
+
+[node name="Collider237" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 28, 4, 6)
+
+[node name="Collider238" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 28, 4, 2)
+
+[node name="Collider184" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 14)
+
+[node name="Collider185" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 19)
+
+[node name="Collider186" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 23)
+
+[node name="Collider187" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 27)
+
+[node name="Collider188" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 31)
+
+[node name="Collider189" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 35)
+
+[node name="Collider190" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 39)
+
+[node name="Collider191" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, 42)
+
+[node name="Collider180" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, -2)
+
+[node name="Collider181" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, -6)
+
+[node name="Collider182" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1.3113416e-07, 0, -1, 0, 1, 0, 1, 0, 1.3113416e-07, 12, 4, -10)
+
+[node name="Collider111" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14, 4, -12)
+
+[node name="Collider225" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14, 4, 0)
+
+[node name="Collider226" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18, 4, 0)
+
+[node name="Collider227" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 22, 4, 0)
+
+[node name="Collider228" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 26, 4, 0)
+
+[node name="Collider229" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 30, 4, 0)
+
+[node name="Collider230" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 34, 4, 0)
+
+[node name="Collider231" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 38, 4, 0)
+
+[node name="Collider232" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 42, 4, 0)
+
+[node name="Collider233" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 46, 4, 0)
+
+[node name="Collider112" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18, 4, -12)
+
+[node name="Collider113" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 22, 4, -12)
+
+[node name="Collider114" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 26, 4, -12)
+
+[node name="Collider115" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 30, 4, -12)
+
+[node name="Collider116" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 34, 4, -12)
+
+[node name="Collider117" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 38, 4, -12)
+
+[node name="Collider118" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 42, 4, -12)
+
+[node name="Collider119" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 46, 4, -12)
+
+[node name="Collider47" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20, 4, 86)
+
+[node name="Collider48" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20, 4, 82)
+
+[node name="Collider49" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20, 4, 78)
+
+[node name="Collider50" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20, 4, 74)
+
+[node name="Collider51" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20, 4, 70)
+
+[node name="Collider7" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 4, 92)
+
+[node name="Collider18" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4, 92)
+
+[node name="Collider19" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 4, 92)
+
+[node name="Collider20" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 4, 92)
+
+[node name="Collider21" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 4, 92)
+
+[node name="Collider22" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 4, 92)
+
+[node name="Collider23" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 4, 92)
+
+[node name="Collider24" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 4, 92)
+
+[node name="Collider25" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 4, 68)
+
+[node name="Collider26" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 4, 68)
+
+[node name="Collider159" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 4, 44)
+
+[node name="Collider160" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 4, 44)
+
+[node name="Collider161" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 4, 44)
+
+[node name="Collider162" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 4, 44)
+
+[node name="Collider163" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 4, 44)
+
+[node name="Collider166" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 4, 44)
+
+[node name="Collider167" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4, 44)
+
+[node name="Collider168" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4, 44)
+
+[node name="Collider169" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4, 44)
+
+[node name="Collider170" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 4, 44)
+
+[node name="Collider171" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 4, 44)
+
+[node name="Collider172" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 4, 44)
+
+[node name="Collider173" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 4, 44)
+
+[node name="Collider174" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 4, 44)
+
+[node name="Collider175" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 4, 44)
+
+[node name="Collider176" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 4, 44)
+
+[node name="Collider177" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 4, 44)
+
+[node name="Collider178" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 4, 44)
+
+[node name="Collider164" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 4, 44)
+
+[node name="Collider165" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 4, 44)
+
+[node name="Collider27" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 4, 68)
+
+[node name="Collider28" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 4, 68)
+
+[node name="Collider29" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 4, 68)
+
+[node name="Collider30" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 4, 68)
+
+[node name="Collider31" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4, 68)
+
+[node name="Collider32" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 4, 68)
+
+[node name="Collider33" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 4, 68)
+
+[node name="Collider34" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4, 68)
+
+[node name="Collider35" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4, 68)
+
+[node name="Collider36" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4, 68)
+
+[node name="Collider37" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 4, 68)
+
+[node name="Collider38" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 4, 68)
+
+[node name="Collider39" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 4, 68)
+
+[node name="Collider40" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 4, 68)
+
+[node name="Collider41" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 4, 68)
+
+[node name="Collider42" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 4, 68)
+
+[node name="Collider43" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 4, 68)
+
+[node name="Collider44" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 4, 68)
+
+[node name="Collider45" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 4, 68)
+
+[node name="Collider8" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 4, 92)
+
+[node name="Collider9" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4, 92)
+
+[node name="Collider10" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4, 92)
+
+[node name="Collider11" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4, 92)
+
+[node name="Collider12" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 4, 90)
+
+[node name="Collider13" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 4, 86)
+
+[node name="Collider14" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 4, 82)
+
+[node name="Collider15" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 4, 78)
+
+[node name="Collider16" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 4, 74)
+
+[node name="Collider17" parent="Invisible Walls" instance=ExtResource("11_4is4o")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 4, 70)
 
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="UI/HUD/Start" to="." method="_on_start_pressed"]

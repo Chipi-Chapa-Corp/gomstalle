@@ -80,14 +80,13 @@ func handle(delta: float) -> void:
 	var landing_height = 1
 
 	if surface_distance != 0:
-		if surface_distance >= 1 or (falling_speed < -0.2 and surface_distance > landing_height):
-			character.anim_tree.set("parameters/IW/Falling_B/blend_amount", 1.0)
-		else:
-			if surface_distance <= landing_height and falling_speed < -0.2 and not _is_landing:
+		if character.item == null:
+			if surface_distance >= 1 or (falling_speed < -0.2 and surface_distance > landing_height):
+					character.anim_tree.set("parameters/IW/Falling_B/blend_amount", 1.0)
+			elif surface_distance <= landing_height and falling_speed < -0.2 and not _is_landing:
 				_is_landing = true
 				character.jump_landing_timer.start()
 				character.anim_tree.set("parameters/IW/Land_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-
 	else:
 		_is_landing = false
 		character.anim_tree.set("parameters/IW/Falling_B/blend_amount", 0.0)

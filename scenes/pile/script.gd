@@ -14,8 +14,13 @@ func get_is_static() -> bool:
 func get_hunter_can_interact() -> bool:
 	return false
 
-func perform_interact(enable: bool, metadata: Dictionary) -> void:
-	rpc("sync_take", 1 if enable else -1)
+func perform_interact(_enable: bool, metadata: Dictionary) -> void:
+	var target = Utils.resolve_node(metadata.get("target"))
+	if target == null:
+		return
+	var amount: int = min(metadata.get("amount", 1), current_amount)
+	target.inventory.add_item(CharacterInventory.InventoryItem.WOOD, amount)
+	rpc("sync_take", amount)
 
 func _ready():
 	super._ready()

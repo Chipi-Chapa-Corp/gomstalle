@@ -6,6 +6,9 @@ extends CharacterBody3D
 @onready var actions := CharacterActions.new(self)
 @onready var looks := CharacterLooks.new(self)
 
+@onready var inventory := CharacterInventory.new(self)
+
+@export var inventory_wood_label: Label
 @export var wall_through_material_override: Material
 @export var hider_parts: Node3D
 @export var hunter_parts: Node3D
@@ -81,6 +84,7 @@ func _on_before_spawn(data: Dictionary) -> void:
 	position = data["position"]
 
 func _ready() -> void:
+	add_child(inventory)
 	hand.transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
 	var rotation_angle = deg_to_rad(45.0)
 	camera_yaw_offset = rotation_angle

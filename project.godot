@@ -25,6 +25,7 @@ Spawner="*res://globals/Spawner.gd"
 SteamManager="*res://globals/SteamManager.gd"
 GameState="*res://globals/GameState.gd"
 MultiplayerManager="*res://globals/MultiplayerManager.gd"
+Utils="*res://globals/Utils.gd"
 
 [global_group]
 

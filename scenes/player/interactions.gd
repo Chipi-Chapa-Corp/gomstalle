@@ -16,6 +16,7 @@ func handle(_delta: float) -> void:
 			"hand": character.hand.get_path(),
 			"target": character.get_path(),
 			"direction": forward_direction,
+			"amount": 1,
 		}
 
 		if character.item != null:

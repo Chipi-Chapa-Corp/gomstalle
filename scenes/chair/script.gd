@@ -55,8 +55,8 @@ func _physics_process(_delta: float) -> void:
 
 func perform_interact(enable: bool, metadata: Dictionary):
 	var interaction_data := metadata.duplicate(true)
-	var hand: RemoteTransform3D = _resolve_node(interaction_data.get("hand"))
-	var target: CharacterBody3D = _resolve_node(interaction_data.get("target"))
+	var hand: RemoteTransform3D = Utils.resolve_node(interaction_data.get("hand"))
+	var target: CharacterBody3D = Utils.resolve_node(interaction_data.get("target"))
 	if hand == null:
 		return
 	interaction_data["transform"] = chair.global_transform
@@ -74,10 +74,10 @@ func perform_interact(enable: bool, metadata: Dictionary):
 func sync_interaction(enable: bool, metadata: Dictionary) -> void:
 	if multiplayer.is_server():
 		return
-	var hand: RemoteTransform3D = _resolve_node(metadata.get("hand"))
+	var hand: RemoteTransform3D = Utils.resolve_node(metadata.get("hand"))
 	if hand == null:
 		return
-	var target: CharacterBody3D = _resolve_node(metadata.get("target"))
+	var target: CharacterBody3D = Utils.resolve_node(metadata.get("target"))
 	_apply_interaction(enable, hand, target, metadata)
 
 func _apply_interaction(enable: bool, hand: RemoteTransform3D, target: CharacterBody3D, metadata: Dictionary) -> void:
@@ -113,12 +113,3 @@ func _set_collision_exclusion(target: CharacterBody3D, enable: bool) -> void:
 	if collision_shadow.get_parent() == target:
 		target.remove_child(collision_shadow)
 	transformer.remote_path = ""
-
-func _resolve_node(value):
-	if value is NodePath:
-		return get_node_or_null(value)
-	if value is EncodedObjectAsID:
-		return instance_from_id(value.object_id)
-	if value is Node:
-		return value
-	return null

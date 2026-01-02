@@ -46,9 +46,11 @@ if [ ! -x "$STEAMGODOT_BIN" ] || [ "$(cat "$STEAMGODOT_STAMP" 2>/dev/null)" != "
   download_and_verify "$STEAMGODOT_URL" "$STEAMGODOT_SHA256" "$tmpdir/steamgodot.tar.xz"
   tar -xf "$tmpdir/steamgodot.tar.xz" -C "$STEAMGODOT_DIR"
   chmod +x "$STEAMGODOT_BIN"
-  ln -sf "$STEAMGODOT_BIN" "$STEAMGODOT_DIR/godotsteam"
   echo "${STEAMGODOT_VERSION}:${STEAMGODOT_SHA256}" > "$STEAMGODOT_STAMP"
 fi
+
+# Use a relative symlink so container mounts keep it valid.
+ln -sf "$STEAMGODOT_BIN_NAME" "$STEAMGODOT_DIR/godotsteam"
 
 if [ ! -f "$STEAMGODOT_TEMPLATES_DIR/godotsteam.451.template.x86_64" ] || \
   [ ! -f "$STEAMGODOT_TEMPLATES_DIR/godotsteam.451.debug.template.x86_64" ] || \

@@ -89,10 +89,11 @@ func _has_player_metadata(peer_id: int) -> bool:
 
 func _build_player_metadata(peer_id: int) -> Dictionary:
 	var player_name := ""
-	if is_multiplayer_authority():
-		player_name = Steam.getPersonaName()
-	else:
-		player_name = Steam.getFriendPersonaName(peer_id)
+	if SteamManager.is_ready():
+		if is_multiplayer_authority():
+			player_name = Steam.getPersonaName()
+		else:
+			player_name = Steam.getFriendPersonaName(peer_id)
 	if player_name.is_empty():
 		player_name = str(peer_id)
 	return {"peer_id": peer_id, "name": player_name}

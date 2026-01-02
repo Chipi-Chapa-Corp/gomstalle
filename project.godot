@@ -12,10 +12,10 @@ config_version=5
 
 config/name="Gomstalle"
 config/version="0.1s.0"
-run/main_scene="uid://ckqporu5qgnv4"
+run/main_scene="res://scenes/main/scene.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 boot_splash/bg_color=Color(0, 0, 0, 1)
-config/icon="uid://5xo3cogw5psb"
+config/icon="res://icon.png"
 config/windows_native_icon="res://icon.ico"
 
 [autoload]
@@ -26,6 +26,10 @@ SteamManager="*res://globals/SteamManager.gd"
 GameState="*res://globals/GameState.gd"
 MultiplayerManager="*res://globals/MultiplayerManager.gd"
 Utils="*res://globals/Utils.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("gut")
 
 [global_group]
 
@@ -101,7 +105,3 @@ skill_1={
 
 3d/physics_engine="Jolt Physics"
 3d/default_gravity=12.0
-
-[editor_plugins]
-
-enabled=PackedStringArray("gut")

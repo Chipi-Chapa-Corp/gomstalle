@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ds2iti2fnrkep"
+uid="uid://bs3wci4tgw7rx"
 path="res://.godot/imported/barrier_corner.gltf-8a170b17c0df913383a5fbe6403b18d2.scn"
 
 [deps]
@@ -37,13 +37,6 @@ import_script/path=""
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
-_subresources={
-"nodes": {
-"PATH:barrier_corner": {
-"generate/physics": true,
-"physics/shape_type": 0
-}
-}
-}
-gltf/naming_version=1
+_subresources={}
+gltf/naming_version=2
 gltf/embedded_image_handling=1

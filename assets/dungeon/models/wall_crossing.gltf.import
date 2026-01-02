@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://p65rnyi1buay"
+uid="uid://c5ahut2snq3bt"
 path="res://.godot/imported/wall_crossing.gltf-53bc268350cb7bcbe48f5bedc5bde44a.scn"
 
 [deps]
@@ -37,13 +37,6 @@ import_script/path=""
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
-_subresources={
-"nodes": {
-"PATH:wall_crossing": {
-"generate/physics": true,
-"physics/shape_type": 0
-}
-}
-}
-gltf/naming_version=1
+_subresources={}
+gltf/naming_version=2
 gltf/embedded_image_handling=1

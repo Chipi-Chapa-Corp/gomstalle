@@ -1,7 +1,6 @@
 .godot/*
 /android/
 
-export_presets.cfg
 build/
 third_party/godotsteam/
 !.godot/global_script_class_cache.cfg

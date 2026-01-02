@@ -13,7 +13,7 @@ on:
       - 'shared/**'
       - 'scenes/**'
       - 'globals/**'
-      - '.github/workflows/gut-tests.yml'
+      - '.github/workflows/ci.yml'
 
 permissions:
   contents: read
@@ -55,8 +55,11 @@ jobs:
 
       - name: Run tests (branch)
         id: branch_tests
+        shell: bash
         run: |
           set +e
+          REPORT_DIR="$GITHUB_WORKSPACE/.ci"
+          mkdir -p "$REPORT_DIR"
           STEAM_APP_ID=480
           echo "$STEAM_APP_ID" > steam_appid.txt
           GODOT_LOG_LEVEL=warn \
@@ -65,12 +68,12 @@ jobs:
             GODOT_IMPORT_BIN=godot \
             GODOT_IMPORT_DISABLE_EDITOR_PLUGINS=1 \
             STEAM_APP_ID="$STEAM_APP_ID" \
-            JUNIT_XML_FILE=/tmp/gut-branch.xml \
+            JUNIT_XML_FILE="$REPORT_DIR/gut-branch.xml" \
             ./scripts/run_tests.sh
-          if [ ! -f /tmp/gut-branch.xml ]; then
-            latest_report="$(ls -t /tmp/gut-branch*.xml 2>/dev/null | head -n 1)"
+          if [ ! -f "$REPORT_DIR/gut-branch.xml" ]; then
+            latest_report="$(ls -t "$REPORT_DIR"/gut-branch*.xml 2>/dev/null | head -n 1)"
             if [ -n "$latest_report" ]; then
-              cp "$latest_report" /tmp/gut-branch.xml
+              cp "$latest_report" "$REPORT_DIR/gut-branch.xml"
             fi
           fi
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
@@ -87,7 +90,7 @@ jobs:
         id: branch_report
         if: always()
         run: |
-          if [ -f /tmp/gut-branch.xml ]; then
+          if [ -f "$GITHUB_WORKSPACE/.ci/gut-branch.xml" ]; then
             echo "found=true" >> "$GITHUB_OUTPUT"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
@@ -98,7 +101,7 @@ jobs:
         uses: dorny/test-reporter@v1
         with:
           name: GUT
-          path: /tmp/gut-branch.xml
+          path: ${{ github.workspace }}/.ci/gut-branch.xml
           reporter: java-junit
           fail-on-error: false
 
@@ -123,6 +126,8 @@ jobs:
           fi
           cd "$MAIN_WORKTREE"
           git submodule update --init --recursive
+          REPORT_DIR="$MAIN_WORKTREE/.ci"
+          mkdir -p "$REPORT_DIR"
           if [ -d /tmp/godot-branch ]; then
             mkdir -p .godot
             rsync -a --delete /tmp/godot-branch/ .godot/
@@ -139,15 +144,19 @@ jobs:
             GODOT_IMPORT_BIN=godot \
             GODOT_IMPORT_DISABLE_EDITOR_PLUGINS=1 \
             STEAM_APP_ID="$STEAM_APP_ID" \
-            JUNIT_XML_FILE=/tmp/gut-main.xml \
+            JUNIT_XML_FILE="$REPORT_DIR/gut-main.xml" \
             ./scripts/run_tests.sh
-          if [ ! -f /tmp/gut-main.xml ]; then
-            latest_report="$(ls -t /tmp/gut-main*.xml 2>/dev/null | head -n 1)"
+          if [ ! -f "$REPORT_DIR/gut-main.xml" ]; then
+            latest_report="$(ls -t "$REPORT_DIR"/gut-main*.xml 2>/dev/null | head -n 1)"
             if [ -n "$latest_report" ]; then
-              cp "$latest_report" /tmp/gut-main.xml
+              cp "$latest_report" "$REPORT_DIR/gut-main.xml"
             fi
           fi
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          if [ -f "$REPORT_DIR/gut-main.xml" ]; then
+            mkdir -p "$GITHUB_WORKSPACE/.ci"
+            cp "$REPORT_DIR/gut-main.xml" "$GITHUB_WORKSPACE/.ci/gut-main.xml"
+          fi
           git worktree remove -f "$MAIN_WORKTREE"
           exit 0
 
@@ -155,7 +164,7 @@ jobs:
         id: main_report
         if: always()
         run: |
-          if [ -f /tmp/gut-main.xml ]; then
+          if [ -f "$GITHUB_WORKSPACE/.ci/gut-main.xml" ]; then
             echo "found=true" >> "$GITHUB_OUTPUT"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
@@ -166,8 +175,8 @@ jobs:
         id: compare
         run: |
           python3 scripts/ci/compare_tests.py \
-            --main /tmp/gut-main.xml \
-            --branch /tmp/gut-branch.xml \
+            --main "$GITHUB_WORKSPACE/.ci/gut-main.xml" \
+            --branch "$GITHUB_WORKSPACE/.ci/gut-branch.xml" \
             --comment-out /tmp/comment.md
 
       - name: Compare results (missing reports)
@@ -207,3 +216,133 @@ jobs:
           if [ -n "$broken" ] && [ "$broken" != "0" ]; then
             exit 1
           fi
+
+  build:
+    needs: tests
+    if: ${{ needs.tests.result == 'success' }}
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.5.1
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux, windows]
+        config: [debug, release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Trust workspace for git
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          apt-get update
+          SOUND_PKG="libasound2"
+          if apt-cache show libasound2t64 >/dev/null 2>&1; then
+            SOUND_PKG="libasound2t64"
+          fi
+          apt-get install -y curl tar python3 unzip xz-utils zip \
+            libgl1-mesa-dev libx11-6 libxext6 libxi6 libxrandr2 libxrender1 \
+            libxcursor1 libxinerama1 libfreetype6 libfontconfig1 "$SOUND_PKG" \
+            libxkbcommon0 \
+            libwayland-client0 libwayland-cursor0 libwayland-egl1 libdecor-0-0 \
+            libdbus-1-3 libgtk-3-0
+
+      - name: Setup GodotSteam
+        shell: bash
+        run: |
+          ./scripts/setup_godot_steam.sh
+
+      - name: Import assets
+        shell: bash
+        run: |
+          godot --headless --path . --import || true
+
+      - name: Export ${{ matrix.platform }} ${{ matrix.config }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT_DIR="build/ci/${{ matrix.platform }}/${{ matrix.config }}"
+          mkdir -p "$OUT_DIR"
+          echo "480" > "$OUT_DIR/steam_appid.txt"
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            PRESET="Linux"
+            OUT_FILE="$OUT_DIR/gomstalle.x86_64"
+            STEAM_LIB="third_party/godotsteam/templates/libsteam_api.so"
+          else
+            PRESET="Windows"
+            OUT_FILE="$OUT_DIR/gomstalle.exe"
+            STEAM_LIB="third_party/godotsteam/templates/steam_api64.dll"
+          fi
+          if [ "${{ matrix.config }}" = "debug" ]; then
+            EXPORT_FLAG="--export-debug"
+          else
+            EXPORT_FLAG="--export-release"
+          fi
+          LD_LIBRARY_PATH="$GITHUB_WORKSPACE/third_party/godotsteam:${LD_LIBRARY_PATH:-}" \
+            "$GITHUB_WORKSPACE/third_party/godotsteam/godotsteam" --headless --path . \
+            "$EXPORT_FLAG" "$PRESET" "$OUT_FILE"
+          if [ -f "$STEAM_LIB" ]; then
+            cp "$STEAM_LIB" "$OUT_DIR/"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gomstalle-${{ matrix.platform }}-${{ matrix.config }}
+          path: build/ci/${{ matrix.platform }}/${{ matrix.config }}
+          if-no-files-found: error
+
+  build_report:
+    runs-on: ubuntu-24.04
+    needs: build
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Build report comment
+        run: |
+          run_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          cat > /tmp/build_comment.md <<EOF
+          <!-- build-artifacts -->
+          ## 🧱 Build artifacts
+
+          <details><summary>Linux</summary>
+
+          - gomstalle-linux-debug
+          - gomstalle-linux-release
+
+          </details>
+
+          <details><summary>Windows</summary>
+
+          - gomstalle-windows-debug
+          - gomstalle-windows-release
+
+          </details>
+
+          Download from: $run_url
+          EOF
+
+      - name: Find existing build report
+        id: find_build_report
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: github-actions[bot]
+          body-includes: "<!-- build-artifacts -->"
+
+      - name: Create or update build report
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find_build_report.outputs.comment-id }}
+          body-file: /tmp/build_comment.md
+          edit-mode: replace

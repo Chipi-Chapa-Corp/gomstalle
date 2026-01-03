@@ -1,5 +1,5 @@
-.godot/
+.godot/*
 /android/
 
-export_presets.cfg
 build/
+third_party/godotsteam/

@@ -1,0 +1,201 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.gd'
+      - 'project.godot'
+      - 'tests/**'
+      - 'scripts/**'
+      - 'addons/**'
+      - 'shared/**'
+      - 'scenes/**'
+      - 'globals/**'
+      - '.github/workflows/ci.yml'
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  tests:
+    name: GUT Tests (logs)
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.5.1
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Trust workspace for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          SOUND_PKG="libasound2"
+          if apt-cache show libasound2t64 >/dev/null 2>&1; then
+            SOUND_PKG="libasound2t64"
+          fi
+          apt-get install -y curl tar python3 unzip xz-utils \
+            libgl1-mesa-dev libx11-6 libxext6 libxi6 libxrandr2 libxrender1 \
+            libxcursor1 libxinerama1 libfreetype6 libfontconfig1 "$SOUND_PKG" \
+            libxkbcommon0 \
+            libwayland-client0 libwayland-cursor0 libwayland-egl1 libdecor-0-0 \
+            libdbus-1-3 libgtk-3-0
+
+      - name: Run tests (branch)
+        id: branch_tests
+        shell: bash
+        run: |
+          set +e
+          REPORT_DIR="$GITHUB_WORKSPACE/.ci"
+          mkdir -p "$REPORT_DIR"
+          STEAM_APP_ID=480
+          echo "$STEAM_APP_ID" > steam_appid.txt
+          GODOT_LOG_LEVEL=warn \
+          USE_STEAMGODOT=1 \
+            GODOT_HEADLESS=1 \
+            GODOT_IMPORT_DISABLE_EDITOR_PLUGINS=1 \
+            STEAM_APP_ID="$STEAM_APP_ID" \
+            JUNIT_XML_FILE="$REPORT_DIR/gut-branch.xml" \
+            ./scripts/run_tests.sh
+          if [ ! -f "$REPORT_DIR/gut-branch.xml" ]; then
+            latest_report="$(ls -t "$REPORT_DIR"/gut-branch*.xml 2>/dev/null | head -n 1)"
+            if [ -n "$latest_report" ]; then
+              cp "$latest_report" "$REPORT_DIR/gut-branch.xml"
+            fi
+          fi
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Check branch report
+        id: branch_report
+        if: always()
+        run: |
+          if [ -f "$GITHUB_WORKSPACE/.ci/gut-branch.xml" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish test report
+        if: ${{ always() && steps.branch_report.outputs.found == 'true' }}
+        uses: dorny/test-reporter@v1
+        with:
+          name: GUT Tests (report)
+          path: ${{ github.workspace }}/.ci/gut-branch.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Fail if tests failed
+        if: ${{ always() }}
+        run: |
+          branch_exit='${{ steps.branch_tests.outputs.exit_code }}'
+          if [ "$branch_exit" != "0" ]; then
+            exit 1
+          fi
+
+  build:
+    name: Build ${{ matrix.config_name }} ${{ matrix.platform_name }} artifact
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.5.1
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            platform_name: Linux
+            config: debug
+            config_name: Debug
+          - platform: linux
+            platform_name: Linux
+            config: release
+            config_name: Release
+          - platform: windows
+            platform_name: Windows
+            config: debug
+            config_name: Debug
+          - platform: windows
+            platform_name: Windows
+            config: release
+            config_name: Release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Trust workspace for git
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          apt-get update
+          SOUND_PKG="libasound2"
+          if apt-cache show libasound2t64 >/dev/null 2>&1; then
+            SOUND_PKG="libasound2t64"
+          fi
+          apt-get install -y curl tar python3 unzip xz-utils zip \
+            libgl1-mesa-dev libx11-6 libxext6 libxi6 libxrandr2 libxrender1 \
+            libxcursor1 libxinerama1 libfreetype6 libfontconfig1 "$SOUND_PKG" \
+            libxkbcommon0 \
+            libwayland-client0 libwayland-cursor0 libwayland-egl1 libdecor-0-0 \
+            libdbus-1-3 libgtk-3-0
+
+      - name: Setup GodotSteam
+        shell: bash
+        run: |
+          ./scripts/setup_godot_steam.sh
+
+      - name: Import assets
+        shell: bash
+        run: |
+          LD_LIBRARY_PATH="$GITHUB_WORKSPACE/third_party/godotsteam:${LD_LIBRARY_PATH:-}" \
+            "$GITHUB_WORKSPACE/third_party/godotsteam/godotsteam" --headless --path . --import || true
+
+      - name: Export ${{ matrix.platform_name }} ${{ matrix.config_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT_DIR="build/ci/${{ matrix.platform }}/${{ matrix.config }}"
+          mkdir -p "$OUT_DIR"
+          echo "480" > "$OUT_DIR/steam_appid.txt"
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            PRESET="Linux"
+            OUT_FILE="$OUT_DIR/gomstalle.x86_64"
+            STEAM_LIB="third_party/godotsteam/templates/libsteam_api.so"
+          else
+            PRESET="Windows"
+            OUT_FILE="$OUT_DIR/gomstalle.exe"
+            STEAM_LIB="third_party/godotsteam/templates/steam_api64.dll"
+          fi
+          if [ "${{ matrix.config }}" = "debug" ]; then
+            EXPORT_FLAG="--export-debug"
+          else
+            EXPORT_FLAG="--export-release"
+          fi
+          LD_LIBRARY_PATH="$GITHUB_WORKSPACE/third_party/godotsteam:${LD_LIBRARY_PATH:-}" \
+            "$GITHUB_WORKSPACE/third_party/godotsteam/godotsteam" --headless --path . \
+            "$EXPORT_FLAG" "$PRESET" "$OUT_FILE"
+          if [ -f "$STEAM_LIB" ]; then
+            cp "$STEAM_LIB" "$OUT_DIR/"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gomstalle-${{ matrix.platform }}-${{ matrix.config }}.zip
+          path: build/ci/${{ matrix.platform }}/${{ matrix.config }}
+          if-no-files-found: error

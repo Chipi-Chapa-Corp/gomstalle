@@ -1,4 +1,4 @@
-name: gut-tests
+name: CI
 
 on:
   pull_request:
@@ -93,6 +93,7 @@ jobs:
           path: ${{ github.workspace }}/.ci/gut-branch.xml
           reporter: java-junit
           fail-on-error: false
+
       - name: Fail if tests failed
         if: ${{ always() }}
         run: |
@@ -102,9 +103,7 @@ jobs:
           fi
 
   build:
-    name: Build ${{ matrix.config }} ${{ matrix.platform }} artifact
-    needs: tests
-    if: ${{ needs.tests.result == 'success' }}
+    name: Build ${{ matrix.config_name }} ${{ matrix.platform_name }} artifact
     runs-on: ubuntu-24.04
     container:
       image: barichello/godot-ci:4.5.1
@@ -112,8 +111,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [linux, windows]
-        config: [debug, release]
+        include:
+          - platform: linux
+            platform_name: Linux
+            config: debug
+            config_name: Debug
+          - platform: linux
+            platform_name: Linux
+            config: release
+            config_name: Release
+          - platform: windows
+            platform_name: Windows
+            config: debug
+            config_name: Debug
+          - platform: windows
+            platform_name: Windows
+            config: release
+            config_name: Release
 
     steps:
       - name: Checkout
@@ -151,7 +165,7 @@ jobs:
           LD_LIBRARY_PATH="$GITHUB_WORKSPACE/third_party/godotsteam:${LD_LIBRARY_PATH:-}" \
             "$GITHUB_WORKSPACE/third_party/godotsteam/godotsteam" --headless --path . --import || true
 
-      - name: Export ${{ matrix.platform }} ${{ matrix.config }}
+      - name: Export ${{ matrix.platform_name }} ${{ matrix.config_name }}
         shell: bash
         run: |
           set -euo pipefail
@@ -182,6 +196,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gomstalle-${{ matrix.platform }}-${{ matrix.config }}
+          name: gomstalle-${{ matrix.platform }}-${{ matrix.config }}.zip
           path: build/ci/${{ matrix.platform }}/${{ matrix.config }}
           if-no-files-found: error

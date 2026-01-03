@@ -20,10 +20,10 @@ require_cmd curl
 require_cmd tar
 
 STEAMGODOT_VERSION="${STEAMGODOT_VERSION:-v4.17}"
-STEAMGODOT_URL="https://codeberg.org/godotsteam/godotsteam/releases/download/${STEAMGODOT_VERSION}/linux64-g451-s163-gs417.tar.xz"
-STEAMGODOT_SHA256="73ef614d27bc77cdc5a96c1034bafb41f45a025af8b19e5597dc19a7a56881ea"
-STEAMGODOT_TEMPLATES_URL="https://codeberg.org/godotsteam/godotsteam/releases/download/${STEAMGODOT_VERSION}/godotsteam-g451-s163-gs417-templates.tar.xz"
-STEAMGODOT_TEMPLATES_SHA256="3f2f4e4093e5500a4027d66b4ba8fb2baac83ec703b0daefded8c427e7973e94"
+STEAMGODOT_URL="${STEAMGODOT_URL:-https://codeberg.org/godotsteam/godotsteam/releases/download/${STEAMGODOT_VERSION}/linux64-g451-s163-gs417.tar.xz}"
+STEAMGODOT_SHA256="${STEAMGODOT_SHA256:-73ef614d27bc77cdc5a96c1034bafb41f45a025af8b19e5597dc19a7a56881ea}"
+STEAMGODOT_TEMPLATES_URL="${STEAMGODOT_TEMPLATES_URL:-https://codeberg.org/godotsteam/godotsteam/releases/download/${STEAMGODOT_VERSION}/godotsteam-g451-s163-gs417-templates.tar.xz}"
+STEAMGODOT_TEMPLATES_SHA256="${STEAMGODOT_TEMPLATES_SHA256:-3f2f4e4093e5500a4027d66b4ba8fb2baac83ec703b0daefded8c427e7973e94}"
 STEAMGODOT_DIR="$ROOT/third_party/godotsteam"
 STEAMGODOT_BIN_NAME="godotsteam.451.editor.x86_64"
 STEAMGODOT_BIN="$STEAMGODOT_DIR/$STEAMGODOT_BIN_NAME"
@@ -35,7 +35,7 @@ download_and_verify() {
   local url="$1"
   local expected_sha="$2"
   local output="$3"
-  curl -L -o "$output" "$url"
+  curl -fL --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 10 -o "$output" "$url"
   echo "${expected_sha}  ${output}" | sha256sum -c -
 }
 

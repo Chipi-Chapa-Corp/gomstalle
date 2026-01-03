@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=4 uid="uid://bafpmkm4tdjlp"]
 
-[ext_resource type="Texture2D" uid="uid://bena86s0iwihb" path="res://assets/dungeon/models/dungeon_texture.png" id="1_erf87"]
+[ext_resource type="Texture2D" uid="uid://jsqy3a5tlp7k" path="res://assets/dungeon/models/dungeon_texture.png" id="1_erf87"]
 [ext_resource type="Script" uid="uid://dotvh4lte2cfy" path="res://scenes/chair/script.gd" id="2_erf87"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ew5sd"]

@@ -3,7 +3,7 @@
 [ext_resource type="StyleBox" uid="uid://b6hguplfulj68" path="res://theme/button/hover.tres" id="1_lu33j"]
 [ext_resource type="StyleBox" uid="uid://dvv3nv4ytcvj4" path="res://theme/button/regular.tres" id="2_wycmq"]
 [ext_resource type="StyleBox" uid="uid://xie3fb2u7fb7" path="res://theme/button/pressed.tres" id="3_x2pqw"]
-[ext_resource type="FontFile" uid="uid://c160touvmrhvm" path="res://assets/fonts/MedievalSharp-Regular.ttf" id="4_wycmq"]
+[ext_resource type="FontFile" uid="uid://dutfmpe7fdhsu" path="res://assets/fonts/MedievalSharp-Regular.ttf" id="4_wycmq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m1y6s"]
 content_margin_left = 4.0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cw0ja2d8khrr7"]
+[gd_scene load_steps=15 format=3 uid="uid://cw0ja2d8khrr7"]
 
 [ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
 [ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
@@ -7,11 +7,12 @@
 [ext_resource type="StyleBox" uid="uid://liox5pylg8l3" path="res://theme/button/pressed-dangerous.tres" id="4_hi41q"]
 [ext_resource type="StyleBox" uid="uid://n6ia02gel5tb" path="res://theme/button/regular-dangerous.tres" id="5_a8a3a"]
 [ext_resource type="PackedScene" uid="uid://bafpmkm4tdjlp" path="res://scenes/chair/scene.tscn" id="5_qbeeu"]
-[ext_resource type="Texture2D" uid="uid://b2ep5xgsi5c8e" path="res://assets/static/plate.png" id="6_a8a3a"]
+[ext_resource type="Texture2D" uid="uid://bd50iwnsco52k" path="res://assets/static/plate.png" id="6_a8a3a"]
 [ext_resource type="PackedScene" uid="uid://d2d5gjlemdjis" path="res://scenes/door/scene.tscn" id="8_hi41q"]
 [ext_resource type="PackedScene" uid="uid://c05xs4dhrmial" path="res://scenes/door_scaffold/scene.tscn" id="9_hi41q"]
 [ext_resource type="PackedScene" uid="uid://dqjnxacyt7dau" path="res://scenes/collider/scene.tscn" id="11_4is4o"]
 [ext_resource type="PackedScene" uid="uid://d21txtcj1jlmu" path="res://scenes/pile/scene.tscn" id="12_qeemm"]
+[ext_resource type="PackedScene" uid="uid://dpllhcj5deajc" path="res://scenes/shrine/scene.tscn" id="13_k3o70"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8a3a"]
 content_margin_left = 0.0
@@ -1215,6 +1216,11 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 
 
 [node name="Pile" parent="Piles" instance=ExtResource("12_qeemm")]
 transform = Transform3D(0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, 0.70710677, 6, 0, 6)
+
+[node name="Shrines" type="Node" parent="."]
+
+[node name="post_skull2" parent="Shrines" instance=ExtResource("13_k3o70")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -2)
 
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="UI/HUD/Start" to="." method="_on_start_pressed"]

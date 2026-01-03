@@ -88,6 +88,12 @@ size = Vector3(2, 3.4765625, 1.8438721)
 
 [node name="Shrine" type="Node3D"]
 
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.472949, 0.91947603)
+billboard = 1
+text = "-20"
+font_size = 96
+
 [node name="post_skull" type="MeshInstance3D" parent="."]
 mesh = SubResource("ArrayMesh_hggwf")
 skeleton = NodePath("")
@@ -114,11 +120,12 @@ shape = SubResource("ConvexPolygonShape3D_nfgp8")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 1)
 light_color = Color(1, 0.2627451, 0.25882354, 1)
 
-[node name="Receiver" type="StaticBody3D" parent="." node_paths=PackedStringArray("mesh")]
+[node name="Receiver" type="StaticBody3D" parent="." node_paths=PackedStringArray("mesh", "label") groups=["interactible"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 16
 script = ExtResource("2_isyg8")
-mesh = NodePath("../post_skull")
+mesh = NodePath("../post_skull/post_skull_skull")
+label = NodePath("../Label3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Receiver"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0014998317, 0.76171875, 0.6823425)

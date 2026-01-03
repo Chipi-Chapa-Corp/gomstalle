@@ -62,7 +62,6 @@ jobs:
           GODOT_LOG_LEVEL=warn \
           USE_STEAMGODOT=1 \
             GODOT_HEADLESS=1 \
-            GODOT_IMPORT_BIN=godot \
             GODOT_IMPORT_DISABLE_EDITOR_PLUGINS=1 \
             STEAM_APP_ID="$STEAM_APP_ID" \
             JUNIT_XML_FILE="$REPORT_DIR/gut-branch.xml" \
@@ -149,7 +148,8 @@ jobs:
       - name: Import assets
         shell: bash
         run: |
-          godot --headless --path . --import || true
+          LD_LIBRARY_PATH="$GITHUB_WORKSPACE/third_party/godotsteam:${LD_LIBRARY_PATH:-}" \
+            "$GITHUB_WORKSPACE/third_party/godotsteam/godotsteam" --headless --path . --import || true
 
       - name: Export ${{ matrix.platform }} ${{ matrix.config }}
         shell: bash

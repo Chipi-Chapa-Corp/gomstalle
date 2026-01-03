@@ -23,6 +23,9 @@ func perform_interact(_enable: bool, metadata: Dictionary) -> void:
 	target.inventory.remove_item(CharacterInventory.InventoryItem.WOOD, required_amount_per_use)
 	rpc("sync_interact")
 
+func _ready() -> void:
+	label.text = str(current_amount - required_amount)
+
 @rpc("any_peer", "call_local", "reliable")
 func sync_interact() -> void:
 	current_amount += required_amount_per_use

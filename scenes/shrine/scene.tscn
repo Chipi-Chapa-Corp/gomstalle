@@ -91,7 +91,6 @@ size = Vector3(2, 3.4765625, 1.8438721)
 [node name="Label3D" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.472949, 0.91947603)
 billboard = 1
-text = "-20"
 font_size = 96
 
 [node name="post_skull" type="MeshInstance3D" parent="."]

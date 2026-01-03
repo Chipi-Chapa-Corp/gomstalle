@@ -1,6 +1,6 @@
 [gd_resource type="MeshLibrary" load_steps=166 format=4 uid="uid://bv7jriu4vhs6d"]
 
-[ext_resource type="Texture2D" uid="uid://bena86s0iwihb" path="res://assets/dungeon/models/dungeon_texture.png" id="8_gq7iq"]
+[ext_resource type="Texture2D" uid="uid://jsqy3a5tlp7k" path="res://assets/dungeon/models/dungeon_texture.png" id="8_gq7iq"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_04qhy"]
 resource_name = "texture"

@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=4 uid="uid://d2d5gjlemdjis"]
 
-[ext_resource type="Texture2D" uid="uid://bena86s0iwihb" path="res://assets/dungeon/models/dungeon_texture.png" id="2_uqy3o"]
-[ext_resource type="AudioStream" uid="uid://byng1qs4qxbqa" path="res://assets/sounds/door.mp3" id="3_mpt51"]
+[ext_resource type="Texture2D" uid="uid://jsqy3a5tlp7k" path="res://assets/dungeon/models/dungeon_texture.png" id="2_uqy3o"]
+[ext_resource type="AudioStream" uid="uid://pw2ttfjlyhrf" path="res://assets/sounds/door.mp3" id="3_mpt51"]
 [ext_resource type="Script" uid="uid://n02442idivhb" path="res://scenes/door/script.gd" id="3_w7b38"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kl046"]

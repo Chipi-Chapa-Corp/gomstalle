@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=4 uid="uid://fd8f7q2av28j"]
 
-[ext_resource type="PackedScene" uid="uid://p65rnyi1buay" path="res://assets/dungeon/models/wall_crossing.gltf" id="1_c4dgr"]
-[ext_resource type="Texture2D" uid="uid://bena86s0iwihb" path="res://assets/dungeon/models/dungeon_texture.png" id="2_1ox8q"]
+[ext_resource type="PackedScene" uid="uid://c5ahut2snq3bt" path="res://assets/dungeon/models/wall_crossing.gltf" id="1_c4dgr"]
+[ext_resource type="Texture2D" uid="uid://jsqy3a5tlp7k" path="res://assets/dungeon/models/dungeon_texture.png" id="2_1ox8q"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rvf77"]
 resource_name = "texture"

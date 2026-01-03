@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=4 uid="uid://d21txtcj1jlmu"]
 
-[ext_resource type="Texture2D" uid="uid://dbf3ei4camjr" path="res://assets/resources/resource_bits_texture.png" id="1_rownv"]
+[ext_resource type="Texture2D" uid="uid://cdr7f6efl4ls0" path="res://assets/resources/resource_bits_texture.png" id="1_rownv"]
 [ext_resource type="Script" uid="uid://dacfrhw352pg7" path="res://scenes/pile/script.gd" id="2_3l5dp"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oa0wq"]

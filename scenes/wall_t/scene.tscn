@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=4 uid="uid://xooghyjbo1pg"]
 
-[ext_resource type="PackedScene" uid="uid://batioryjo4jqo" path="res://assets/dungeon/models/wall_Tsplit.gltf" id="1_pubmg"]
-[ext_resource type="Texture2D" uid="uid://bena86s0iwihb" path="res://assets/dungeon/models/dungeon_texture.png" id="2_2e537"]
+[ext_resource type="PackedScene" uid="uid://cvefencof16v0" path="res://assets/dungeon/models/wall_Tsplit.gltf" id="1_pubmg"]
+[ext_resource type="Texture2D" uid="uid://jsqy3a5tlp7k" path="res://assets/dungeon/models/dungeon_texture.png" id="2_2e537"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pkjpt"]
 resource_name = "texture"

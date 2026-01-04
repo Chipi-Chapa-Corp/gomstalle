@@ -139,6 +139,7 @@ func spawn_portal(cell: Vector3i, item_id: int) -> void:
 		var portal_node: Node3D = portal_instance
 		portal_node.visible = false
 		portal_node.global_position = cell_transform.origin + Vector3(0, -portal_depth_offset, 0)
+		_scale_portal_surface(portal_node, tile_instance)
 		await _run_portal_sequence(tile_instance, portal_node, cell_transform.origin, cell)
 
 func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D, portal_position: Vector3, portal_cell: Vector3i) -> void:
@@ -213,6 +214,25 @@ func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 	if down.length() == 0.0:
 		down = Vector3.DOWN
 	return (direction.normalized() * tile_size + down.normalized() * tile_height * 0.25) * portal_tile_slide_distance_multiplier
+
+func _scale_portal_surface(portal_node: Node3D, tile_instance: MeshInstance3D) -> void:
+	if portal_node == null or tile_instance == null or grid_map == null:
+		return
+	var surface_node = portal_node.get_node_or_null("PortalSurface")
+	if surface_node == null or not surface_node is MeshInstance3D:
+		return
+	var surface_mesh = surface_node.mesh
+	var base_size = 1.0
+	if surface_mesh is QuadMesh:
+		var quad_mesh: QuadMesh = surface_mesh
+		base_size = maxf(quad_mesh.size.x, quad_mesh.size.y)
+	var tile_bounds = tile_instance.get_aabb().size
+	var cell_size = grid_map.cell_size
+	var portal_size = maxf(maxf(tile_bounds.x, tile_bounds.z), maxf(cell_size.x, cell_size.z))
+	if portal_size <= 0.0 or base_size <= 0.0:
+		return
+	var scale_factor = (portal_size / base_size) * 1.05
+	surface_node.scale = Vector3.ONE * scale_factor
 
 func _get_portal_corner_direction(portal_cell: Vector3i) -> Vector3:
 	if grid_map == null:

@@ -137,12 +137,12 @@ func spawn_portal(cell: Vector3i, item_id: int) -> void:
 		portal_node.global_position = cell_transform.origin + Vector3(0, -portal_depth_offset, 0)
 		await _run_portal_sequence(tile_instance, portal_node, cell_transform.origin)
 
-func _run_portal_sequence(tile_instance: Node3D, portal_instance: Node3D, portal_position: Vector3) -> void:
+func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D, portal_position: Vector3) -> void:
 	var local_player = _get_local_player()
 	if local_player != null:
 		local_player.set_camera_override(portal_position)
 	await get_tree().create_timer(portal_camera_focus_duration).timeout
-	var slide_offset = _get_portal_slide_offset()
+	var slide_offset = _get_portal_slide_offset(tile_instance)
 	var tween = create_tween()
 	tween.tween_property(tile_instance, "global_position", tile_instance.global_position + slide_offset, portal_tile_slide_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
@@ -188,10 +188,19 @@ func _get_cell_global_transform(cell: Vector3i) -> Transform3D:
 	var global_position = grid_map.to_global(local_position)
 	return Transform3D(global_basis, global_position)
 
-func _get_portal_slide_offset() -> Vector3:
+func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 	if grid_map == null:
 		return Vector3.ZERO
+	var tile_size = grid_map.cell_size.x
+	var tile_height = grid_map.cell_size.y
+	if tile_instance != null:
+		var tile_bounds = tile_instance.get_aabb().size
+		tile_size = max(tile_size, max(tile_bounds.x, tile_bounds.z))
+		tile_height = max(tile_height, tile_bounds.y)
 	var direction = grid_map.global_transform.basis.x
 	if direction.length() == 0.0:
 		direction = Vector3.RIGHT
-	return direction.normalized() * grid_map.cell_size.x * portal_tile_slide_distance_multiplier
+	var down = -grid_map.global_transform.basis.y
+	if down.length() == 0.0:
+		down = Vector3.DOWN
+	return (direction.normalized() * tile_size + down.normalized() * tile_height * 0.25) * portal_tile_slide_distance_multiplier

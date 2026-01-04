@@ -13,6 +13,7 @@ extends Node3D
 @export var portal_tile_slide_duration: float = 1.5
 @export var portal_tile_slide_distance_multiplier: float = 1.0
 @export var portal_depth_offset: float = 0.05
+@export var portal_camera_zoom_fov: float = 55.0
 @onready var player_list_item_sample_persistent: Control = player_list_item_sample.duplicate()
 
 class PortalCandidate:
@@ -135,12 +136,13 @@ func spawn_portal(cell: Vector3i, item_id: int) -> void:
 		var portal_node: Node3D = portal_instance
 		portal_node.visible = false
 		portal_node.global_position = cell_transform.origin + Vector3(0, -portal_depth_offset, 0)
-		await _run_portal_sequence(tile_instance, portal_node, cell_transform.origin)
+		await _run_portal_sequence(tile_instance, portal_node, cell_transform.origin, cell)
 
-func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D, portal_position: Vector3) -> void:
+func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D, portal_position: Vector3, portal_cell: Vector3i) -> void:
 	var local_player = _get_local_player()
 	if local_player != null:
-		local_player.set_camera_override(portal_position)
+		var corner_direction = _get_portal_corner_direction(portal_cell)
+		local_player.set_camera_override(portal_position, corner_direction, portal_camera_zoom_fov)
 	await get_tree().create_timer(portal_camera_focus_duration).timeout
 	var slide_offset = _get_portal_slide_offset(tile_instance)
 	var tween = create_tween()
@@ -204,3 +206,67 @@ func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 	if down.length() == 0.0:
 		down = Vector3.DOWN
 	return (direction.normalized() * tile_size + down.normalized() * tile_height * 0.25) * portal_tile_slide_distance_multiplier
+
+func _get_portal_corner_direction(portal_cell: Vector3i) -> Vector3:
+	if grid_map == null:
+		return Vector3.ONE.normalized()
+	var bounds = _get_grid_bounds()
+	var x_sign = _get_nearest_wall_sign(portal_cell, Vector3i(1, 0, 0), Vector3i(-1, 0, 0), bounds)
+	var z_sign = _get_nearest_wall_sign(portal_cell, Vector3i(0, 0, 1), Vector3i(0, 0, -1), bounds)
+	if x_sign == 0:
+		x_sign = 1
+	if z_sign == 0:
+		z_sign = 1
+	var local_direction = Vector3(float(x_sign), 0.0, float(z_sign))
+	if local_direction.length() == 0.0:
+		local_direction = Vector3(1.0, 0.0, 1.0)
+	var world_direction = grid_map.global_transform.basis * local_direction
+	if world_direction.length() == 0.0:
+		return local_direction.normalized()
+	return world_direction.normalized()
+
+func _get_grid_bounds() -> Dictionary:
+	var used_cells: Array[Vector3i] = grid_map.get_used_cells()
+	if used_cells.is_empty():
+		return {"min_x": 0, "max_x": 0, "min_z": 0, "max_z": 0}
+	var min_x = used_cells[0].x
+	var max_x = used_cells[0].x
+	var min_z = used_cells[0].z
+	var max_z = used_cells[0].z
+	for cell in used_cells:
+		min_x = min(min_x, cell.x)
+		max_x = max(max_x, cell.x)
+		min_z = min(min_z, cell.z)
+		max_z = max(max_z, cell.z)
+	return {"min_x": min_x, "max_x": max_x, "min_z": min_z, "max_z": max_z}
+
+func _get_nearest_wall_sign(portal_cell: Vector3i, positive_dir: Vector3i, negative_dir: Vector3i, bounds: Dictionary) -> int:
+	var positive_distance = _distance_to_wall(portal_cell, positive_dir, bounds)
+	var negative_distance = _distance_to_wall(portal_cell, negative_dir, bounds)
+	if positive_distance == INF and negative_distance == INF:
+		return 0
+	if positive_distance <= negative_distance:
+		return positive_dir.x + positive_dir.z
+	return negative_dir.x + negative_dir.z
+
+func _distance_to_wall(portal_cell: Vector3i, direction: Vector3i, bounds: Dictionary) -> float:
+	var min_x: int = bounds["min_x"]
+	var max_x: int = bounds["max_x"]
+	var min_z: int = bounds["min_z"]
+	var max_z: int = bounds["max_z"]
+	var step := 1
+	while true:
+		var cell = portal_cell + direction * step
+		if cell.x < min_x or cell.x > max_x or cell.z < min_z or cell.z > max_z:
+			return INF
+		var item_id = grid_map.get_cell_item(cell)
+		if item_id >= 0 and _is_wall_item(item_id):
+			return float(step)
+		step += 1
+	return INF
+
+func _is_wall_item(item_id: int) -> bool:
+	if grid_map == null or grid_map.mesh_library == null:
+		return false
+	var item_name = grid_map.mesh_library.get_item_name(item_id)
+	return item_name.begins_with("wall")

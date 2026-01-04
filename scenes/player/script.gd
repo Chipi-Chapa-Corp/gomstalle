@@ -68,10 +68,15 @@ var is_dead := false
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var camera_offset: Vector3
+var base_camera_offset: Vector3
+var base_camera_basis: Basis
+var base_camera_fov: float = 0.0
 var camera_yaw_offset: float = 0.0
 var camera_velocity: Vector3 = Vector3.ZERO
 var camera_override_active: bool = false
 var camera_override_target: Vector3 = Vector3.ZERO
+var camera_override_direction: Vector3 = Vector3.ZERO
+var camera_override_fov: float = 0.0
 
 var INTERACT_MASK := 1 << (interact_on_layer - 1)
 
@@ -114,6 +119,10 @@ func _ready() -> void:
 	camera_offset = camera.global_transform.origin - global_transform.origin
 	camera_offset = camera_offset.rotated(Vector3.UP, camera_yaw_offset)
 	camera.rotation.y = camera_yaw_offset
+	base_camera_offset = camera_offset
+	base_camera_basis = camera.global_transform.basis
+	base_camera_fov = camera.fov
+	camera_override_fov = base_camera_fov
 	interact_shape.radius = interact_radius
 	interact_query_params.shape = interact_shape
 	interact_query_params.collision_mask = INTERACT_MASK
@@ -135,12 +144,13 @@ func _physics_process(delta: float) -> void:
 		actions.handle(delta)
 
 	move_and_slide()
-	var target_camera_position: Vector3 = global_transform.origin + camera_offset
-	if camera_override_active:
-		target_camera_position = camera_override_target + camera_offset
+	var target_camera_position = _get_camera_target_position()
 	var camera_result: Array[Vector3] = Utils.smooth_damp_vector3(camera.global_transform.origin, target_camera_position, camera_velocity, camera_follow_time, delta)
 	camera.global_transform.origin = camera_result[0]
 	camera_velocity = camera_result[1]
+	var smoothing_factor = _get_camera_smoothing_factor(delta)
+	_update_camera_orientation(smoothing_factor)
+	_update_camera_fov(smoothing_factor)
 	_update_portal_arrow()
 
 func set_dead(state: bool) -> void:
@@ -164,13 +174,22 @@ func _on_attacked(body: Node3D) -> void:
 func _exit_tree() -> void:
 	GameState.state_changed.disconnect(_on_game_state_changed)
 
-func set_camera_override(target: Vector3) -> void:
+func set_camera_override(target: Vector3, direction: Vector3, fov: float) -> void:
 	camera_override_active = true
 	camera_override_target = target
+	var flattened_direction = Vector3(direction.x, 0.0, direction.z)
+	if flattened_direction.length() == 0.0:
+		camera_override_direction = Vector3.ZERO
+	else:
+		camera_override_direction = flattened_direction.normalized()
+	camera_override_fov = maxf(fov, 1.0)
 	camera_velocity = Vector3.ZERO
 
 func clear_camera_override() -> void:
 	camera_override_active = false
+	camera_override_target = Vector3.ZERO
+	camera_override_direction = Vector3.ZERO
+	camera_override_fov = base_camera_fov
 	camera_velocity = Vector3.ZERO
 
 func _update_portal_arrow() -> void:
@@ -194,3 +213,45 @@ func _update_portal_arrow() -> void:
 		portal_arrow.rotation = Vector2.UP.angle_to(screen_direction)
 	portal_arrow.position = Vector2(viewport_size.x * 0.5, viewport_size.y * 0.85)
 	portal_arrow.visible = true
+
+func _get_camera_target_position() -> Vector3:
+	var focus_position = global_transform.origin
+	var offset = camera_offset
+	if camera_override_active:
+		focus_position = camera_override_target
+		offset = _get_camera_override_offset()
+	return focus_position + offset
+
+func _get_camera_override_offset() -> Vector3:
+	var base_horizontal = Vector2(base_camera_offset.x, base_camera_offset.z)
+	if base_horizontal.length() == 0.0:
+		return base_camera_offset
+	var horizontal_distance = base_horizontal.length()
+	var direction = Vector2(camera_override_direction.x, camera_override_direction.z)
+	if direction.length() == 0.0:
+		direction = base_horizontal.normalized()
+	else:
+		direction = direction.normalized()
+	return Vector3(direction.x * horizontal_distance, base_camera_offset.y, direction.y * horizontal_distance)
+
+func _get_camera_smoothing_factor(delta: float) -> float:
+	var clamped_follow_time: float = maxf(camera_follow_time, 0.0001)
+	var omega: float = 2.0 / clamped_follow_time
+	var scaled_time: float = omega * delta
+	return 1.0 - Utils.exp_cubic_approx(scaled_time)
+
+func _update_camera_orientation(smoothing_factor: float) -> void:
+	if camera == null:
+		return
+	var target_basis = base_camera_basis
+	if camera_override_active:
+		target_basis = camera.global_transform.looking_at(camera_override_target, Vector3.UP).basis
+	camera.global_transform.basis = camera.global_transform.basis.slerp(target_basis, smoothing_factor)
+
+func _update_camera_fov(smoothing_factor: float) -> void:
+	if camera == null:
+		return
+	var target_fov = base_camera_fov
+	if camera_override_active:
+		target_fov = camera_override_fov
+	camera.fov = lerpf(camera.fov, target_fov, smoothing_factor)

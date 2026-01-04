@@ -24,6 +24,7 @@ func perform_interact(_enable: bool, metadata: Dictionary) -> void:
 	rpc("sync_interact")
 
 func _ready() -> void:
+	super._ready()
 	label.text = str(current_amount - required_amount)
 
 @rpc("any_peer", "call_local", "reliable")

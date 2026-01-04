@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://z28uh1grau7rh"]
+
+[ext_resource type="PackedScene" uid="uid://r2h30bn3mda6" path="res://assets/spooky/floor_dirt_grave.gltf" id="1_floor_grave"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_portal"]
+size = Vector2(0.3, 0.3)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_portal"]
+emission_shape = 3
+emission_box_extents = Vector3(0.6, 0.05, 0.6)
+direction = Vector3(0, 1, 0)
+initial_velocity_min = 0.2
+initial_velocity_max = 1.2
+angle_min = -45.0
+angle_max = 45.0
+gravity = Vector3(0, 0.2, 0)
+scale_min = 0.2
+scale_max = 0.6
+color = Color(0.4, 0.2, 1, 0.9)
+
+[node name="Portal" type="Node3D"]
+
+[node name="Grave" parent="." instance=ExtResource("1_floor_grave")]
+
+[node name="Particles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+emitting = true
+amount = 120
+lifetime = 1.6
+one_shot = false
+randomness = 0.6
+process_material = SubResource("ParticleProcessMaterial_portal")
+draw_pass_1 = SubResource("QuadMesh_portal")

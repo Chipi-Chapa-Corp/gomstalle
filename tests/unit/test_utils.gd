@@ -61,3 +61,24 @@ func test_smooth_damp_vector3_moves_towards_target() -> void:
 	assert_true(new_position.x > current.x, "Position should move towards target")
 	assert_true(new_position.x < target.x, "Position should not overshoot target")
 	assert_true(new_velocity.x > 0.0, "Velocity should move towards target")
+
+func test_select_farthest_candidate_index_with_empty_candidates() -> void:
+	var result := Utils.select_farthest_candidate_index([], [Vector3.ZERO])
+	assert_eq(result, -1, "Empty candidates should return -1")
+
+func test_select_farthest_candidate_index_with_empty_points() -> void:
+	var result := Utils.select_farthest_candidate_index([Vector3.ZERO, Vector3.ONE], [])
+	assert_eq(result, 0, "Empty points should pick first candidate")
+
+func test_select_farthest_candidate_index_maximizes_min_distance() -> void:
+	var candidates: Array[Vector3] = [
+		Vector3.ZERO,
+		Vector3(10.0, 0.0, 0.0),
+		Vector3(20.0, 0.0, 0.0)
+	]
+	var points: Array[Vector3] = [
+		Vector3(0.0, 0.0, 0.0),
+		Vector3(18.0, 0.0, 0.0)
+	]
+	var result := Utils.select_farthest_candidate_index(candidates, points)
+	assert_eq(result, 1, "Should pick candidate with largest minimal distance")

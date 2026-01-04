@@ -27,3 +27,22 @@ func smooth_damp_vector3(current: Vector3, target: Vector3, velocity: Vector3, s
 	var new_velocity: Vector3 = (velocity - omega * temp) * damping_factor
 	var new_value: Vector3 = target + (change + temp) * damping_factor
 	return [new_value, new_velocity]
+
+func select_farthest_candidate_index(candidates: Array[Vector3], points: Array[Vector3]) -> int:
+	if candidates.is_empty():
+		return -1
+	if points.is_empty():
+		return 0
+	var best_index := 0
+	var best_score := -INF
+	for index in candidates.size():
+		var candidate: Vector3 = candidates[index]
+		var min_distance := INF
+		for point in points:
+			var distance := candidate.distance_to(point)
+			if distance < min_distance:
+				min_distance = distance
+		if min_distance > best_score:
+			best_score = min_distance
+			best_index = index
+	return best_index

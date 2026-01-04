@@ -122,7 +122,7 @@ light_energy = 3.0
 spot_range = 5.359833
 spot_angle = 54.30567
 
-[node name="Receiver" type="StaticBody3D" parent="." node_paths=PackedStringArray("mesh", "label") groups=["interactible"]]
+[node name="Receiver" type="StaticBody3D" parent="." node_paths=PackedStringArray("mesh", "label") groups=["interactible", "shrine"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 16
 script = ExtResource("2_isyg8")

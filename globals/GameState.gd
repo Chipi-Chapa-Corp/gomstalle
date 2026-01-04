@@ -20,6 +20,8 @@ var hunter_peer_id: int = 0
 var room_id: int = 0
 var game_state: State = State.IDLE
 var start_positions: Dictionary = {}
+var portal_active: bool = false
+var portal_position: Vector3 = Vector3.ZERO
 
 # --------- PUBLIC API ---------
 func create_and_join_lobby(callback: Callable) -> void:
@@ -63,6 +65,8 @@ func reset(state: State) -> void:
 	start_positions.clear()
 	hunter_peer_id = 0
 	room_id = 0
+	portal_active = false
+	portal_position = Vector3.ZERO
 	_set_state(state)
 
 func quit(multiplayer_api: MultiplayerAPI) -> void:

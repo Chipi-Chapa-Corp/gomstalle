@@ -30,6 +30,7 @@ extends CharacterBody3D
 @export var attack_audio_player: AudioStreamPlayer3D
 @export var surface_ray: RayCast3D
 @export var camera_follow_time: float = 0.15
+@export var portal_arrow: Node2D
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 
@@ -69,6 +70,8 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var camera_offset: Vector3
 var camera_yaw_offset: float = 0.0
 var camera_velocity: Vector3 = Vector3.ZERO
+var camera_override_active: bool = false
+var camera_override_target: Vector3 = Vector3.ZERO
 
 var INTERACT_MASK := 1 << (interact_on_layer - 1)
 
@@ -99,6 +102,8 @@ func _ready() -> void:
 		camera.current = false
 		set_physics_process(false)
 		set_process_input(false)
+	if portal_arrow != null:
+		portal_arrow.visible = false
 
 	print("player ready, process %s" % is_physics_processing())
 
@@ -131,9 +136,12 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	var target_camera_position: Vector3 = global_transform.origin + camera_offset
+	if camera_override_active:
+		target_camera_position = camera_override_target + camera_offset
 	var camera_result: Array[Vector3] = Utils.smooth_damp_vector3(camera.global_transform.origin, target_camera_position, camera_velocity, camera_follow_time, delta)
 	camera.global_transform.origin = camera_result[0]
 	camera_velocity = camera_result[1]
+	_update_portal_arrow()
 
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)
@@ -155,3 +163,34 @@ func _on_attacked(body: Node3D) -> void:
 
 func _exit_tree() -> void:
 	GameState.state_changed.disconnect(_on_game_state_changed)
+
+func set_camera_override(target: Vector3) -> void:
+	camera_override_active = true
+	camera_override_target = target
+	camera_velocity = Vector3.ZERO
+
+func clear_camera_override() -> void:
+	camera_override_active = false
+	camera_velocity = Vector3.ZERO
+
+func _update_portal_arrow() -> void:
+	if portal_arrow == null:
+		return
+	if not GameState.portal_active:
+		portal_arrow.visible = false
+		return
+	if camera == null:
+		portal_arrow.visible = false
+		return
+	var viewport_size = get_viewport().get_visible_rect().size
+	var screen_center = viewport_size * 0.5
+	var portal_screen = camera.unproject_position(GameState.portal_position)
+	var screen_direction = portal_screen - screen_center
+	if camera.is_position_behind(GameState.portal_position):
+		screen_direction = -screen_direction
+	if screen_direction.length_squared() == 0.0:
+		portal_arrow.rotation = 0.0
+	else:
+		portal_arrow.rotation = Vector2.UP.angle_to(screen_direction)
+	portal_arrow.position = Vector2(viewport_size.x * 0.5, viewport_size.y * 0.85)
+	portal_arrow.visible = true

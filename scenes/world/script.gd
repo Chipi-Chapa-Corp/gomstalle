@@ -9,11 +9,14 @@ extends Node3D
 @export var grid_map: GridMap
 @export var portal_container: Node3D
 @export var portal_scene: PackedScene
-@export var portal_camera_focus_duration: float = 2.5
+@export var portal_camera_focus_duration: float = 3.0
 @export var portal_tile_slide_duration: float = 1.5
 @export var portal_tile_slide_distance_multiplier: float = 1.0
 @export var portal_depth_offset: float = 0.05
 @export var portal_camera_zoom_fov: float = 55.0
+@export var portal_camera_progress_target: float = 0.95
+@export var portal_camera_return_duration: float = 1.5
+@export var portal_open_hold_duration: float = 1.0
 @onready var player_list_item_sample_persistent: Control = player_list_item_sample.duplicate()
 
 class PortalCandidate:
@@ -142,17 +145,21 @@ func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D
 	var local_player = _get_local_player()
 	if local_player != null:
 		var corner_direction = _get_portal_corner_direction(portal_cell)
-		local_player.set_camera_override(portal_position, corner_direction, portal_camera_zoom_fov)
+		var approach_follow_time = Utils.smooth_time_for_progress(portal_camera_focus_duration, portal_camera_progress_target)
+		local_player.set_camera_override(portal_position, corner_direction, portal_camera_zoom_fov, approach_follow_time)
 	await get_tree().create_timer(portal_camera_focus_duration).timeout
+	portal_instance.visible = true
+	GameState.portal_position = portal_position
+	GameState.portal_active = true
 	var slide_offset = _get_portal_slide_offset(tile_instance)
 	var tween = create_tween()
 	tween.tween_property(tile_instance, "global_position", tile_instance.global_position + slide_offset, portal_tile_slide_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
-	portal_instance.visible = true
-	GameState.portal_position = portal_position
-	GameState.portal_active = true
+	await get_tree().create_timer(portal_open_hold_duration).timeout
 	if local_player != null:
 		local_player.clear_camera_override()
+		var return_follow_time = Utils.smooth_time_for_progress(portal_camera_return_duration, portal_camera_progress_target)
+		local_player.set_temporary_camera_follow_time(return_follow_time, portal_camera_return_duration)
 
 func _collect_floor_candidates() -> Array[PortalCandidate]:
 	var candidates: Array[PortalCandidate] = []

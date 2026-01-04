@@ -62,6 +62,19 @@ func test_smooth_damp_vector3_moves_towards_target() -> void:
 	assert_true(new_position.x < target.x, "Position should not overshoot target")
 	assert_true(new_velocity.x > 0.0, "Velocity should move towards target")
 
+func test_smooth_time_for_progress_matches_remaining_fraction() -> void:
+	var duration := 2.5
+	var progress := 0.95
+	var smooth_time = Utils.smooth_time_for_progress(duration, progress)
+	assert_true(smooth_time > 0.0, "Smooth time should be positive for valid inputs")
+	var u = 2.0 * duration / smooth_time
+	var remaining = (1.0 + u) * Utils.exp_cubic_approx(u)
+	assert_almost_eq(remaining, 1.0 - progress, 0.001, "Remaining fraction should match target")
+
+func test_smooth_time_for_progress_zero_duration() -> void:
+	var smooth_time = Utils.smooth_time_for_progress(0.0, 0.95)
+	assert_eq(smooth_time, 0.0, "Zero duration should return zero smooth time")
+
 func test_select_farthest_candidate_index_with_empty_candidates() -> void:
 	var result := Utils.select_farthest_candidate_index([], [Vector3.ZERO])
 	assert_eq(result, -1, "Empty candidates should return -1")

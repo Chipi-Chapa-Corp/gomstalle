@@ -29,6 +29,7 @@ extends CharacterBody3D
 @export var movement_audio_player: AudioStreamPlayer3D
 @export var attack_audio_player: AudioStreamPlayer3D
 @export var surface_ray: RayCast3D
+@export var camera_follow_time: float = 0.15
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 
@@ -67,6 +68,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var camera_offset: Vector3
 var camera_yaw_offset: float = 0.0
+var camera_velocity: Vector3 = Vector3.ZERO
 
 var INTERACT_MASK := 1 << (interact_on_layer - 1)
 
@@ -89,6 +91,7 @@ func _ready() -> void:
 	var rotation_angle = deg_to_rad(45.0)
 	camera_yaw_offset = rotation_angle
 	if is_multiplayer_authority():
+		camera.set_as_top_level(true)
 		camera.make_current()
 		label.text = Steam.getPersonaName()
 		label.visible = false
@@ -127,7 +130,10 @@ func _physics_process(delta: float) -> void:
 		actions.handle(delta)
 
 	move_and_slide()
-	camera.global_transform.origin = global_transform.origin + camera_offset
+	var target_camera_position: Vector3 = global_transform.origin + camera_offset
+	var camera_result: Array[Vector3] = Utils.smooth_damp_vector3(camera.global_transform.origin, target_camera_position, camera_velocity, camera_follow_time, delta)
+	camera.global_transform.origin = camera_result[0]
+	camera_velocity = camera_result[1]
 
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)

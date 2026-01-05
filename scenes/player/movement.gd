@@ -55,7 +55,7 @@ func _apply_movement(delta: float, movement_input: Vector2, run_requested: bool)
 	var movement_direction = Vector3.ZERO
 	if movement_input != Vector2.ZERO:
 		var input_vector = Vector3(movement_input.x, 0.0, movement_input.y)
-		movement_direction = input_vector.rotated(Vector3.UP, character.camera_yaw_offset)
+		movement_direction = input_vector.rotated(Vector3.UP, character.camera_utils.camera_yaw_offset)
 	if movement_direction.length() > 1.0:
 		movement_direction = movement_direction.normalized()
 	var is_moving := movement_direction.length() > 0.0

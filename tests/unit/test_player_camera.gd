@@ -55,26 +55,26 @@ func test_temporary_camera_damping_time_constant_expires() -> void:
 	player._advance_temporary_camera_damping_time_constant(0.5)
 	assert_eq(player._get_active_camera_damping_time_constant(), 0.4, "Temporary damping time constant should expire after duration")
 
-func test_portal_arrow_hidden_during_camera_override() -> void:
+func test_portal_indicator_hidden_during_camera_override() -> void:
 	var player := PlayerScript.new()
 	_created_nodes.append(player)
-	player.portal_arrow = Node2D.new()
-	_created_nodes.append(player.portal_arrow)
+	player.portal_indicator = Node3D.new()
+	_created_nodes.append(player.portal_indicator)
 	player.camera = Camera3D.new()
 	_created_nodes.append(player.camera)
 	GameState.portal_active = true
 	player.set_camera_override(Vector3.ZERO, Vector3.RIGHT, 60.0, 1.0)
-	assert_false(player._should_show_portal_arrow(), "Arrow should stay hidden during camera override")
+	assert_false(player._should_show_portal_indicator(), "Indicator should stay hidden during camera override")
 	GameState.portal_active = false
 
-func test_portal_arrow_visible_after_override() -> void:
+func test_portal_indicator_visible_after_override() -> void:
 	var player := PlayerScript.new()
 	_created_nodes.append(player)
-	player.portal_arrow = Node2D.new()
-	_created_nodes.append(player.portal_arrow)
+	player.portal_indicator = Node3D.new()
+	_created_nodes.append(player.portal_indicator)
 	player.camera = Camera3D.new()
 	_created_nodes.append(player.camera)
 	GameState.portal_active = true
 	player.camera_override_active = false
-	assert_true(player._should_show_portal_arrow(), "Arrow should show after camera override ends")
+	assert_true(player._should_show_portal_indicator(), "Indicator should show after camera override ends")
 	GameState.portal_active = false

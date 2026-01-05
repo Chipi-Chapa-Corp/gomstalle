@@ -30,8 +30,11 @@ extends CharacterBody3D
 @export var attack_audio_player: AudioStreamPlayer3D
 @export var surface_ray: RayCast3D
 @export var camera_damping_time_constant: float = 0.15
+@export var portal_indicator_distance: float = 0.9
+@export var portal_indicator_height_offset: float = 0.03
+@export var portal_indicator_turn_speed: float = 10.0
 
-@onready var portal_arrow: Node2D = $"2D/HUD/PortalArrow"
+@onready var portal_indicator: Node3D = $PortalIndicator
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 
@@ -81,6 +84,7 @@ var camera_override_fov: float = 0.0
 var camera_override_damping_time_constant: float = 0.0
 var camera_temporary_damping_time_constant: float = 0.0
 var camera_temporary_damping_duration_remaining: float = 0.0
+var portal_indicator_yaw: float = 0.0
 
 var INTERACT_MASK := 1 << (interact_on_layer - 1)
 
@@ -111,7 +115,8 @@ func _ready() -> void:
 		camera.current = false
 		set_physics_process(false)
 		set_process_input(false)
-	portal_arrow.visible = false
+	portal_indicator.top_level = true
+	portal_indicator.visible = false
 
 	print("player ready, process %s" % is_physics_processing())
 
@@ -155,7 +160,7 @@ func _physics_process(delta: float) -> void:
 	camera_velocity = camera_step.velocity
 	_update_camera_orientation(camera_step.blend_factor)
 	_update_camera_fov(camera_step.blend_factor)
-	_update_portal_arrow()
+	_update_portal_indicator(delta)
 
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)
@@ -202,29 +207,36 @@ func set_temporary_camera_damping_time_constant(damping_time_constant: float, du
 	camera_temporary_damping_time_constant = maxf(damping_time_constant, 0.0)
 	camera_temporary_damping_duration_remaining = maxf(duration, 0.0)
 
-func _update_portal_arrow() -> void:
-	if not _should_show_portal_arrow():
-		portal_arrow.visible = false
+func _update_portal_indicator(delta: float) -> void:
+	if not _should_show_portal_indicator():
+		portal_indicator.visible = false
 		return
-	var viewport_size = get_viewport().get_visible_rect().size
-	var screen_center = viewport_size * 0.5
-	var portal_screen = camera.unproject_position(GameState.portal_position)
-	var screen_direction = portal_screen - screen_center
-	if camera.is_position_behind(GameState.portal_position):
-		screen_direction = -screen_direction
-	if screen_direction.length_squared() == 0.0:
-		portal_arrow.rotation = 0.0
-	else:
-		portal_arrow.rotation = Vector2.UP.angle_to(screen_direction)
-	portal_arrow.position = Vector2(viewport_size.x * 0.5, viewport_size.y * 0.85)
-	portal_arrow.visible = true
+	var portal_direction = GameState.portal_position - global_position
+	portal_direction.y = 0.0
+	if portal_direction.length_squared() == 0.0:
+		portal_direction = Vector3.FORWARD
+	var normalized_direction = portal_direction.normalized()
+	var target_yaw = atan2(normalized_direction.x, normalized_direction.z)
+	var rotation_blend = clampf(delta * portal_indicator_turn_speed, 0.0, 1.0)
+	portal_indicator_yaw = lerp_angle(portal_indicator_yaw, target_yaw, rotation_blend)
+	portal_indicator.rotation = Vector3(0.0, portal_indicator_yaw, 0.0)
+	var base_position = _get_portal_indicator_base_position()
+	portal_indicator.global_position = base_position + normalized_direction * portal_indicator_distance + Vector3(0.0, portal_indicator_height_offset, 0.0)
+	portal_indicator.visible = true
 
-func _should_show_portal_arrow() -> bool:
+func _should_show_portal_indicator() -> bool:
 	if not GameState.portal_active:
 		return false
 	if camera_override_active:
 		return false
 	return true
+
+func _get_portal_indicator_base_position() -> Vector3:
+	var base_position = global_position
+	surface_ray.force_raycast_update()
+	if surface_ray.is_colliding():
+		base_position = surface_ray.get_collision_point()
+	return base_position
 
 func _get_camera_target_position() -> Vector3:
 	var focus_position = global_transform.origin

@@ -1360,22 +1360,22 @@ script = ExtResource("22_jm7ge")
 shape = SubResource("Resource_21oge")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="Background"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 11, -2, -37)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 11, -1, -37)
 mesh = SubResource("BoxMesh_53vc2")
 skeleton = NodePath("../MeshInstance3D")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="Background"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65, -2, 33)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -61, -1, 33)
 mesh = SubResource("BoxMesh_53vc2")
 skeleton = NodePath("../MeshInstance3D")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="Background"]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2, -2, 120)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2, -1, 116)
 mesh = SubResource("BoxMesh_53vc2")
 skeleton = NodePath("../MeshInstance3D")
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="Background"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 112, -2, 94)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 111, -1, 92)
 mesh = SubResource("BoxMesh_53vc2")
 skeleton = NodePath("../MeshInstance3D")
 

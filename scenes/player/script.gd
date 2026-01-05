@@ -13,7 +13,7 @@ extends CharacterBody3D
 @export var hider_parts: Node3D
 @export var hunter_parts: Node3D
 @export var hand: RemoteTransform3D
-@onready var camera: Camera3D = $Camera3D
+@export var camera: Camera3D
 @export var anim_tree: AnimationTree
 @export var model: Node3D
 @export var label: Label3D

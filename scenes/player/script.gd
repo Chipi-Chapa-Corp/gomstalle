@@ -146,10 +146,13 @@ func _physics_process(delta: float) -> void:
 		item = null
 
 	forces.handle(delta)
-	if not is_stunned and not is_dead and not GameState.is_paused:
+	var can_process_input = not is_stunned and not is_dead and not GameState.is_paused
+	if can_process_input and not GameState.portal_cinematic_active:
 		movement.handle(delta)
 		interactions.handle(delta)
 		actions.handle(delta)
+	elif can_process_input and GameState.portal_cinematic_active:
+		movement.handle_input_locked(delta)
 
 	move_and_slide()
 	_advance_temporary_camera_damping_time_constant(delta)

@@ -134,6 +134,7 @@ func spawn_portal(cell: Vector3i, item_id: int) -> void:
 func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D, portal_position: Vector3, portal_cell: Vector3i) -> void:
 	var local_player = _get_local_player()
 	if local_player != null:
+		GameState.portal_cinematic_active = true
 		var corner_direction = _get_portal_corner_direction(portal_cell)
 		var approach_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(portal_camera_focus_duration)
 		local_player.set_camera_override(portal_position, corner_direction, portal_camera_zoom_fov, approach_damping_time_constant)
@@ -150,6 +151,8 @@ func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D
 		local_player.clear_camera_override()
 		var return_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(portal_camera_return_duration)
 		local_player.set_temporary_camera_damping_time_constant(return_damping_time_constant, portal_camera_return_duration)
+		await get_tree().create_timer(portal_camera_return_duration).timeout
+		GameState.portal_cinematic_active = false
 
 func _collect_floor_candidates() -> Array[PortalCandidate]:
 	var candidates: Array[PortalCandidate] = []

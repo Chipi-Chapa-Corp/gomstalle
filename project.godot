@@ -29,7 +29,11 @@ Utils="*res://globals/Utils.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("gut")
+enabled=PackedStringArray("res://addons/proton_scatter/plugin.cfg")
+
+[filesystem]
+
+import/blender/enabled=false
 
 [global_group]
 

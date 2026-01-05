@@ -23,7 +23,7 @@ class PortalCandidate:
 	var item_id: int
 	var position: Vector3
 
-	func _init(cell: Vector3i, item_id: int, position: Vector3) -> void:
+	func _init(_cell: Vector3i, _item_id: int, _position: Vector3) -> void:
 		self.cell = cell
 		self.item_id = item_id
 		self.position = position
@@ -166,8 +166,8 @@ func _collect_floor_candidates() -> Array[PortalCandidate]:
 		var item_name = grid_map.mesh_library.get_item_name(item_id)
 		if not item_name.begins_with("floor_"):
 			continue
-		var position = grid_map.to_global(grid_map.map_to_local(cell))
-		candidates.append(PortalCandidate.new(cell, item_id, position))
+		var candidate_position = grid_map.to_global(grid_map.map_to_local(cell))
+		candidates.append(PortalCandidate.new(cell, item_id, candidate_position))
 	return candidates
 
 func _select_portal_candidate_farthest_from_players() -> PortalCandidate:
@@ -211,9 +211,9 @@ func _get_local_player() -> Node:
 func _get_cell_global_transform(cell: Vector3i) -> Transform3D:
 	var local_position = grid_map.map_to_local(cell)
 	var local_basis = grid_map.get_cell_item_basis(cell)
-	var global_basis = grid_map.global_transform.basis * local_basis
-	var global_position = grid_map.to_global(local_position)
-	return Transform3D(global_basis, global_position)
+	var cell_global_basis = grid_map.global_transform.basis * local_basis
+	var cell_global_position = grid_map.to_global(local_position)
+	return Transform3D(cell_global_basis, cell_global_position)
 
 func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 	if grid_map == null:
@@ -227,7 +227,7 @@ func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 	var direction = grid_map.global_transform.basis.x
 	if direction.length() == 0.0:
 		direction = Vector3.RIGHT
-	var down = -grid_map.global_transform.basis.y
+	var down = - grid_map.global_transform.basis.y
 	if down.length() == 0.0:
 		down = Vector3.DOWN
 	return (direction.normalized() * tile_size + down.normalized() * tile_height * 0.25) * portal_tile_slide_distance_multiplier

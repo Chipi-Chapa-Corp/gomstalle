@@ -13,7 +13,7 @@ extends CharacterBody3D
 @export var hider_parts: Node3D
 @export var hunter_parts: Node3D
 @export var hand: RemoteTransform3D
-@export var camera: Camera3D
+@onready var camera: Camera3D = $Camera3D
 @export var anim_tree: AnimationTree
 @export var model: Node3D
 @export var label: Label3D
@@ -29,8 +29,9 @@ extends CharacterBody3D
 @export var movement_audio_player: AudioStreamPlayer3D
 @export var attack_audio_player: AudioStreamPlayer3D
 @export var surface_ray: RayCast3D
-@export var camera_follow_time: float = 0.15
-@export var portal_arrow: Node2D
+@export var camera_damping_time_constant: float = 0.15
+
+@onready var portal_arrow: Node2D = $"2D/HUD/PortalArrow"
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 
@@ -77,9 +78,9 @@ var camera_override_active: bool = false
 var camera_override_target: Vector3 = Vector3.ZERO
 var camera_override_direction: Vector3 = Vector3.ZERO
 var camera_override_fov: float = 0.0
-var camera_override_follow_time: float = 0.0
-var camera_temporary_follow_time: float = 0.0
-var camera_temporary_follow_time_remaining: float = 0.0
+var camera_override_damping_time_constant: float = 0.0
+var camera_temporary_damping_time_constant: float = 0.0
+var camera_temporary_damping_duration_remaining: float = 0.0
 
 var INTERACT_MASK := 1 << (interact_on_layer - 1)
 
@@ -110,8 +111,7 @@ func _ready() -> void:
 		camera.current = false
 		set_physics_process(false)
 		set_process_input(false)
-	if portal_arrow != null:
-		portal_arrow.visible = false
+	portal_arrow.visible = false
 
 	print("player ready, process %s" % is_physics_processing())
 
@@ -147,15 +147,14 @@ func _physics_process(delta: float) -> void:
 		actions.handle(delta)
 
 	move_and_slide()
-	_advance_temporary_camera_follow_time(delta)
+	_advance_temporary_camera_damping_time_constant(delta)
 	var target_camera_position = _get_camera_target_position()
-	var follow_time = _get_active_camera_follow_time()
-	var camera_result: Array[Vector3] = Utils.smooth_damp_vector3(camera.global_transform.origin, target_camera_position, camera_velocity, follow_time, delta)
-	camera.global_transform.origin = camera_result[0]
-	camera_velocity = camera_result[1]
-	var smoothing_factor = _get_camera_smoothing_factor(delta, follow_time)
-	_update_camera_orientation(smoothing_factor)
-	_update_camera_fov(smoothing_factor)
+	var damping_time_constant = _get_active_camera_damping_time_constant()
+	var camera_step = SmoothDamp.smooth_damp_vector3_step(camera.global_transform.origin, target_camera_position, camera_velocity, damping_time_constant, delta)
+	camera.global_transform.origin = camera_step.value
+	camera_velocity = camera_step.velocity
+	_update_camera_orientation(camera_step.blend_factor)
+	_update_camera_fov(camera_step.blend_factor)
 	_update_portal_arrow()
 
 func set_dead(state: bool) -> void:
@@ -179,7 +178,7 @@ func _on_attacked(body: Node3D) -> void:
 func _exit_tree() -> void:
 	GameState.state_changed.disconnect(_on_game_state_changed)
 
-func set_camera_override(target: Vector3, direction: Vector3, fov: float, follow_time: float) -> void:
+func set_camera_override(target: Vector3, direction: Vector3, fov: float, damping_time_constant: float) -> void:
 	camera_override_active = true
 	camera_override_target = target
 	var flattened_direction = Vector3(direction.x, 0.0, direction.z)
@@ -188,7 +187,7 @@ func set_camera_override(target: Vector3, direction: Vector3, fov: float, follow
 	else:
 		camera_override_direction = flattened_direction.normalized()
 	camera_override_fov = maxf(fov, 1.0)
-	camera_override_follow_time = maxf(follow_time, 0.0)
+	camera_override_damping_time_constant = maxf(damping_time_constant, 0.0)
 	camera_velocity = Vector3.ZERO
 
 func clear_camera_override() -> void:
@@ -196,17 +195,16 @@ func clear_camera_override() -> void:
 	camera_override_target = Vector3.ZERO
 	camera_override_direction = Vector3.ZERO
 	camera_override_fov = base_camera_fov
-	camera_override_follow_time = 0.0
+	camera_override_damping_time_constant = 0.0
 	camera_velocity = Vector3.ZERO
 
-func set_temporary_camera_follow_time(follow_time: float, duration: float) -> void:
-	camera_temporary_follow_time = maxf(follow_time, 0.0)
-	camera_temporary_follow_time_remaining = maxf(duration, 0.0)
+func set_temporary_camera_damping_time_constant(damping_time_constant: float, duration: float) -> void:
+	camera_temporary_damping_time_constant = maxf(damping_time_constant, 0.0)
+	camera_temporary_damping_duration_remaining = maxf(duration, 0.0)
 
 func _update_portal_arrow() -> void:
 	if not _should_show_portal_arrow():
-		if portal_arrow != null:
-			portal_arrow.visible = false
+		portal_arrow.visible = false
 		return
 	var viewport_size = get_viewport().get_visible_rect().size
 	var screen_center = viewport_size * 0.5
@@ -222,10 +220,6 @@ func _update_portal_arrow() -> void:
 	portal_arrow.visible = true
 
 func _should_show_portal_arrow() -> bool:
-	if portal_arrow == null:
-		return false
-	if camera == null:
-		return false
 	if not GameState.portal_active:
 		return false
 	if camera_override_active:
@@ -252,35 +246,25 @@ func _get_camera_override_offset() -> Vector3:
 		direction = direction.normalized()
 	return Vector3(direction.x * horizontal_distance, base_camera_offset.y, direction.y * horizontal_distance)
 
-func _get_active_camera_follow_time() -> float:
-	if camera_override_active and camera_override_follow_time > 0.0:
-		return camera_override_follow_time
-	if camera_temporary_follow_time_remaining > 0.0 and camera_temporary_follow_time > 0.0:
-		return camera_temporary_follow_time
-	return camera_follow_time
+func _get_active_camera_damping_time_constant() -> float:
+	if camera_override_active and camera_override_damping_time_constant > 0.0:
+		return camera_override_damping_time_constant
+	if camera_temporary_damping_duration_remaining > 0.0 and camera_temporary_damping_time_constant > 0.0:
+		return camera_temporary_damping_time_constant
+	return camera_damping_time_constant
 
-func _get_camera_smoothing_factor(delta: float, follow_time: float) -> float:
-	var clamped_follow_time: float = maxf(follow_time, 0.0001)
-	var omega: float = 2.0 / clamped_follow_time
-	var scaled_time: float = omega * delta
-	return 1.0 - Utils.exp_cubic_approx(scaled_time)
-
-func _advance_temporary_camera_follow_time(delta: float) -> void:
-	if camera_temporary_follow_time_remaining <= 0.0:
+func _advance_temporary_camera_damping_time_constant(delta: float) -> void:
+	if camera_temporary_damping_duration_remaining <= 0.0:
 		return
-	camera_temporary_follow_time_remaining = maxf(camera_temporary_follow_time_remaining - delta, 0.0)
+	camera_temporary_damping_duration_remaining = maxf(camera_temporary_damping_duration_remaining - delta, 0.0)
 
 func _update_camera_orientation(smoothing_factor: float) -> void:
-	if camera == null:
-		return
 	var target_basis = base_camera_basis
 	if camera_override_active:
 		target_basis = camera.global_transform.looking_at(camera_override_target, Vector3.UP).basis
 	camera.global_transform.basis = camera.global_transform.basis.slerp(target_basis, smoothing_factor)
 
 func _update_camera_fov(smoothing_factor: float) -> void:
-	if camera == null:
-		return
 	var target_fov = base_camera_fov
 	if camera_override_active:
 		target_fov = camera_override_fov

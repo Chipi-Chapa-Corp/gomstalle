@@ -14,7 +14,6 @@ extends Node3D
 @export var portal_tile_slide_distance_multiplier: float = 1.0
 @export var portal_depth_offset: float = 0.05
 @export var portal_camera_zoom_fov: float = 55.0
-@export var portal_camera_progress_target: float = 0.95
 @export var portal_camera_return_duration: float = 1.5
 @export var portal_open_hold_duration: float = 1.0
 @onready var player_list_item_sample_persistent: Control = player_list_item_sample.duplicate()
@@ -102,17 +101,7 @@ func _on_shrine_filled(_shrine: Node) -> void:
 func _trigger_portal() -> void:
 	if portal_triggered or grid_map == null or grid_map.mesh_library == null:
 		return
-	var candidates = _collect_floor_candidates()
-	if candidates.is_empty():
-		return
-	var player_positions = _get_player_positions()
-	var candidate_positions: Array[Vector3] = []
-	for candidate in candidates:
-		candidate_positions.append(candidate.position)
-	var best_index = Utils.select_farthest_candidate_index(candidate_positions, player_positions)
-	if best_index < 0:
-		return
-	var chosen = candidates[best_index]
+	var chosen = _select_portal_candidate_farthest_from_players()
 	spawn_portal.rpc(chosen.cell, chosen.item_id)
 
 @rpc("any_peer", "call_local", "reliable")
@@ -146,8 +135,8 @@ func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D
 	var local_player = _get_local_player()
 	if local_player != null:
 		var corner_direction = _get_portal_corner_direction(portal_cell)
-		var approach_follow_time = Utils.smooth_time_for_progress(portal_camera_focus_duration, portal_camera_progress_target)
-		local_player.set_camera_override(portal_position, corner_direction, portal_camera_zoom_fov, approach_follow_time)
+		var approach_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(portal_camera_focus_duration)
+		local_player.set_camera_override(portal_position, corner_direction, portal_camera_zoom_fov, approach_damping_time_constant)
 	await get_tree().create_timer(portal_camera_focus_duration).timeout
 	portal_instance.visible = true
 	GameState.portal_position = portal_position
@@ -159,8 +148,8 @@ func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D
 	await get_tree().create_timer(portal_open_hold_duration).timeout
 	if local_player != null:
 		local_player.clear_camera_override()
-		var return_follow_time = Utils.smooth_time_for_progress(portal_camera_return_duration, portal_camera_progress_target)
-		local_player.set_temporary_camera_follow_time(return_follow_time, portal_camera_return_duration)
+		var return_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(portal_camera_return_duration)
+		local_player.set_temporary_camera_damping_time_constant(return_damping_time_constant, portal_camera_return_duration)
 
 func _collect_floor_candidates() -> Array[PortalCandidate]:
 	var candidates: Array[PortalCandidate] = []
@@ -177,6 +166,31 @@ func _collect_floor_candidates() -> Array[PortalCandidate]:
 		var position = grid_map.to_global(grid_map.map_to_local(cell))
 		candidates.append(PortalCandidate.new(cell, item_id, position))
 	return candidates
+
+func _select_portal_candidate_farthest_from_players() -> PortalCandidate:
+	var candidates = _collect_floor_candidates()
+	assert(not candidates.is_empty(), "Portal requires at least one floor tile candidate.")
+	var player_positions = _get_player_positions()
+	var best_index = _find_candidate_index_farthest_from_players(candidates, player_positions)
+	assert(best_index >= 0, "Portal candidate selection returned an invalid index.")
+	return candidates[best_index]
+
+func _find_candidate_index_farthest_from_players(candidates: Array[PortalCandidate], player_positions: Array[Vector3]) -> int:
+	if player_positions.is_empty():
+		return 0
+	var best_index := 0
+	var best_min_distance := -INF
+	for index in candidates.size():
+		var candidate_position: Vector3 = candidates[index].position
+		var closest_player_distance := INF
+		for player_position in player_positions:
+			var distance_to_player := candidate_position.distance_to(player_position)
+			if distance_to_player < closest_player_distance:
+				closest_player_distance = distance_to_player
+		if closest_player_distance > best_min_distance:
+			best_min_distance = closest_player_distance
+			best_index = index
+	return best_index
 
 func _get_player_positions() -> Array[Vector3]:
 	var positions: Array[Vector3] = []

@@ -26,34 +26,34 @@ func test_camera_override_offset_falls_back_to_base_direction() -> void:
 	var offset: Vector3 = player._get_camera_override_offset()
 	assert_eq(offset, Vector3(3.0, 2.0, 4.0), "Zero override direction should keep base camera offset")
 
-func test_active_camera_follow_time_uses_override_value() -> void:
+func test_active_camera_damping_time_constant_uses_override_value() -> void:
 	var player := PlayerScript.new()
 	_created_nodes.append(player)
-	player.camera_follow_time = 0.2
+	player.camera_damping_time_constant = 0.2
 	player.set_camera_override(Vector3.ZERO, Vector3.RIGHT, 60.0, 2.5)
-	assert_eq(player._get_active_camera_follow_time(), 2.5, "Override follow time should be used when active")
+	assert_eq(player._get_active_camera_damping_time_constant(), 2.5, "Override damping time constant should be used when active")
 
-func test_active_camera_follow_time_falls_back_to_default() -> void:
+func test_active_camera_damping_time_constant_falls_back_to_default() -> void:
 	var player := PlayerScript.new()
 	_created_nodes.append(player)
-	player.camera_follow_time = 0.3
+	player.camera_damping_time_constant = 0.3
 	player.set_camera_override(Vector3.ZERO, Vector3.RIGHT, 60.0, 0.0)
-	assert_eq(player._get_active_camera_follow_time(), 0.3, "Default follow time should be used when override follow time is zero")
+	assert_eq(player._get_active_camera_damping_time_constant(), 0.3, "Default damping time constant should be used when override value is zero")
 
-func test_active_camera_follow_time_uses_temporary_value() -> void:
+func test_active_camera_damping_time_constant_uses_temporary_value() -> void:
 	var player := PlayerScript.new()
 	_created_nodes.append(player)
-	player.camera_follow_time = 0.25
-	player.set_temporary_camera_follow_time(1.0, 0.5)
-	assert_eq(player._get_active_camera_follow_time(), 1.0, "Temporary follow time should be used while active")
+	player.camera_damping_time_constant = 0.25
+	player.set_temporary_camera_damping_time_constant(1.0, 0.5)
+	assert_eq(player._get_active_camera_damping_time_constant(), 1.0, "Temporary damping time constant should be used while active")
 
-func test_temporary_camera_follow_time_expires() -> void:
+func test_temporary_camera_damping_time_constant_expires() -> void:
 	var player := PlayerScript.new()
 	_created_nodes.append(player)
-	player.camera_follow_time = 0.4
-	player.set_temporary_camera_follow_time(1.0, 0.5)
-	player._advance_temporary_camera_follow_time(0.5)
-	assert_eq(player._get_active_camera_follow_time(), 0.4, "Temporary follow time should expire after duration")
+	player.camera_damping_time_constant = 0.4
+	player.set_temporary_camera_damping_time_constant(1.0, 0.5)
+	player._advance_temporary_camera_damping_time_constant(0.5)
+	assert_eq(player._get_active_camera_damping_time_constant(), 0.4, "Temporary damping time constant should expire after duration")
 
 func test_portal_arrow_hidden_during_camera_override() -> void:
 	var player := PlayerScript.new()

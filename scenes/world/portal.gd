@@ -146,8 +146,7 @@ func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 	return (direction.normalized() * tile_size + down.normalized() * tile_height * 0.25) * world.portal_tile_slide_distance_multiplier
 
 func _start_portal_camera_cinematic(local_player: Node, portal_position: Vector3, portal_cell: Vector3i) -> void:
-	if local_player == null:
-		return
+	assert(local_player != null)
 	GameState.portal_cinematic_active = true
 	var corner_direction = _get_portal_corner_direction(portal_cell)
 	var approach_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(world.portal_camera_focus_duration)

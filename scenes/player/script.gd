@@ -35,7 +35,7 @@ extends CharacterBody3D
 @export var camera_damping_time_constant: float = 0.15
 
 @export var portal_indicator: Node3D
-@export var portal_indicator_distance: float = 0.9
+@export var portal_indicator_distance: float = 1.1
 @export var portal_indicator_height_offset: float = 0.03
 @export var portal_indicator_turn_speed: float = 10.0
 

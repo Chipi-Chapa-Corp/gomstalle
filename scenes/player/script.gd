@@ -35,9 +35,11 @@ extends CharacterBody3D
 @export var camera_damping_time_constant: float = 0.15
 
 @export var portal_indicator: Node3D
+@export var portal_indicator_through_walls: MeshInstance3D
 @export var portal_indicator_distance: float = 1.1
 @export var portal_indicator_height_offset: float = 0.03
 @export var portal_indicator_turn_speed: float = 10.0
+@export var portal_indicator_player_occlusion_radius: float = 0.5
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 
@@ -95,6 +97,7 @@ func _ready() -> void:
 	add_child(inventory)
 	assert(camera != null)
 	assert(portal_indicator != null)
+	assert(portal_indicator_through_walls != null)
 	hand.transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
 	camera_utils.initialize(deg_to_rad(45.0))
 	if is_multiplayer_authority():
@@ -108,6 +111,7 @@ func _ready() -> void:
 		set_process_input(false)
 	portal_indicator.top_level = true
 	portal_indicator.visible = false
+	portal_indicator_through_walls.visible = false
 
 	print("player ready, process %s" % is_physics_processing())
 

@@ -91,3 +91,21 @@ func test_portal_indicator_visible_after_override() -> void:
 	camera_utils.camera_override_active = false
 	assert_true(portal_utils._should_show_portal_indicator(), "Indicator should show after camera override ends")
 	GameState.portal_active = false
+
+func test_portal_indicator_through_walls_detects_player_projection() -> void:
+	var context = _create_camera_context()
+	var player = context["player"]
+	var portal_utils = _create_portal_indicator_utils(player)
+	player.portal_indicator_player_occlusion_radius = 0.5
+	player.position = Vector3(1.0, 0.0, 0.0)
+	var result = portal_utils._is_portal_indicator_occluded_by_player(Vector3.ZERO, Vector3(2.0, 0.0, 0.0))
+	assert_true(result, "Through-walls indicator should hide when player blocks the view.")
+
+func test_portal_indicator_through_walls_ignores_player_outside_radius() -> void:
+	var context = _create_camera_context()
+	var player = context["player"]
+	var portal_utils = _create_portal_indicator_utils(player)
+	player.portal_indicator_player_occlusion_radius = 0.4
+	player.position = Vector3(1.0, 0.0, 1.0)
+	var result = portal_utils._is_portal_indicator_occluded_by_player(Vector3.ZERO, Vector3(2.0, 0.0, 0.0))
+	assert_false(result, "Through-walls indicator should ignore players outside the occlusion radius.")

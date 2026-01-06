@@ -30,7 +30,7 @@ func update_portal_indicator(delta: float) -> void:
 func _should_show_portal_indicator() -> bool:
 	if not GameState.portal_active:
 		return false
-	if character.camera_override_active:
+	if character.camera_utils.camera_override_active:
 		return false
 	return true
 

@@ -35,8 +35,4 @@ func _should_show_portal_indicator() -> bool:
 	return true
 
 func _get_portal_indicator_base_position() -> Vector3:
-	var base_position = character.global_position
-	character.surface_ray.force_raycast_update()
-	if character.surface_ray.is_colliding():
-		base_position = character.surface_ray.get_collision_point()
-	return base_position
+	return character.global_position

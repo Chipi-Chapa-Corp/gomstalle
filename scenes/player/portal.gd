@@ -15,7 +15,7 @@ func update_portal_indicator(delta: float) -> void:
 	if portal_direction.length_squared() == 0.0:
 		portal_direction = Vector3.FORWARD
 	var normalized_direction = portal_direction.normalized()
-	var target_yaw = atan2(normalized_direction.x, normalized_direction.z)
+	var target_yaw = atan2(normalized_direction.x, normalized_direction.z) + PI
 	var rotation_blend = clampf(delta * character.portal_indicator_turn_speed, 0.0, 1.0)
 	character.portal_indicator_yaw = lerp_angle(character.portal_indicator_yaw, target_yaw, rotation_blend)
 	character.portal_indicator.rotation = Vector3(0.0, character.portal_indicator_yaw, 0.0)

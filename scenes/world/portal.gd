@@ -52,11 +52,7 @@ func spawn_portal(cell: Vector3i, item_id: int) -> void:
 
 func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D, portal_position: Vector3, portal_cell: Vector3i) -> void:
 	var local_player = _get_local_player()
-	if local_player != null:
-		GameState.portal_cinematic_active = true
-		var corner_direction = _get_portal_corner_direction(portal_cell)
-		var approach_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(world.portal_camera_focus_duration)
-		local_player.set_camera_override(portal_position, corner_direction, world.portal_camera_zoom_fov, approach_damping_time_constant)
+	_start_portal_camera_cinematic(local_player, portal_position, portal_cell)
 	await world.get_tree().create_timer(world.portal_camera_focus_duration).timeout
 	portal_instance.visible = true
 	GameState.portal_position = portal_position
@@ -67,9 +63,7 @@ func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D
 	await tween.finished
 	await world.get_tree().create_timer(world.portal_open_hold_duration).timeout
 	if local_player != null:
-		local_player.clear_camera_override()
-		var return_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(world.portal_camera_return_duration)
-		local_player.set_temporary_camera_damping_time_constant(return_damping_time_constant, world.portal_camera_return_duration)
+		_finish_portal_camera_cinematic(local_player)
 		await world.get_tree().create_timer(world.portal_camera_return_duration).timeout
 		GameState.portal_cinematic_active = false
 
@@ -150,6 +144,20 @@ func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 	if down.length() == 0.0:
 		down = Vector3.DOWN
 	return (direction.normalized() * tile_size + down.normalized() * tile_height * 0.25) * world.portal_tile_slide_distance_multiplier
+
+func _start_portal_camera_cinematic(local_player: Node, portal_position: Vector3, portal_cell: Vector3i) -> void:
+	if local_player == null:
+		return
+	GameState.portal_cinematic_active = true
+	var corner_direction = _get_portal_corner_direction(portal_cell)
+	var approach_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(world.portal_camera_focus_duration)
+	local_player.camera_utils.set_camera_override(portal_position, corner_direction, world.portal_camera_zoom_fov, approach_damping_time_constant)
+
+func _finish_portal_camera_cinematic(local_player: Node) -> void:
+	var camera_utils = local_player.camera_utils
+	camera_utils.clear_camera_override()
+	var return_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(world.portal_camera_return_duration)
+	camera_utils.set_temporary_camera_damping_time_constant(return_damping_time_constant, world.portal_camera_return_duration)
 
 func _scale_portal_surface(portal_node: Node3D, tile_instance: MeshInstance3D) -> void:
 	if portal_node == null or tile_instance == null or world.grid_map == null:

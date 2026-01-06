@@ -93,6 +93,8 @@ func _on_before_spawn(data: Dictionary) -> void:
 
 func _ready() -> void:
 	add_child(inventory)
+	assert(camera != null)
+	assert(portal_indicator != null)
 	hand.transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
 	camera_utils.initialize(deg_to_rad(45.0))
 	if is_multiplayer_authority():

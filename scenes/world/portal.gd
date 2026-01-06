@@ -230,13 +230,7 @@ func _distance_to_wall(portal_cell: Vector3i, direction: Vector3i, bounds: Dicti
 		if cell.x < min_x or cell.x > max_x or cell.z < min_z or cell.z > max_z:
 			return INF
 		var item_id = world.grid_map.get_cell_item(cell)
-		if item_id >= 0 and _is_wall_item(item_id):
+		if item_id >= 0 and Utils.is_wall_item(world.grid_map, item_id):
 			return float(step)
 		step += 1
 	return INF
-
-func _is_wall_item(item_id: int) -> bool:
-	if world.grid_map == null or world.grid_map.mesh_library == null:
-		return false
-	var item_name = world.grid_map.mesh_library.get_item_name(item_id)
-	return item_name.begins_with("wall")

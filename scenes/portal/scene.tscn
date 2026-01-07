@@ -1,0 +1,85 @@
+[gd_scene load_steps=10 format=3 uid="uid://z28uh1grau7rh"]
+
+[ext_resource type="Shader" uid="uid://42jrfi1et5ehr" path="res://scenes/portal/portal_shader.gdshader" id="2_portal_shader"]
+
+[sub_resource type="Gradient" id="Gradient_portal"]
+offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
+colors = PackedColorArray(0.45, 0.08, 0.9, 0.7, 0.4, 0.2, 1, 0.65, 0.5, 0.25, 1, 0.6, 0.65, 0.2, 0.95, 0.0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_portal"]
+gradient = SubResource("Gradient_portal")
+width = 256
+
+[sub_resource type="Gradient" id="Gradient_portal_alpha"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 0.9, 1, 1, 1, 0.4, 1, 1, 1, 0.0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_portal_alpha"]
+gradient = SubResource("Gradient_portal_alpha")
+width = 128
+height = 128
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_portal_surface"]
+shader = ExtResource("2_portal_shader")
+shader_parameter/color_a = Color(0.3, 0.06, 0.85, 1)
+shader_parameter/color_b = Color(0.5, 0.12, 1, 1)
+shader_parameter/color_c = Color(0.7, 0.18, 1, 1)
+shader_parameter/emission_strength = 2.8
+shader_parameter/swirl_speed = 0.7
+shader_parameter/swirl_strength = 2.6
+shader_parameter/radius = 0.98
+shader_parameter/edge_softness = 0.04
+shader_parameter/noise_scale = 6.5
+shader_parameter/pulse_strength = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_portal"]
+shading_mode = 2
+transparency = 1
+blend_mode = 1
+cull_mode = 2
+albedo_texture = SubResource("GradientTexture2D_portal_alpha")
+albedo_color = Color(1, 1, 1, 1)
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+
+[sub_resource type="QuadMesh" id="QuadMesh_portal"]
+size = Vector2(0.2, 0.2)
+material = SubResource("StandardMaterial3D_portal")
+
+[sub_resource type="QuadMesh" id="QuadMesh_portal_surface"]
+size = Vector2(1, 1)
+material = SubResource("ShaderMaterial_portal_surface")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_portal"]
+emission_shape = 3
+emission_box_extents = Vector3(0.7, 0.04, 0.7)
+direction = Vector3(0, 1, 0)
+initial_velocity_min = 0.05
+initial_velocity_max = 0.35
+angle_min = -12.0
+angle_max = 12.0
+gravity = Vector3(0, -0.15, 0)
+scale_min = 0.15
+scale_max = 0.4
+color = Color(1, 1, 1, 1)
+color_ramp = SubResource("GradientTexture1D_portal")
+
+[node name="Portal" type="Node3D"]
+
+[node name="PortalSurface" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.02, 0)
+rotation_degrees = Vector3(-90, 0, 0)
+mesh = SubResource("QuadMesh_portal_surface")
+
+[node name="Particles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+emitting = true
+amount = 90
+lifetime = 1.4
+one_shot = false
+randomness = 0.7
+process_material = SubResource("ParticleProcessMaterial_portal")
+draw_pass_1 = SubResource("QuadMesh_portal")

@@ -6,6 +6,8 @@ extends Interactable
 @export var required_amount: int = 10
 @export var current_amount: int = 0
 @export var required_amount_per_use: int = 1
+signal filled(shrine: Node)
+var is_filled := false
 
 func get_outline_target() -> MeshInstance3D:
 	return mesh
@@ -31,5 +33,7 @@ func _ready() -> void:
 func sync_interact() -> void:
 	current_amount += required_amount_per_use
 	label.text = str(current_amount - required_amount)
-	if current_amount >= required_amount:
-		get_parent().queue_free() # TODO: Sync
+	if current_amount >= required_amount and not is_filled:
+		is_filled = true
+		filled.emit(self)
+		get_parent().queue_free()

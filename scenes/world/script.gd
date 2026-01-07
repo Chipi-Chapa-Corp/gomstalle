@@ -6,30 +6,30 @@ extends Node3D
 @export var player_container: Node
 @export var player_list: VBoxContainer
 @export var player_list_item_sample: Control
-@onready var player_list_item_sample_persistent: Control = player_list_item_sample.duplicate()
+@export var grid_map: GridMap
+@export var portal_container: Node3D
+@export var portal_scene: PackedScene
+@export var portal_camera_focus_duration: float = 3.0
+@export var portal_tile_slide_duration: float = 1.5
+@export var portal_tile_slide_distance_multiplier: float = 1.0
+@export var portal_depth_offset: float = 0.05
+@export var portal_camera_zoom_fov: float = 55.0
+@export var portal_camera_return_duration: float = 1.5
+@export var portal_open_hold_duration: float = 1.0
+
+@onready var player_list_utils := WorldPlayerListUtils.new(self)
+@onready var portal_utils := WorldPortalUtils.new(self)
+@onready var shrine_utils := WorldShrineUtils.new(self)
 
 func _ready():
-	player_list_item_sample_persistent.visible = true
+	player_list_utils.initialize()
 	Spawner.set_path(player_container.get_path())
-	MultiplayerManager.peer_connected.connect(_on_peer_connected)
-	MultiplayerManager.peer_list_changed.connect(_on_peer_list_changed)
+	MultiplayerManager.peer_connected.connect(player_list_utils.handle_peer_connected)
+	MultiplayerManager.peer_list_changed.connect(player_list_utils.handle_peer_list_changed)
 	var result := MultiplayerManager.join_multiplayer(multiplayer)
 	if result != OK:
 		push_error("Error: Failed to create or connect to server")
-		# TODO: Show error
-
-func _on_peer_connected(peer_id: int) -> void:
-	if multiplayer.is_server():
-		start_button.visible = true
-	Spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})
-
-func _on_peer_list_changed(peers: Array[Dictionary]) -> void:
-	for child in player_list.get_children():
-		player_list.remove_child(child)
-	for peer in peers:
-		var item = player_list_item_sample_persistent.duplicate()
-		item.get_node("Container/Label").text = peer["name"]
-		player_list.add_child(item)
+	shrine_utils.register_shrines()
 
 func _on_start_pressed():
 	if not MultiplayerManager.is_host:
@@ -50,5 +50,10 @@ func _on_quit_pressed() -> void:
 	GameState.quit(multiplayer)
 
 func _exit_tree() -> void:
-	MultiplayerManager.peer_connected.disconnect(_on_peer_connected)
-	MultiplayerManager.peer_list_changed.disconnect(_on_peer_list_changed)
+	MultiplayerManager.peer_connected.disconnect(player_list_utils.handle_peer_connected)
+	MultiplayerManager.peer_list_changed.disconnect(player_list_utils.handle_peer_list_changed)
+	shrine_utils.cleanup()
+
+@rpc("any_peer", "call_local", "reliable")
+func spawn_portal(cell: Vector3i, item_id: int) -> void:
+	portal_utils.spawn_portal(cell, item_id)

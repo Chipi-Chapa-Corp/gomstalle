@@ -666,8 +666,6 @@ resource_name = "texture"
 albedo_texture = ExtResource("8_gq7iq")
 metallic_specular = 0.3
 roughness = 0.45
-stencil_mode = 3
-stencil_flags = 2
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_lpgyj"]
 _surfaces = [{

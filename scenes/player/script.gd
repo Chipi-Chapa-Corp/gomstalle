@@ -5,6 +5,8 @@ extends CharacterBody3D
 @onready var interactions := CharacterInteractions.new(self)
 @onready var actions := CharacterActions.new(self)
 @onready var looks := CharacterLooks.new(self)
+@onready var camera_utils := CharacterCameraUtils.new(self)
+@onready var portal_indicator_utils := CharacterPortalIndicatorUtils.new(self)
 
 @onready var inventory := CharacterInventory.new(self)
 
@@ -29,7 +31,15 @@ extends CharacterBody3D
 @export var movement_audio_player: AudioStreamPlayer3D
 @export var attack_audio_player: AudioStreamPlayer3D
 @export var surface_ray: RayCast3D
-@export var camera_follow_time: float = 0.15
+
+@export var camera_damping_time_constant: float = 0.15
+
+@export var portal_indicator: Node3D
+@export var portal_indicator_through_walls: MeshInstance3D
+@export var portal_indicator_distance: float = 1.1
+@export var portal_indicator_height_offset: float = 0.03
+@export var portal_indicator_turn_speed: float = 10.0
+@export var portal_indicator_player_occlusion_radius: float = 0.5
 
 @onready var playback = anim_tree.get("parameters/playback") as AnimationNodeStateMachinePlayback
 
@@ -66,9 +76,7 @@ var is_dead := false
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
-var camera_offset: Vector3
-var camera_yaw_offset: float = 0.0
-var camera_velocity: Vector3 = Vector3.ZERO
+var portal_indicator_yaw: float = 0.0
 
 var INTERACT_MASK := 1 << (interact_on_layer - 1)
 
@@ -87,9 +95,11 @@ func _on_before_spawn(data: Dictionary) -> void:
 
 func _ready() -> void:
 	add_child(inventory)
+	assert(camera != null)
+	assert(portal_indicator != null)
+	assert(portal_indicator_through_walls != null)
 	hand.transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
-	var rotation_angle = deg_to_rad(45.0)
-	camera_yaw_offset = rotation_angle
+	camera_utils.initialize(deg_to_rad(45.0))
 	if is_multiplayer_authority():
 		camera.set_as_top_level(true)
 		camera.make_current()
@@ -99,6 +109,9 @@ func _ready() -> void:
 		camera.current = false
 		set_physics_process(false)
 		set_process_input(false)
+	portal_indicator.top_level = true
+	portal_indicator.visible = false
+	portal_indicator_through_walls.visible = false
 
 	print("player ready, process %s" % is_physics_processing())
 
@@ -106,9 +119,6 @@ func _ready() -> void:
 
 	GameState.state_changed.connect(_on_game_state_changed)
 
-	camera_offset = camera.global_transform.origin - global_transform.origin
-	camera_offset = camera_offset.rotated(Vector3.UP, camera_yaw_offset)
-	camera.rotation.y = camera_yaw_offset
 	interact_shape.radius = interact_radius
 	interact_query_params.shape = interact_shape
 	interact_query_params.collision_mask = INTERACT_MASK
@@ -124,16 +134,16 @@ func _physics_process(delta: float) -> void:
 		item = null
 
 	forces.handle(delta)
-	if not is_stunned and not is_dead and not GameState.is_paused:
+	var can_process_input = not is_stunned and not is_dead and not GameState.is_paused
+	if can_process_input and not GameState.portal_cinematic_active:
 		movement.handle(delta)
 		interactions.handle(delta)
 		actions.handle(delta)
+	elif can_process_input and GameState.portal_cinematic_active:
+		movement.handle_input_locked(delta)
 
 	move_and_slide()
-	var target_camera_position: Vector3 = global_transform.origin + camera_offset
-	var camera_result: Array[Vector3] = Utils.smooth_damp_vector3(camera.global_transform.origin, target_camera_position, camera_velocity, camera_follow_time, delta)
-	camera.global_transform.origin = camera_result[0]
-	camera_velocity = camera_result[1]
+	camera_utils.update(delta)
 
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)

@@ -42,15 +42,20 @@ func _update_footsteps(delta: float, is_moving: bool, is_running: bool) -> void:
 	_was_grounded = grounded
 
 func handle(delta: float) -> void:
-	var vertical_velocity = character.velocity.y
-	character.velocity.y = 0.0
-
 	var run_requested = Input.is_action_pressed("run")
 	var movement_input = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	_apply_movement(delta, movement_input, run_requested)
+
+func handle_input_locked(delta: float) -> void:
+	_apply_movement(delta, Vector2.ZERO, false)
+
+func _apply_movement(delta: float, movement_input: Vector2, run_requested: bool) -> void:
+	var vertical_velocity = character.velocity.y
+	character.velocity.y = 0.0
 	var movement_direction = Vector3.ZERO
 	if movement_input != Vector2.ZERO:
 		var input_vector = Vector3(movement_input.x, 0.0, movement_input.y)
-		movement_direction = input_vector.rotated(Vector3.UP, character.camera_yaw_offset)
+		movement_direction = input_vector.rotated(Vector3.UP, character.camera_utils.camera_yaw_offset)
 	if movement_direction.length() > 1.0:
 		movement_direction = movement_direction.normalized()
 	var is_moving := movement_direction.length() > 0.0

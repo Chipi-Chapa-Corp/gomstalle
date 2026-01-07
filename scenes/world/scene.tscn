@@ -11,11 +11,10 @@
 [ext_resource type="PackedScene" uid="uid://d2d5gjlemdjis" path="res://scenes/door/scene.tscn" id="8_hi41q"]
 [ext_resource type="PackedScene" uid="uid://c05xs4dhrmial" path="res://scenes/door_scaffold/scene.tscn" id="9_hi41q"]
 [ext_resource type="PackedScene" uid="uid://dqjnxacyt7dau" path="res://scenes/collider/scene.tscn" id="11_4is4o"]
-[ext_resource type="PackedScene" uid="uid://d21txtcj1jlmu" path="res://scenes/pile/scene.tscn" id="12_qeemm"]
 [ext_resource type="PackedScene" uid="uid://dpllhcj5deajc" path="res://scenes/shrine/scene.tscn" id="13_k3o70"]
-[ext_resource type="PackedScene" uid="uid://z28uh1grau7rh" path="res://scenes/portal/scene.tscn" id="15_portal_scene"]
 [ext_resource type="Script" uid="uid://cwadej2u8x060" path="res://addons/proton_scatter/src/scatter.gd" id="14_egm64"]
 [ext_resource type="Script" uid="uid://tei6a8kk21r2" path="res://addons/proton_scatter/src/stack/modifier_stack.gd" id="15_53vc2"]
+[ext_resource type="PackedScene" uid="uid://cvsmxow8vnx7v" path="res://scenes/portal/scene.tscn" id="15_portal_scene"]
 [ext_resource type="Script" uid="uid://d0wqlkchdvq7u" path="res://addons/proton_scatter/src/modifiers/base_modifier.gd" id="16_mty66"]
 [ext_resource type="Script" uid="uid://dj5bce3xb2cpe" path="res://addons/proton_scatter/src/modifiers/create_inside_random.gd" id="17_1dxit"]
 [ext_resource type="Script" uid="uid://b3g2mwh2aybmc" path="res://addons/proton_scatter/src/modifiers/randomize_transforms.gd" id="18_21oge"]
@@ -1286,13 +1285,25 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 
 
 [node name="Piles" type="Node" parent="."]
 
-[node name="Pile" parent="Piles" instance=ExtResource("12_qeemm")]
-transform = Transform3D(0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, 0.70710677, 6, 0, 6)
-
 [node name="Shrines" type="Node" parent="."]
 
 [node name="post_skull2" parent="Shrines" instance=ExtResource("13_k3o70")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -2)
+transform = Transform3D(-0.34365967, 0, 0.93909425, 0, 1, 0, -0.93909425, 0, -0.34365967, -34, 0, 18)
+
+[node name="post_skull4" parent="Shrines" instance=ExtResource("13_k3o70")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 23)
+
+[node name="post_skull5" parent="Shrines" instance=ExtResource("13_k3o70")]
+transform = Transform3D(0.73845536, 0, 0.6743024, 0, 1, 0, -0.6743024, 0, 0.73845536, -18, 0, 70)
+
+[node name="post_skull6" parent="Shrines" instance=ExtResource("13_k3o70")]
+transform = Transform3D(-0.603208, 0, -0.7975839, 0, 1, 0, 0.7975839, 0, -0.603208, 11, 4, 91)
+
+[node name="post_skull7" parent="Shrines" instance=ExtResource("13_k3o70")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 0, 47)
+
+[node name="post_skull8" parent="Shrines" instance=ExtResource("13_k3o70")]
+transform = Transform3D(0.78693503, 0, -0.61703587, 0, 1, 0, 0.61703587, 0, 0.78693503, 46, 0, 14)
 
 [node name="Background" type="Node" parent="."]
 
@@ -1386,7 +1397,7 @@ mesh = SubResource("BoxMesh_53vc2")
 skeleton = NodePath("../MeshInstance3D")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Background"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74, -1, 32)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73, -1, 32)
 mesh = SubResource("BoxMesh_53vc2")
 
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Quit" to="." method="_on_quit_pressed"]

@@ -2,6 +2,7 @@ extends GutTest
 
 const MultiplayerHarnessScript = preload("res://tests/helpers/multiplayer_harness.gd")
 const DoorScene = preload("res://scenes/door/scene.tscn")
+const InputTestUtils = preload("res://tests/helpers/input_test_utils.gd")
 
 var harness
 var original_time_scale: float
@@ -11,10 +12,10 @@ func before_each() -> void:
 
 func after_each() -> void:
 	Engine.time_scale = original_time_scale
-	_release_input_actions()
+	InputTestUtils.release_input_actions()
 	if is_instance_valid(harness):
-		_disable_player_physics(harness.host_world)
-		_disable_player_physics(harness.client_world)
+		harness.disable_player_physics(harness.host_world)
+		harness.disable_player_physics(harness.client_world)
 		harness.cleanup()
 	harness = null
 
@@ -26,18 +27,18 @@ func test_door_open_syncs_to_client() -> void:
 	await harness.setup(24567)
 	await harness.wait_for_peer_count(2, 180)
 
-	await _wait_for_physics_condition(
+	await harness.wait_for_physics_condition(
 		func():
 			return (
-				_get_authority_player(harness.host_world.player_container) != null
-				and _get_authority_player(harness.client_world.player_container) != null
+				harness.get_authority_player(harness.host_world.player_container) != null
+				and harness.get_authority_player(harness.client_world.player_container) != null
 			),
 		180,
 		"authority_players_ready"
 	)
 
-	var host_player = _get_authority_player(harness.host_world.player_container)
-	var client_player = _get_authority_player(harness.client_world.player_container)
+	var host_player = harness.get_authority_player(harness.host_world.player_container)
+	var client_player = harness.get_authority_player(harness.client_world.player_container)
 
 	assert_not_null(host_player, "Host player should exist")
 	assert_not_null(client_player, "Client player should exist")
@@ -45,17 +46,17 @@ func test_door_open_syncs_to_client() -> void:
 	var host_peer_id = int(host_player.get("peer_id"))
 	var client_peer_id = int(client_player.get("peer_id"))
 
-	await _wait_for_physics_condition(
+	await harness.wait_for_physics_condition(
 		func():
 			return (
-				_get_player_by_peer_id(harness.host_world.player_container, client_peer_id) != null
-				and _get_player_by_peer_id(harness.client_world.player_container, host_peer_id) != null
+				harness.get_player_by_peer_id(harness.host_world.player_container, client_peer_id) != null
+				and harness.get_player_by_peer_id(harness.client_world.player_container, host_peer_id) != null
 			),
 		180,
 		"replicated_players_ready"
 	)
 
-	var host_client_player = _get_player_by_peer_id(harness.host_world.player_container, client_peer_id)
+	var host_client_player = harness.get_player_by_peer_id(harness.host_world.player_container, client_peer_id)
 
 	assert_not_null(host_client_player, "Host should have client player")
 
@@ -84,7 +85,7 @@ func test_door_open_syncs_to_client() -> void:
 	var max_frames = _max_frames_for_distance(initial_distance - target_distance, client_player.run_move_speed)
 	await _move_player_towards(client_player, client_door_target, target_distance, max_frames)
 
-	await _wait_for_physics_condition(
+	await harness.wait_for_physics_condition(
 		func(): return client_player.closest_item == client_door,
 		120,
 		"door_is_closest_interactable"
@@ -93,15 +94,15 @@ func test_door_open_syncs_to_client() -> void:
 	var distance_to_door = client_player.global_position.distance_to(client_door_target)
 	assert_true(distance_to_door <= client_player.interact_radius, "Client should be within interact radius")
 
-	await _press_interact()
+	await InputTestUtils.press_action(get_tree(), "interact")
 
-	await _wait_for_physics_condition(
+	await harness.wait_for_physics_condition(
 		func(): return host_door.is_opened and client_door.is_opened,
 		120,
 		"door_opened_on_both_peers"
 	)
 
-	await _wait_for_physics_condition(
+	await harness.wait_for_physics_condition(
 		func(): return host_client_player.position.distance_to(client_player.position) <= 0.01,
 		120,
 		"client_position_replicated_to_host"
@@ -111,42 +112,8 @@ func test_door_open_syncs_to_client() -> void:
 	assert_true(host_door.is_opened, "Host door should be open")
 	assert_true(client_door.is_opened, "Client door should be open")
 
-func _wait_for_physics_condition(predicate: Callable, frames: int, label: String) -> void:
-	var waited := 0
-	while waited < frames:
-		if predicate.call():
-			return
-		await get_tree().physics_frame
-		waited += 1
-	assert(false, "Timed out waiting for condition: %s" % label)
-
-func _get_player_by_peer_id(container: Node, peer_id: int) -> Node3D:
-	for child in container.get_children():
-		var candidate = child as Node3D
-		if candidate == null:
-			continue
-		if candidate.get("peer_id") == peer_id:
-			return candidate
-	return null
-
-func _get_authority_player(container: Node) -> Node3D:
-	for child in container.get_children():
-		var candidate = child as Node3D
-		if candidate == null:
-			continue
-		if candidate.is_multiplayer_authority():
-			return candidate
-	return null
-
 func _horizontal_distance(from: Vector3, to: Vector3) -> float:
 	return Vector2(from.x, from.z).distance_to(Vector2(to.x, to.z))
-
-func _disable_player_physics(world: Node) -> void:
-	var container = world.get("player_container") as Node
-	assert(container != null)
-	for child in container.get_children():
-		child.set_physics_process(false)
-		child.set_process_input(false)
 
 func _create_test_arena(world: Node3D, origin: Vector3) -> Node3D:
 	var arena = Node3D.new()
@@ -202,52 +169,12 @@ func _max_frames_for_distance(distance: float, speed: float) -> int:
 
 func _move_player_towards(player: CharacterBody3D, target_position: Vector3, target_distance: float, max_frames: int) -> void:
 	var input_vector = _input_vector_towards(player, target_position)
-	_apply_movement_input(input_vector, true)
+	InputTestUtils.apply_movement_input(input_vector, true)
 	var frames = 0
 	var distance = _horizontal_distance(player.global_position, target_position)
 	while frames < max_frames and distance > target_distance:
 		await get_tree().physics_frame
 		distance = _horizontal_distance(player.global_position, target_position)
 		frames += 1
-	_release_movement_inputs()
+	InputTestUtils.release_movement_inputs()
 	assert_true(distance <= target_distance, "Player should reach door")
-
-func _apply_movement_input(input_vector: Vector2, run: bool) -> void:
-	_release_movement_inputs()
-	var horizontal = clampf(input_vector.x, -1.0, 1.0)
-	var vertical = clampf(input_vector.y, -1.0, 1.0)
-	if horizontal < 0.0:
-		Input.action_press("move_left", -horizontal)
-	elif horizontal > 0.0:
-		Input.action_press("move_right", horizontal)
-	if vertical < 0.0:
-		Input.action_press("move_forward", -vertical)
-	elif vertical > 0.0:
-		Input.action_press("move_backward", vertical)
-	if run:
-		Input.action_press("run")
-
-func _release_movement_inputs() -> void:
-	Input.action_release("move_left")
-	Input.action_release("move_right")
-	Input.action_release("move_forward")
-	Input.action_release("move_backward")
-	Input.action_release("run")
-
-func _release_input_actions() -> void:
-	_release_movement_inputs()
-	Input.action_release("interact")
-
-func _press_interact() -> void:
-	var press := InputEventAction.new()
-	press.action = "interact"
-	press.pressed = true
-	press.strength = 1.0
-	Input.parse_input_event(press)
-	await get_tree().physics_frame
-	var release := InputEventAction.new()
-	release.action = "interact"
-	release.pressed = false
-	release.strength = 0.0
-	Input.parse_input_event(release)
-	await get_tree().physics_frame

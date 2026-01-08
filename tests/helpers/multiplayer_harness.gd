@@ -82,6 +82,40 @@ func wait_for_condition(predicate: Callable, frames: int) -> void:
 		waited += 1
 	assert(false, "Timed out waiting for condition")
 
+func wait_for_physics_condition(predicate: Callable, frames: int, label: String) -> void:
+	var waited := 0
+	while waited < frames:
+		if predicate.call():
+			return
+		await get_tree().physics_frame
+		waited += 1
+	assert(false, "Timed out waiting for condition: %s" % label)
+
+func get_player_by_peer_id(container: Node, peer_id: int) -> Node3D:
+	for child in container.get_children():
+		var candidate = child as Node3D
+		if candidate == null:
+			continue
+		if candidate.get("peer_id") == peer_id:
+			return candidate
+	return null
+
+func get_authority_player(container: Node) -> Node3D:
+	for child in container.get_children():
+		var candidate = child as Node3D
+		if candidate == null:
+			continue
+		if candidate.is_multiplayer_authority():
+			return candidate
+	return null
+
+func disable_player_physics(world: Node) -> void:
+	var container = world.get("player_container") as Node
+	assert(container != null)
+	for child in container.get_children():
+		child.set_physics_process(false)
+		child.set_process_input(false)
+
 func cleanup() -> void:
 	host_multiplayer.multiplayer_peer.close()
 	client_multiplayer.multiplayer_peer.close()

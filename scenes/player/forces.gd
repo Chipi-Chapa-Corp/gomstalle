@@ -23,20 +23,7 @@ func handle(delta: float) -> void:
 func _stun(timeout: float) -> void:
 	if character.is_dead or character.is_stunned:
 		return
-	rpc("_sync_stun", timeout)
-
-@rpc("any_peer", "call_local", "reliable")
-func _sync_stun(timeout: float) -> void:
-	if character.is_dead or character.is_stunned:
-		return
-	character.stun_effect.play()
-	character.is_stunned = true
-	character.anim_tree.set("parameters/IW/Walk/blend_position", Vector2.ZERO)
-	character.anim_tree.set("parameters/IW/Run/blend_position", Vector2.ZERO)
-	character.anim_tree.set("parameters/IW/MovementState/blend_amount", 0.0)
-	character.anim_tree.set("parameters/IW/Stun_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	await character.get_tree().create_timer(timeout).timeout
-	character.is_stunned = false
+	character.rpc("apply_stun", timeout)
 
 func set_dead(state: bool) -> void:
 	character.is_dead = state

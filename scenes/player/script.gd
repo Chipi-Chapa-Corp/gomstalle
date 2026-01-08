@@ -96,6 +96,7 @@ func _on_before_spawn(data: Dictionary) -> void:
 
 func _ready() -> void:
 	add_child(inventory)
+	add_to_group("players")
 	assert(camera != null)
 	assert(portal_indicator != null)
 	assert(portal_indicator_through_walls != null)
@@ -117,8 +118,6 @@ func _ready() -> void:
 	portal_indicator.top_level = true
 	portal_indicator.visible = false
 	portal_indicator_through_walls.visible = false
-
-	print("player ready, process %s" % is_physics_processing())
 
 	attack_hitbox.monitoring = false
 
@@ -149,6 +148,19 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	camera_utils.update(delta)
+
+@rpc("any_peer", "call_local", "reliable")
+func apply_stun(timeout: float) -> void:
+	if is_dead or is_stunned:
+		return
+	stun_effect.play()
+	is_stunned = true
+	anim_tree.set("parameters/IW/Walk/blend_position", Vector2.ZERO)
+	anim_tree.set("parameters/IW/Run/blend_position", Vector2.ZERO)
+	anim_tree.set("parameters/IW/MovementState/blend_amount", 0.0)
+	anim_tree.set("parameters/IW/Stun_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	await get_tree().create_timer(timeout).timeout
+	is_stunned = false
 
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)

@@ -15,6 +15,7 @@ func handle(_delta: float) -> void:
 			"position": character.global_transform.origin,
 			"hand": character.hand.get_path(),
 			"target": character.get_path(),
+			"peer_id": character.peer_id,
 			"direction": forward_direction,
 			"amount": 1,
 		}

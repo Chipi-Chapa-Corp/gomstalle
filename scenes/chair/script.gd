@@ -111,15 +111,6 @@ func _try_stun_collisions(previous_velocity: Vector3) -> void:
 		on_stun()
 		return
 
-func _find_player_in_branch(peer_id: int) -> CharacterBody3D:
-	for node in get_tree().get_nodes_in_group("players"):
-		var candidate = node as CharacterBody3D
-		if candidate == null:
-			continue
-		if candidate.get("peer_id") == peer_id and candidate.get_multiplayer() == multiplayer:
-			return candidate
-	return null
-
 func _resolve_target(metadata: Dictionary) -> CharacterBody3D:
 	var resolved = Utils.resolve_node(metadata.get("target")) as CharacterBody3D
 	var peer_id_value = metadata.get("peer_id")
@@ -128,7 +119,7 @@ func _resolve_target(metadata: Dictionary) -> CharacterBody3D:
 	var peer_id = int(peer_id_value)
 	if resolved != null and resolved.get("peer_id") == peer_id and resolved.get_multiplayer() == multiplayer:
 		return resolved
-	var candidate = _find_player_in_branch(peer_id)
+	var candidate = Utils.find_player_in_branch(peer_id, multiplayer)
 	if candidate != null:
 		return candidate
 	assert(false, "Failed to resolve chair holder for peer")
@@ -140,7 +131,7 @@ func _resolve_collision_target(body: CharacterBody3D) -> CharacterBody3D:
 	var peer_id_value = body.get("peer_id")
 	if peer_id_value == null:
 		return null
-	return _find_player_in_branch(int(peer_id_value))
+	return Utils.find_player_in_branch(int(peer_id_value), multiplayer)
 
 func _resolve_hand(metadata: Dictionary, target: CharacterBody3D) -> RemoteTransform3D:
 	if target != null:

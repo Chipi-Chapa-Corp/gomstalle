@@ -26,7 +26,7 @@ func join_multiplayer(multiplayer_api: MultiplayerAPI) -> Error:
 	if not multiplayer_api.peer_disconnected.is_connected(_on_peer_disconnected):
 		multiplayer_api.peer_disconnected.connect(_on_peer_disconnected)
 	var result := _create_server(multiplayer_api) if is_host else _connect_to_server(multiplayer_api)
-	if result == OK:
+	if result == OK and is_host:
 		_seed_players(multiplayer_api)
 	return result
 
@@ -85,8 +85,19 @@ func _is_local_backend() -> bool:
 
 func _on_peer_connected(peer_id: int) -> void:
 	_add_player_metadata(peer_id)
+	if not is_host:
+		call_deferred("_ensure_local_metadata")
 	peer_list_changed.emit(connected_players_metadata)
 	peer_connected.emit(peer_id)
+
+func _ensure_local_metadata() -> void:
+	if not multiplayer.has_multiplayer_peer():
+		return
+	if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		call_deferred("_ensure_local_metadata")
+		return
+	_add_player_metadata(multiplayer.get_unique_id())
+	peer_list_changed.emit(connected_players_metadata)
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	_remove_player_metadata(peer_id)

@@ -162,8 +162,15 @@ func apply_stun(timeout: float) -> void:
 	await get_tree().create_timer(timeout).timeout
 	is_stunned = false
 
+@rpc("any_peer", "call_local", "reliable")
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)
+
+@rpc("any_peer", "call_local", "reliable")
+func apply_attack_kill(target_peer_id: int) -> void:
+	var target = Utils.find_player_in_branch(target_peer_id, multiplayer)
+	assert(target != null)
+	target.set_dead(true)
 
 func _on_game_state_changed(state: GameState.State) -> void:
 	if state == GameState.State.STARTED:

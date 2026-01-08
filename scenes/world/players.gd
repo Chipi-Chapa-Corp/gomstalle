@@ -16,7 +16,7 @@ func initialize() -> void:
 func handle_peer_connected(peer_id: int) -> void:
 	if world.multiplayer.is_server():
 		world.start_button.visible = true
-		spawner.spawn_entity("player", {"peer_id": peer_id, "position": Vector3.ZERO})
+		spawner.call_deferred("spawn_entity", "player", {"peer_id": peer_id, "position": Vector3.ZERO})
 
 func handle_peer_list_changed(peers: Array[Dictionary]) -> void:
 	for child in world.player_list.get_children():

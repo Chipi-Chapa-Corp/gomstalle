@@ -160,6 +160,11 @@ func disable_player_physics(world: Node) -> void:
 		child.set_process_input(false)
 
 func cleanup() -> void:
+	host_root.process_mode = Node.PROCESS_MODE_DISABLED
+	client_root.process_mode = Node.PROCESS_MODE_DISABLED
 	host_multiplayer.multiplayer_peer.close()
 	client_multiplayer.multiplayer_peer.close()
+	host_root.queue_free()
+	client_root.queue_free()
+	await get_tree().process_frame
 	queue_free()

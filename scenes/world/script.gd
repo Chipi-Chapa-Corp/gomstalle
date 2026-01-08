@@ -37,6 +37,7 @@ func _ready():
 	spawner.set_path(player_container.get_path())
 	multiplayer_manager.peer_connected.connect(player_list_utils.handle_peer_connected)
 	multiplayer_manager.peer_list_changed.connect(player_list_utils.handle_peer_list_changed)
+	GameState.state_changed.connect(_on_game_state_changed)
 	var result = multiplayer_manager.join_multiplayer(multiplayer)
 	if result != OK:
 		push_error("Error: Failed to create or connect to server")
@@ -63,7 +64,12 @@ func _on_quit_pressed() -> void:
 func _exit_tree() -> void:
 	multiplayer_manager.peer_connected.disconnect(player_list_utils.handle_peer_connected)
 	multiplayer_manager.peer_list_changed.disconnect(player_list_utils.handle_peer_list_changed)
+	GameState.state_changed.disconnect(_on_game_state_changed)
 	shrine_utils.cleanup()
+
+func _on_game_state_changed(state: GameState.State) -> void:
+	if state == GameState.State.STARTED:
+		start_button.visible = false
 
 @rpc("any_peer", "call_local", "reliable")
 func spawn_portal(cell: Vector3i, item_id: int) -> void:

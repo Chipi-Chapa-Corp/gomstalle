@@ -4,13 +4,16 @@ const MultiplayerHarnessScript = preload("res://tests/helpers/multiplayer_harnes
 const InputTestUtils = preload("res://tests/helpers/input_test_utils.gd")
 const TestArenaFactory = preload("res://tests/helpers/test_arena_factory.gd")
 const PlayerScript = preload("res://scenes/player/script.gd")
+const TestErrorGuard = preload("res://tests/helpers/test_error_guard.gd")
 
 var harness
 var original_time_scale: float
 var original_metadata: Array[Dictionary]
 var original_is_host: bool
+var original_engine_error_treatment: int
 
 func before_each() -> void:
+	original_engine_error_treatment = TestErrorGuard.suppress_engine_errors(self)
 	original_time_scale = Engine.time_scale
 	original_metadata = MultiplayerManager.connected_players_metadata.duplicate(true)
 	original_is_host = MultiplayerManager.is_host
@@ -21,12 +24,13 @@ func after_each() -> void:
 	if is_instance_valid(harness):
 		harness.disable_player_physics(harness.host_world)
 		harness.disable_player_physics(harness.client_world)
-		harness.cleanup()
+		await harness.cleanup()
 	MultiplayerManager.connected_players_metadata.clear()
 	for metadata in original_metadata:
 		MultiplayerManager.connected_players_metadata.append(metadata)
 	MultiplayerManager.is_host = original_is_host
 	GameState.reset(GameState.State.IDLE)
+	TestErrorGuard.restore_engine_errors(self, original_engine_error_treatment)
 	harness = null
 
 func test_start_sets_hunter_and_hides_start_button() -> void:

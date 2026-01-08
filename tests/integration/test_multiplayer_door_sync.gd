@@ -3,6 +3,8 @@ extends GutTest
 const MultiplayerHarnessScript = preload("res://tests/helpers/multiplayer_harness.gd")
 const DoorScene = preload("res://scenes/door/scene.tscn")
 const InputTestUtils = preload("res://tests/helpers/input_test_utils.gd")
+const TestArenaFactory = preload("res://tests/helpers/test_arena_factory.gd")
+const PlayerScript = preload("res://scenes/player/script.gd")
 
 var harness
 var original_time_scale: float
@@ -24,40 +26,14 @@ func test_door_open_syncs_to_client() -> void:
 
 	harness = MultiplayerHarnessScript.new()
 	add_child(harness)
-	await harness.setup(24567)
-	await harness.wait_for_peer_count(2, 180)
+	await harness.setup_with_players(24567, 180)
 
-	await harness.wait_for_physics_condition(
-		func():
-			return (
-				harness.get_authority_player(harness.host_world.player_container) != null
-				and harness.get_authority_player(harness.client_world.player_container) != null
-			),
-		180,
-		"authority_players_ready"
-	)
-
-	var host_player = harness.get_authority_player(harness.host_world.player_container)
-	var client_player = harness.get_authority_player(harness.client_world.player_container)
+	var host_player = harness.host_player as PlayerScript
+	var client_player = harness.client_player as PlayerScript
+	var host_client_player = harness.host_remote_player as PlayerScript
 
 	assert_not_null(host_player, "Host player should exist")
 	assert_not_null(client_player, "Client player should exist")
-
-	var host_peer_id = int(host_player.get("peer_id"))
-	var client_peer_id = int(client_player.get("peer_id"))
-
-	await harness.wait_for_physics_condition(
-		func():
-			return (
-				harness.get_player_by_peer_id(harness.host_world.player_container, client_peer_id) != null
-				and harness.get_player_by_peer_id(harness.client_world.player_container, host_peer_id) != null
-			),
-		180,
-		"replicated_players_ready"
-	)
-
-	var host_client_player = harness.get_player_by_peer_id(harness.host_world.player_container, client_peer_id)
-
 	assert_not_null(host_client_player, "Host should have client player")
 
 	host_player.set_physics_process(false)
@@ -65,8 +41,8 @@ func test_door_open_syncs_to_client() -> void:
 
 	var arena_origin = Vector3(1000, 0, 1000)
 	var door_local_position = Vector3(0, 0, 3)
-	var host_arena = _create_test_arena(harness.host_world, arena_origin)
-	var client_arena = _create_test_arena(harness.client_world, arena_origin)
+	var host_arena = TestArenaFactory.create(harness.host_world, arena_origin)
+	var client_arena = TestArenaFactory.create(harness.client_world, arena_origin)
 	var host_door = _spawn_test_door(host_arena, door_local_position)
 	var client_door = _spawn_test_door(client_arena, door_local_position)
 	var client_door_target = _get_interactable_target_position(client_door)
@@ -114,22 +90,6 @@ func test_door_open_syncs_to_client() -> void:
 
 func _horizontal_distance(from: Vector3, to: Vector3) -> float:
 	return Vector2(from.x, from.z).distance_to(Vector2(to.x, to.z))
-
-func _create_test_arena(world: Node3D, origin: Vector3) -> Node3D:
-	var arena = Node3D.new()
-	arena.name = "TestArena"
-	world.add_child(arena)
-	arena.global_position = origin
-	var floor = StaticBody3D.new()
-	floor.name = "Floor"
-	var floor_shape = CollisionShape3D.new()
-	var floor_box = BoxShape3D.new()
-	floor_box.size = Vector3(20, 1, 20)
-	floor_shape.shape = floor_box
-	floor_shape.position = Vector3(0, -0.5, 0)
-	floor.add_child(floor_shape)
-	arena.add_child(floor)
-	return arena
 
 func _spawn_test_door(arena: Node3D, local_position: Vector3) -> Node3D:
 	var door_instance = DoorScene.instantiate()

@@ -16,6 +16,12 @@ var host_spawner: Node
 var client_spawner: Node
 var host_multiplayer: SceneMultiplayer
 var client_multiplayer: SceneMultiplayer
+var host_player: Node3D
+var client_player: Node3D
+var host_peer_id: int
+var client_peer_id: int
+var host_remote_player: Node3D
+var client_remote_player: Node3D
 
 func setup(port: int) -> void:
 	Settings.network_backend = NetworkConfig.BACKEND_LOCAL
@@ -63,6 +69,43 @@ func setup(port: int) -> void:
 	client_world.set("spawner", client_spawner)
 	client_world.set("multiplayer_manager", client_manager)
 	client_root.add_child(client_world)
+
+func setup_with_players(port: int, frames: int) -> void:
+	await setup(port)
+	await wait_for_peer_count(2, frames)
+
+	await wait_for_physics_condition(
+		func():
+			return (
+				get_authority_player(host_world.player_container) != null
+				and get_authority_player(client_world.player_container) != null
+			),
+		frames,
+		"authority_players_ready"
+	)
+
+	host_player = get_authority_player(host_world.player_container)
+	client_player = get_authority_player(client_world.player_container)
+	assert(host_player != null)
+	assert(client_player != null)
+
+	host_peer_id = int(host_player.get("peer_id"))
+	client_peer_id = int(client_player.get("peer_id"))
+
+	await wait_for_physics_condition(
+		func():
+			return (
+				get_player_by_peer_id(host_world.player_container, client_peer_id) != null
+				and get_player_by_peer_id(client_world.player_container, host_peer_id) != null
+			),
+		frames,
+		"replicated_players_ready"
+	)
+
+	host_remote_player = get_player_by_peer_id(host_world.player_container, client_peer_id)
+	client_remote_player = get_player_by_peer_id(client_world.player_container, host_peer_id)
+	assert(host_remote_player != null)
+	assert(client_remote_player != null)
 
 func wait_for_peer_count(expected_count: int, frames: int) -> void:
 	var waited := 0

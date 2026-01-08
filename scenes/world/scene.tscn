@@ -1406,5 +1406,14 @@ mesh = SubResource("BoxMesh_53vc2")
 [node name="Table Long with Barrels" parent="Tables" instance=ExtResource("25_mty66")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 0, 26)
 
+[node name="Table Long with Barrels2" parent="Tables" instance=ExtResource("25_mty66")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -31, 0, 88)
+
+[node name="Table Long with Barrels3" parent="Tables" instance=ExtResource("25_mty66")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -31, 0, 84)
+
+[node name="Table Long with Barrels4" parent="Tables" instance=ExtResource("25_mty66")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7, 0, 34)
+
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="UI/HUD/Start" to="." method="_on_start_pressed"]

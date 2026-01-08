@@ -1,0 +1,88 @@
+extends Node
+
+class_name MultiplayerHarness
+
+const WorldScene = preload("res://scenes/world/scene.tscn")
+const MultiplayerManagerScript = preload("res://globals/MultiplayerManager.gd")
+const SpawnerScript = preload("res://globals/Spawner.gd")
+
+var host_root: Node
+var client_root: Node
+var host_world: Node
+var client_world: Node
+var host_manager: Node
+var client_manager: Node
+var host_spawner: Node
+var client_spawner: Node
+var host_multiplayer: SceneMultiplayer
+var client_multiplayer: SceneMultiplayer
+
+func setup(port: int) -> void:
+	Settings.network_backend = NetworkConfig.BACKEND_LOCAL
+	Settings.local_host = "127.0.0.1"
+	Settings.local_port = port
+	Settings.local_max_clients = 2
+
+	host_root = Node.new()
+	host_root.name = "HostRoot"
+	client_root = Node.new()
+	client_root.name = "ClientRoot"
+	add_child(host_root)
+	add_child(client_root)
+
+	host_multiplayer = SceneMultiplayer.new()
+	client_multiplayer = SceneMultiplayer.new()
+	host_multiplayer.root_path = host_root.get_path()
+	client_multiplayer.root_path = client_root.get_path()
+	get_tree().set_multiplayer(host_multiplayer, host_root.get_path())
+	get_tree().set_multiplayer(client_multiplayer, client_root.get_path())
+
+	host_spawner = SpawnerScript.new()
+	client_spawner = SpawnerScript.new()
+	host_root.add_child(host_spawner)
+	client_root.add_child(client_spawner)
+
+	await get_tree().process_frame
+
+	host_manager = MultiplayerManagerScript.new()
+	host_manager.is_host = true
+	host_root.add_child(host_manager)
+
+	client_manager = MultiplayerManagerScript.new()
+	client_manager.is_host = false
+	client_root.add_child(client_manager)
+
+	host_world = WorldScene.instantiate()
+	host_world.set("spawner", host_spawner)
+	host_world.set("multiplayer_manager", host_manager)
+	host_root.add_child(host_world)
+
+	await get_tree().process_frame
+
+	client_world = WorldScene.instantiate()
+	client_world.set("spawner", client_spawner)
+	client_world.set("multiplayer_manager", client_manager)
+	client_root.add_child(client_world)
+
+func wait_for_peer_count(expected_count: int, frames: int) -> void:
+	var waited := 0
+	while waited < frames:
+		if host_manager.get_connected_peer_ids().size() == expected_count and client_manager.get_connected_peer_ids().size() == expected_count:
+			return
+		await get_tree().process_frame
+		waited += 1
+	assert(false, "Timed out waiting for peers")
+
+func wait_for_condition(predicate: Callable, frames: int) -> void:
+	var waited := 0
+	while waited < frames:
+		if predicate.call():
+			return
+		await get_tree().process_frame
+		waited += 1
+	assert(false, "Timed out waiting for condition")
+
+func cleanup() -> void:
+	host_multiplayer.multiplayer_peer.close()
+	client_multiplayer.multiplayer_peer.close()
+	queue_free()

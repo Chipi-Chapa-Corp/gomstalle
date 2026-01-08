@@ -30,6 +30,8 @@ func refresh_lobby_list() -> void:
 # --------- ---------- ---------
 
 func _ready() -> void:
+	if NetworkConfig.get_backend_name() == NetworkConfig.BACKEND_LOCAL:
+		return
 	if not Steam:
 		push_error("Steam singleton not found. You need `SteamGodot SteamMultiplayerPeer` version of editor.")
 		return

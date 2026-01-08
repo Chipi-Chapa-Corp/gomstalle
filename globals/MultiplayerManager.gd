@@ -31,6 +31,16 @@ func join_multiplayer(multiplayer_api: MultiplayerAPI) -> Error:
 	return result
 
 func _create_server(multiplayer_api: MultiplayerAPI) -> Error:
+	if _is_local_backend():
+		return _create_local_server(multiplayer_api)
+	return _create_steam_server(multiplayer_api)
+
+func _connect_to_server(multiplayer_api: MultiplayerAPI) -> Error:
+	if _is_local_backend():
+		return _connect_local_server(multiplayer_api)
+	return _connect_steam_server(multiplayer_api)
+
+func _create_steam_server(multiplayer_api: MultiplayerAPI) -> Error:
 	var peer = SteamMultiplayerPeer.new()
 	var result := peer.host_with_lobby(SteamManager.current_lobby_id)
 	if result == OK:
@@ -41,7 +51,7 @@ func _create_server(multiplayer_api: MultiplayerAPI) -> Error:
 		push_error("Error: Failed to host with lobby")
 		return FAILED
 
-func _connect_to_server(multiplayer_api: MultiplayerAPI) -> Error:
+func _connect_steam_server(multiplayer_api: MultiplayerAPI) -> Error:
 	var peer = SteamMultiplayerPeer.new()
 	var result := peer.connect_to_lobby(SteamManager.current_lobby_id)
 	if result == OK:
@@ -50,6 +60,28 @@ func _connect_to_server(multiplayer_api: MultiplayerAPI) -> Error:
 	else:
 		push_error("Error: Failed to connect to lobby")
 		return FAILED
+
+func _create_local_server(multiplayer_api: MultiplayerAPI) -> Error:
+	var peer := ENetMultiplayerPeer.new()
+	var result := peer.create_server(Settings.local_port, Settings.local_max_clients)
+	if result == OK:
+		multiplayer_api.multiplayer_peer = peer
+		peer_connected.emit(multiplayer_api.get_unique_id())
+		return OK
+	push_error("Error: Failed to create local server")
+	return FAILED
+
+func _connect_local_server(multiplayer_api: MultiplayerAPI) -> Error:
+	var peer := ENetMultiplayerPeer.new()
+	var result := peer.create_client(Settings.local_host, Settings.local_port)
+	if result == OK:
+		multiplayer_api.multiplayer_peer = peer
+		return OK
+	push_error("Error: Failed to connect to local server")
+	return FAILED
+
+func _is_local_backend() -> bool:
+	return Settings.network_backend == NetworkConfig.BACKEND_LOCAL
 
 func _on_peer_connected(peer_id: int) -> void:
 	_add_player_metadata(peer_id)

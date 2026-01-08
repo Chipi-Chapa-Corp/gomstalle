@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://cw0ja2d8khrr7"]
+[gd_scene load_steps=40 format=3 uid="uid://cw0ja2d8khrr7"]
 
 [ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
 [ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
@@ -24,6 +24,7 @@
 [ext_resource type="Script" uid="uid://csldl8kual6ro" path="res://addons/proton_scatter/src/scatter_shape.gd" id="22_jm7ge"]
 [ext_resource type="Script" uid="uid://cbh6i475pyy45" path="res://addons/proton_scatter/src/shapes/box_shape.gd" id="23_jnn3q"]
 [ext_resource type="Texture2D" uid="uid://drdh36j6mu3ah" path="res://addons/proton_scatter/demos/assets/textures/t_rock_dirty.png" id="24_53vc2"]
+[ext_resource type="PackedScene" uid="uid://d28j7v7rw0oih" path="res://scenes/table_long_barrels/scene.tscn" id="25_mty66"]
 
 [sub_resource type="Environment" id="Environment_k3o70"]
 ambient_light_source = 2
@@ -1399,6 +1400,20 @@ skeleton = NodePath("../MeshInstance3D")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Background"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73, -1, 32)
 mesh = SubResource("BoxMesh_53vc2")
+
+[node name="Tables" type="Node" parent="."]
+
+[node name="Table Long with Barrels" parent="Tables" instance=ExtResource("25_mty66")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 0, 26)
+
+[node name="Table Long with Barrels2" parent="Tables" instance=ExtResource("25_mty66")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -31, 0, 88)
+
+[node name="Table Long with Barrels3" parent="Tables" instance=ExtResource("25_mty66")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -31, 0, 84)
+
+[node name="Table Long with Barrels4" parent="Tables" instance=ExtResource("25_mty66")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7, 0, 34)
 
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="UI/HUD/Start" to="." method="_on_start_pressed"]

@@ -1,5 +1,5 @@
 extends Object
-class_name TestErrorGuard
+class_name GutErrorGuard
 
 static func suppress_engine_errors(test: GutTest) -> int:
 	var previous = test.gut.error_tracker.treat_engine_errors_as

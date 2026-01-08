@@ -6,7 +6,7 @@ const TestArenaFactory = preload("res://tests/helpers/test_arena_factory.gd")
 const ChairScene = preload("res://scenes/chair/scene.tscn")
 const ChairScript = preload("res://scenes/chair/script.gd")
 const PlayerScript = preload("res://scenes/player/script.gd")
-const TestErrorGuard = preload("res://tests/helpers/test_error_guard.gd")
+const GutErrorGuard = preload("res://tests/helpers/gut_error_guard.gd")
 
 var harness
 var original_time_scale: float
@@ -16,7 +16,7 @@ var client_chair: ChairScript
 var arena_origin: Vector3
 
 func before_each() -> void:
-	original_engine_error_treatment = TestErrorGuard.suppress_engine_errors(self)
+	original_engine_error_treatment = GutErrorGuard.suppress_engine_errors(self)
 	original_time_scale = Engine.time_scale
 
 func after_each() -> void:
@@ -26,7 +26,7 @@ func after_each() -> void:
 		harness.disable_player_physics(harness.host_world)
 		harness.disable_player_physics(harness.client_world)
 		await harness.cleanup()
-	TestErrorGuard.restore_engine_errors(self, original_engine_error_treatment)
+	GutErrorGuard.restore_engine_errors(self, original_engine_error_treatment)
 	harness = null
 	host_chair = null
 	client_chair = null

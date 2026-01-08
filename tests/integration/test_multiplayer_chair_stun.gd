@@ -35,7 +35,7 @@ func test_host_stuns_client_with_chair() -> void:
 	Engine.time_scale = 2.0
 
 	harness = MultiplayerHarnessScript.new()
-	add_child(harness)
+	add_child_autoqfree(harness)
 	await harness.setup_with_players(24570, 180)
 	await _setup_chairs()
 
@@ -49,7 +49,7 @@ func test_client_stuns_host_with_chair() -> void:
 	Engine.time_scale = 2.0
 
 	harness = MultiplayerHarnessScript.new()
-	add_child(harness)
+	add_child_autoqfree(harness)
 	await harness.setup_with_players(24571, 180)
 	await _setup_chairs()
 

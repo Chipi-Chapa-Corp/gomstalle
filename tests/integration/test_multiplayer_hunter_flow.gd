@@ -91,7 +91,7 @@ func test_hunter_attack_kills_target_on_both_peers() -> void:
 
 func _setup_harness(port: int) -> void:
 	harness = MultiplayerHarnessScript.new()
-	add_child(harness)
+	add_child_autoqfree(harness)
 	await harness.setup_with_players(port, 180)
 
 func _start_match() -> void:

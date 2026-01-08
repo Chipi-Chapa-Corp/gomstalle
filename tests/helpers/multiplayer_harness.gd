@@ -59,6 +59,7 @@ func setup(port: int) -> void:
 	client_root.add_child(client_manager)
 
 	host_world = WorldScene.instantiate()
+	_strip_scatter_nodes(host_world)
 	host_world.set("spawner", host_spawner)
 	host_world.set("multiplayer_manager", host_manager)
 	host_root.add_child(host_world)
@@ -66,6 +67,7 @@ func setup(port: int) -> void:
 	await get_tree().process_frame
 
 	client_world = WorldScene.instantiate()
+	_strip_scatter_nodes(client_world)
 	client_world.set("spawner", client_spawner)
 	client_world.set("multiplayer_manager", client_manager)
 	client_root.add_child(client_world)
@@ -160,11 +162,32 @@ func disable_player_physics(world: Node) -> void:
 		child.set_process_input(false)
 
 func cleanup() -> void:
+	var host_peer = host_multiplayer.multiplayer_peer
+	var client_peer = client_multiplayer.multiplayer_peer
+	assert(host_peer != null)
+	assert(client_peer != null)
+	host_multiplayer.multiplayer_peer = null
+	client_multiplayer.multiplayer_peer = null
+	host_multiplayer = null
+	client_multiplayer = null
 	host_root.process_mode = Node.PROCESS_MODE_DISABLED
 	client_root.process_mode = Node.PROCESS_MODE_DISABLED
-	host_multiplayer.multiplayer_peer.close()
-	client_multiplayer.multiplayer_peer.close()
-	host_root.queue_free()
-	client_root.queue_free()
+	host_peer.close()
+	client_peer.close()
 	await get_tree().process_frame
-	queue_free()
+	host_root.free()
+	client_root.free()
+	await get_tree().process_frame
+	await _clear_orphan_nodes()
+
+func _clear_orphan_nodes() -> void:
+	var orphan_ids = Node.get_orphan_node_ids()
+	for orphan_id in orphan_ids:
+		var orphan = instance_from_id(orphan_id)
+		if orphan != null:
+			orphan.free()
+	await get_tree().process_frame
+func _strip_scatter_nodes(world: Node) -> void:
+	var scatter = world.get_node_or_null("Background/ProtonScatter")
+	if scatter != null:
+		scatter.free()

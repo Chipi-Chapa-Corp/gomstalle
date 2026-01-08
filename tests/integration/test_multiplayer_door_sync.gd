@@ -29,7 +29,7 @@ func test_door_open_syncs_to_client() -> void:
 	Engine.time_scale = 2.0
 
 	harness = MultiplayerHarnessScript.new()
-	add_child(harness)
+	add_child_autoqfree(harness)
 	await harness.setup_with_players(24567, 180)
 
 	var host_player = harness.host_player as PlayerScript

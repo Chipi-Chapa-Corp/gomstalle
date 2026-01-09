@@ -6,9 +6,10 @@ const WorldScene = preload("res://scenes/world/scene.tscn")
 const MultiplayerManagerScript = preload("res://globals/MultiplayerManager.gd")
 const SpawnerScript = preload("res://globals/Spawner.gd")
 
-const CAPTURE_WIDTH := 320
-const CAPTURE_HEIGHT := 180
-const CAPTURE_LABEL_HEIGHT := 48
+const CAPTURE_WIDTH := 480
+const CAPTURE_HEIGHT := 270
+const CAPTURE_LABEL_HEIGHT := 72
+const CAPTURE_LABEL_FONT_SIZE := 26
 
 var host_root: Node
 var client_root: Node
@@ -37,9 +38,11 @@ var visual_capture_frames_dir := ""
 var visual_capture_index := 0
 var visual_capture_fps := 30
 var visual_capture_accum := 0.0
-var visual_capture_ui_max_percent := 0.3
+var visual_capture_ui_max_percent := 0.2
 var visual_capture_ui_pending := false
 var visual_capture_pending_frame := false
+var visual_capture_ui_pending_frames := 0
+var visual_capture_ui_pending_limit := 10
 
 func setup(port: int) -> void:
 	Settings.network_backend = NetworkConfig.BACKEND_LOCAL
@@ -224,7 +227,11 @@ func _process(delta: float) -> void:
 	if not visual_capture_active:
 		return
 	if visual_capture_ui_pending:
+		visual_capture_ui_pending_frames += 1
 		visual_capture_ui_pending = _apply_capture_ui_scale()
+		if visual_capture_ui_pending and visual_capture_ui_pending_frames < visual_capture_ui_pending_limit:
+			return
+		visual_capture_ui_pending = false
 	if visual_capture_pending_frame:
 		if _capture_frame():
 			visual_capture_pending_frame = false
@@ -247,6 +254,7 @@ func start_visual_capture(test_name: String, fps: int = 30) -> void:
 	visual_capture_ui_max_percent = _get_capture_ui_max_percent()
 	visual_capture_ui_pending = _apply_capture_ui_scale()
 	visual_capture_pending_frame = true
+	visual_capture_ui_pending_frames = 0
 
 func stop_visual_capture() -> void:
 	visual_capture_active = false
@@ -267,7 +275,7 @@ func _get_capture_ui_max_percent() -> float:
 	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO_UI_MAX_PERCENT")
 	var percent = float(value)
 	if percent <= 0.0 or percent > 1.0:
-		return 0.3
+		return 0.2
 	return percent
 
 func _setup_visual_capture() -> void:
@@ -319,6 +327,7 @@ func _create_label_viewport(name: String, width: int, height: int) -> SubViewpor
 	visual_capture_label.text = ""
 	visual_capture_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	visual_capture_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	visual_capture_label.add_theme_font_size_override("font_size", CAPTURE_LABEL_FONT_SIZE)
 	visual_capture_label.size = Vector2(width, height)
 	visual_capture_label.anchor_right = 1.0
 	visual_capture_label.anchor_bottom = 1.0

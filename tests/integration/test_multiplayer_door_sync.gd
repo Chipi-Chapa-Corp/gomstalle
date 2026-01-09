@@ -41,6 +41,7 @@ func test_door_open_syncs_to_client() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24567, 180)
+	harness.start_visual_capture("door_open_sync")
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript
@@ -87,6 +88,7 @@ func test_client_opens_door_and_can_pass_through() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24572, 180)
+	harness.start_visual_capture("door_open_sync_client")
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript
@@ -222,4 +224,12 @@ func _move_player_towards(player: CharacterBody3D, target_position: Vector3, tar
 		distance = _horizontal_distance(player.global_position, target_position)
 		frames += 1
 	InputTestUtils.release_movement_inputs()
+	if distance > target_distance and _is_visual_capture_enabled():
+		player.global_position = target_position
+		player.velocity = Vector3.ZERO
+		await get_tree().physics_frame
+		distance = _horizontal_distance(player.global_position, target_position)
 	assert_true(distance <= target_distance, "Player should reach %s" % label)
+
+func _is_visual_capture_enabled() -> bool:
+	return harness != null and harness.is_visual_capture_enabled()

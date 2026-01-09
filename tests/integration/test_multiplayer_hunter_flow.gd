@@ -36,6 +36,7 @@ func after_each() -> void:
 func test_start_sets_hunter_and_hides_start_button() -> void:
 	Engine.time_scale = 2.0
 	await _setup_harness(24582)
+	harness.start_visual_capture("hunter_start_flow")
 
 	var host_world = harness.host_world
 	var client_world = harness.client_world
@@ -54,6 +55,7 @@ func test_start_sets_hunter_and_hides_start_button() -> void:
 func test_hunter_attack_kills_target_on_both_peers() -> void:
 	Engine.time_scale = 2.0
 	await _setup_harness(24583)
+	harness.start_visual_capture("hunter_kill_flow")
 	await _start_match()
 
 	var context = _resolve_hunter_context()

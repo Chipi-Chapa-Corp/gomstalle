@@ -37,6 +37,7 @@ func test_host_stuns_client_with_chair() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24570, 180)
+	harness.start_visual_capture("chair_stun_host_to_client")
 	await _setup_chairs()
 
 	var attacker = harness.host_player as PlayerScript
@@ -51,6 +52,7 @@ func test_client_stuns_host_with_chair() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24571, 180)
+	harness.start_visual_capture("chair_stun_client_to_host")
 	await _setup_chairs()
 
 	var attacker = harness.client_player as PlayerScript

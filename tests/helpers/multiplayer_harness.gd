@@ -6,6 +6,10 @@ const WorldScene = preload("res://scenes/world/scene.tscn")
 const MultiplayerManagerScript = preload("res://globals/MultiplayerManager.gd")
 const SpawnerScript = preload("res://globals/Spawner.gd")
 
+const CAPTURE_WIDTH := 320
+const CAPTURE_HEIGHT := 180
+const CAPTURE_LABEL_HEIGHT := 48
+
 var host_root: Node
 var client_root: Node
 var host_world: Node
@@ -22,6 +26,19 @@ var host_peer_id: int
 var client_peer_id: int
 var host_remote_player: Node3D
 var client_remote_player: Node3D
+var visual_capture_enabled := false
+var visual_capture_active := false
+var visual_capture_root: Node
+var visual_capture_host_viewport: SubViewport
+var visual_capture_client_viewport: SubViewport
+var visual_capture_label_viewport: SubViewport
+var visual_capture_label: Label
+var visual_capture_frames_dir := ""
+var visual_capture_index := 0
+var visual_capture_fps := 30
+var visual_capture_accum := 0.0
+var visual_capture_ui_max_percent := 0.3
+var visual_capture_ui_pending := false
 
 func setup(port: int) -> void:
 	Settings.network_backend = NetworkConfig.BACKEND_LOCAL
@@ -35,6 +52,7 @@ func setup(port: int) -> void:
 	client_root.name = "ClientRoot"
 	add_child(host_root)
 	add_child(client_root)
+	_setup_visual_capture()
 
 	host_multiplayer = SceneMultiplayer.new()
 	client_multiplayer = SceneMultiplayer.new()
@@ -111,7 +129,8 @@ func setup_with_players(port: int, frames: int) -> void:
 
 func wait_for_peer_count(expected_count: int, frames: int) -> void:
 	var waited := 0
-	while waited < frames:
+	var max_frames = _adjust_wait_frames(frames)
+	while waited < max_frames:
 		if host_manager.get_connected_peer_ids().size() == expected_count and client_manager.get_connected_peer_ids().size() == expected_count:
 			return
 		await get_tree().process_frame
@@ -120,7 +139,8 @@ func wait_for_peer_count(expected_count: int, frames: int) -> void:
 
 func wait_for_condition(predicate: Callable, frames: int) -> void:
 	var waited := 0
-	while waited < frames:
+	var max_frames = _adjust_wait_frames(frames)
+	while waited < max_frames:
 		if predicate.call():
 			return
 		await get_tree().process_frame
@@ -129,12 +149,18 @@ func wait_for_condition(predicate: Callable, frames: int) -> void:
 
 func wait_for_physics_condition(predicate: Callable, frames: int, label: String) -> void:
 	var waited := 0
-	while waited < frames:
+	var max_frames = _adjust_wait_frames(frames)
+	while waited < max_frames:
 		if predicate.call():
 			return
 		await get_tree().physics_frame
 		waited += 1
 	assert(false, "Timed out waiting for condition: %s" % label)
+
+func _adjust_wait_frames(frames: int) -> int:
+	if not visual_capture_active:
+		return frames
+	return int(ceil(float(frames) * 3.0))
 
 func get_player_by_peer_id(container: Node, peer_id: int) -> Node3D:
 	for child in container.get_children():
@@ -166,6 +192,7 @@ func cleanup() -> void:
 	var client_peer = client_multiplayer.multiplayer_peer
 	assert(host_peer != null)
 	assert(client_peer != null)
+	visual_capture_active = false
 	host_multiplayer.multiplayer_peer = null
 	client_multiplayer.multiplayer_peer = null
 	host_multiplayer = null
@@ -191,3 +218,222 @@ func _strip_scatter_nodes(world: Node) -> void:
 	var scatter = world.get_node_or_null("Background/ProtonScatter")
 	if scatter != null:
 		scatter.free()
+
+func _process(delta: float) -> void:
+	if not visual_capture_active:
+		return
+	if visual_capture_ui_pending:
+		visual_capture_ui_pending = _apply_capture_ui_scale()
+	visual_capture_accum += delta
+	var interval = 1.0 / float(visual_capture_fps)
+	if visual_capture_accum < interval:
+		return
+	visual_capture_accum -= interval
+	_capture_frame()
+
+func start_visual_capture(test_name: String, fps: int = 30) -> void:
+	if not visual_capture_enabled:
+		return
+	visual_capture_active = true
+	visual_capture_fps = fps if fps > 0 else _get_capture_fps()
+	visual_capture_accum = 0.0
+	visual_capture_index = 0
+	visual_capture_frames_dir = _prepare_capture_dirs(test_name)
+	_set_label_text(test_name)
+	visual_capture_ui_max_percent = _get_capture_ui_max_percent()
+	visual_capture_ui_pending = _apply_capture_ui_scale()
+
+func stop_visual_capture() -> void:
+	visual_capture_active = false
+
+func is_visual_capture_enabled() -> bool:
+	return visual_capture_enabled
+
+func _is_visual_capture_enabled() -> bool:
+	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO").strip_edges().to_lower()
+	return value == "1" or value == "true"
+
+func _get_capture_fps() -> int:
+	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO_FPS")
+	var fps = int(value)
+	return fps if fps > 0 else 30
+
+func _get_capture_ui_max_percent() -> float:
+	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO_UI_MAX_PERCENT")
+	var percent = float(value)
+	if percent <= 0.0 or percent > 1.0:
+		return 0.3
+	return percent
+
+func _setup_visual_capture() -> void:
+	if not _is_visual_capture_enabled():
+		return
+	visual_capture_enabled = true
+	visual_capture_root = Node.new()
+	visual_capture_root.name = "VisualCapture"
+	add_child(visual_capture_root)
+	visual_capture_host_viewport = _create_capture_viewport("HostViewport", CAPTURE_WIDTH, CAPTURE_HEIGHT)
+	visual_capture_client_viewport = _create_capture_viewport("ClientViewport", CAPTURE_WIDTH, CAPTURE_HEIGHT)
+	visual_capture_label_viewport = _create_label_viewport("LabelViewport", CAPTURE_WIDTH, CAPTURE_LABEL_HEIGHT)
+	visual_capture_root.add_child(visual_capture_host_viewport)
+	visual_capture_root.add_child(visual_capture_client_viewport)
+	visual_capture_root.add_child(visual_capture_label_viewport)
+	if host_root.get_parent() != null:
+		host_root.get_parent().remove_child(host_root)
+	visual_capture_host_viewport.add_child(host_root)
+	if client_root.get_parent() != null:
+		client_root.get_parent().remove_child(client_root)
+	visual_capture_client_viewport.add_child(client_root)
+
+func _create_capture_viewport(name: String, width: int, height: int) -> SubViewport:
+	var viewport = SubViewport.new()
+	viewport.name = name
+	viewport.size = Vector2i(width, height)
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_ALWAYS
+	viewport.transparent_bg = false
+	viewport.own_world_3d = true
+	return viewport
+
+func _create_label_viewport(name: String, width: int, height: int) -> SubViewport:
+	var viewport = SubViewport.new()
+	viewport.name = name
+	viewport.size = Vector2i(width, height)
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_ALWAYS
+	viewport.transparent_bg = false
+	var root = Control.new()
+	root.size = Vector2(width, height)
+	root.anchor_right = 1.0
+	root.anchor_bottom = 1.0
+	var background = ColorRect.new()
+	background.size = Vector2(width, height)
+	background.color = Color(0, 0, 0, 1)
+	root.add_child(background)
+	visual_capture_label = Label.new()
+	visual_capture_label.text = ""
+	visual_capture_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	visual_capture_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	visual_capture_label.size = Vector2(width, height)
+	visual_capture_label.anchor_right = 1.0
+	visual_capture_label.anchor_bottom = 1.0
+	root.add_child(visual_capture_label)
+	viewport.add_child(root)
+	return viewport
+
+func _set_label_text(text: String) -> void:
+	if visual_capture_label != null:
+		visual_capture_label.text = text
+
+func _prepare_capture_dirs(test_name: String) -> String:
+	var root = _get_capture_root_dir()
+	DirAccess.make_dir_recursive_absolute(root)
+	var test_dir = root.path_join(test_name)
+	DirAccess.make_dir_recursive_absolute(test_dir)
+	var frames_dir = test_dir.path_join("frames")
+	DirAccess.make_dir_recursive_absolute(frames_dir)
+	var dir = DirAccess.open(frames_dir)
+	if dir != null:
+		dir.list_dir_begin()
+		var file_name = dir.get_next()
+		while file_name != "":
+			if not dir.current_is_dir():
+				dir.remove(file_name)
+			file_name = dir.get_next()
+		dir.list_dir_end()
+	return frames_dir
+
+func _get_capture_root_dir() -> String:
+	var root = OS.get_environment("GOMSTALLE_TEST_VIDEO_DIR")
+	if root.is_empty():
+		root = "user://test_videos"
+	return ProjectSettings.globalize_path(root)
+
+func _capture_frame() -> void:
+	if visual_capture_frames_dir.is_empty():
+		return
+	var host_image = visual_capture_host_viewport.get_texture().get_image()
+	var client_image = visual_capture_client_viewport.get_texture().get_image()
+	var label_image = visual_capture_label_viewport.get_texture().get_image()
+	if host_image == null or client_image == null or label_image == null:
+		return
+	host_image.convert(Image.FORMAT_RGBA8)
+	client_image.convert(Image.FORMAT_RGBA8)
+	label_image.convert(Image.FORMAT_RGBA8)
+	var total_height = CAPTURE_HEIGHT * 2 + CAPTURE_LABEL_HEIGHT
+	var final_image = Image.create(CAPTURE_WIDTH, total_height, false, Image.FORMAT_RGBA8)
+	final_image.blit_rect(host_image, Rect2i(0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT), Vector2i(0, 0))
+	final_image.blit_rect(client_image, Rect2i(0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT), Vector2i(0, CAPTURE_HEIGHT))
+	final_image.blit_rect(label_image, Rect2i(0, 0, CAPTURE_WIDTH, CAPTURE_LABEL_HEIGHT), Vector2i(0, CAPTURE_HEIGHT * 2))
+	var file_name = "frame_%06d.png" % visual_capture_index
+	var output_path = visual_capture_frames_dir.path_join(file_name)
+	final_image.save_png(output_path)
+	visual_capture_index += 1
+
+func _apply_capture_ui_scale() -> bool:
+	var pending = false
+	var viewport_size = Vector2(float(CAPTURE_WIDTH), float(CAPTURE_HEIGHT))
+	if host_world != null:
+		pending = _scale_control_to_percent(host_world.get("start_button") as Control, viewport_size) or pending
+		pending = _scale_control_to_percent(host_world.get("player_list") as Control, viewport_size) or pending
+	if client_world != null:
+		pending = _scale_control_to_percent(client_world.get("start_button") as Control, viewport_size) or pending
+		pending = _scale_control_to_percent(client_world.get("player_list") as Control, viewport_size) or pending
+	if host_player != null:
+		pending = _scale_control_to_percent(host_player.get("stamina_bar") as Control, viewport_size) or pending
+		pending = _scale_control_to_percent(host_player.get("inventory_wood_label") as Control, viewport_size) or pending
+	if client_player != null:
+		pending = _scale_control_to_percent(client_player.get("stamina_bar") as Control, viewport_size) or pending
+		pending = _scale_control_to_percent(client_player.get("inventory_wood_label") as Control, viewport_size) or pending
+	return pending
+
+func _scale_control_to_percent(control: Control, viewport_size: Vector2) -> bool:
+	if control == null:
+		return false
+	var size = _get_control_size(control)
+	if size.x <= 0.0 or size.y <= 0.0:
+		return true
+	var max_width = viewport_size.x * visual_capture_ui_max_percent
+	var max_height = viewport_size.y * visual_capture_ui_max_percent
+	var scale = 1.0
+	if size.x > 0.0:
+		scale = minf(scale, max_width / size.x)
+	if size.y > 0.0:
+		scale = minf(scale, max_height / size.y)
+	_apply_control_scale(control, scale)
+	return false
+
+func _get_control_size(control: Control) -> Vector2:
+	var size = control.size
+	if size.x <= 0.0 or size.y <= 0.0:
+		size = control.get_combined_minimum_size()
+	return size
+
+func _apply_control_scale(control: Control, scale: float) -> void:
+	if is_equal_approx(scale, 1.0):
+		control.scale = Vector2.ONE
+		return
+	var reference_point = _get_reference_point(control)
+	var original_transform = control.get_global_transform()
+	var reference_global = original_transform * reference_point
+	control.scale = Vector2(scale, scale)
+	var scaled_transform = control.get_global_transform()
+	var scaled_reference_global = scaled_transform * reference_point
+	var delta = reference_global - scaled_reference_global
+	control.global_position += delta
+
+func _get_reference_point(control: Control) -> Vector2:
+	var size = _get_control_size(control)
+	return Vector2(
+		_get_reference_component(control.anchor_left, control.anchor_right, size.x),
+		_get_reference_component(control.anchor_top, control.anchor_bottom, size.y)
+	)
+
+func _get_reference_component(anchor_min: float, anchor_max: float, size: float) -> float:
+	if not is_equal_approx(anchor_min, anchor_max):
+		return 0.0
+	if anchor_min <= 0.0:
+		return 0.0
+	if anchor_min >= 1.0:
+		return size
+	return size * 0.5

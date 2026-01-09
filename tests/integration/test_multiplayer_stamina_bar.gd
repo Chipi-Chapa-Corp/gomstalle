@@ -29,6 +29,7 @@ func test_stamina_bar_visibility_and_regeneration() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24568, 180)
+	harness.start_visual_capture("stamina_bar_authority")
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript
@@ -67,6 +68,7 @@ func test_remote_stamina_bar_hidden_when_idle() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24569, 180)
+	harness.start_visual_capture("stamina_bar_remote")
 
 	var host_player = harness.host_player as PlayerScript
 	var client_remote_player = harness.client_remote_player as PlayerScript

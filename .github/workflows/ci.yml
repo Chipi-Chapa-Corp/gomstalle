@@ -160,17 +160,22 @@ jobs:
             : > "$concat_list"
             for test_dir in "$VIDEO_DIR"/*; do
               frames_dir="$test_dir/frames"
-              if [ -d "$frames_dir" ]; then
+              if [ -d "$frames_dir" ] && ls "$frames_dir"/frame_*.png >/dev/null 2>&1; then
                 test_name="$(basename "$test_dir")"
                 ffmpeg -y -framerate "$VIDEO_FPS" -i "$frames_dir/frame_%06d.png" \
                   -c:v libx264 -pix_fmt yuv420p "$test_dir/${test_name}.mp4"
                 rm -rf "$frames_dir"
                 printf "file '%s'\n" "$test_dir/${test_name}.mp4" >> "$concat_list"
+              elif [ -d "$frames_dir" ]; then
+                rm -rf "$frames_dir"
               fi
             done
             if [ -s "$concat_list" ]; then
               ffmpeg -y -f concat -safe 0 -i "$concat_list" -c:v libx264 -pix_fmt yuv420p \
                 "$REPORT_DIR/gomstalle-visual-tests.mp4"
+            else
+              echo "No visual frames captured"
+              exit 1
             fi
           fi
 

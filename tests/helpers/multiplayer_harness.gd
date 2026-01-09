@@ -39,6 +39,7 @@ var visual_capture_fps := 30
 var visual_capture_accum := 0.0
 var visual_capture_ui_max_percent := 0.3
 var visual_capture_ui_pending := false
+var visual_capture_pending_frame := false
 
 func setup(port: int) -> void:
 	Settings.network_backend = NetworkConfig.BACKEND_LOCAL
@@ -224,6 +225,9 @@ func _process(delta: float) -> void:
 		return
 	if visual_capture_ui_pending:
 		visual_capture_ui_pending = _apply_capture_ui_scale()
+	if visual_capture_pending_frame:
+		if _capture_frame():
+			visual_capture_pending_frame = false
 	visual_capture_accum += delta
 	var interval = 1.0 / float(visual_capture_fps)
 	if visual_capture_accum < interval:
@@ -242,6 +246,7 @@ func start_visual_capture(test_name: String, fps: int = 30) -> void:
 	_set_label_text(test_name)
 	visual_capture_ui_max_percent = _get_capture_ui_max_percent()
 	visual_capture_ui_pending = _apply_capture_ui_scale()
+	visual_capture_pending_frame = true
 
 func stop_visual_capture() -> void:
 	visual_capture_active = false
@@ -349,14 +354,14 @@ func _get_capture_root_dir() -> String:
 		root = "user://test_videos"
 	return ProjectSettings.globalize_path(root)
 
-func _capture_frame() -> void:
+func _capture_frame() -> bool:
 	if visual_capture_frames_dir.is_empty():
-		return
+		return false
 	var host_image = visual_capture_host_viewport.get_texture().get_image()
 	var client_image = visual_capture_client_viewport.get_texture().get_image()
 	var label_image = visual_capture_label_viewport.get_texture().get_image()
 	if host_image == null or client_image == null or label_image == null:
-		return
+		return false
 	host_image.convert(Image.FORMAT_RGBA8)
 	client_image.convert(Image.FORMAT_RGBA8)
 	label_image.convert(Image.FORMAT_RGBA8)
@@ -369,6 +374,7 @@ func _capture_frame() -> void:
 	var output_path = visual_capture_frames_dir.path_join(file_name)
 	final_image.save_png(output_path)
 	visual_capture_index += 1
+	return true
 
 func _apply_capture_ui_scale() -> bool:
 	var pending = false

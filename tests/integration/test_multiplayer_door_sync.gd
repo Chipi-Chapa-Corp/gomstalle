@@ -119,6 +119,11 @@ func test_client_opens_door_and_can_pass_through() -> void:
 		120,
 		"host_door_opened_by_client"
 	)
+	await harness.wait_for_physics_condition(
+		func(): return absf(client_door.body.rotation_degrees.y) >= 80.0,
+		120,
+		"client_door_rotation_open"
+	)
 
 	var passage_offset = client_player.interact_radius + 1.0
 	var passage_target = _calculate_passage_position(client_door, passage_offset)

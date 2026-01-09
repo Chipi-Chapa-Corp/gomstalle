@@ -97,12 +97,9 @@ shadow_mesh = SubResource("ArrayMesh_y1enl")
 size = Vector3(2, 2.64551, 1.49847)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_1lb5u"]
-properties/0/path = NodePath("Receiver:is_opened")
+properties/0/path = NodePath("Receiver:open_rotation_degrees")
 properties/0/spawn = true
 properties/0/replication_mode = 1
-properties/1/path = NodePath("wall_doorway/StaticBody3D2/wall_doorway_door:rotation")
-properties/1/spawn = true
-properties/1/replication_mode = 1
 
 [node name="wall_doorway" type="Node3D"]
 

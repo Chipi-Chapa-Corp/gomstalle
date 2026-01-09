@@ -352,6 +352,7 @@ func _create_label_viewport(name: String, width: int, height: int) -> SubViewpor
 	visual_capture_label.text = ""
 	visual_capture_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	visual_capture_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	visual_capture_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	visual_capture_label.add_theme_font_size_override("font_size", CAPTURE_LABEL_FONT_SIZE)
 	visual_capture_label.size = Vector2(width, height)
 	visual_capture_label.anchor_right = 1.0

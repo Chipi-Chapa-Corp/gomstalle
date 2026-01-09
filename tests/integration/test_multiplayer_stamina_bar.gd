@@ -17,6 +17,8 @@ func after_each() -> void:
 	Engine.time_scale = original_time_scale
 	InputTestUtils.release_input_actions()
 	if is_instance_valid(harness):
+		await harness.wait_for_visual_capture_padding()
+		harness.stop_visual_capture()
 		harness.disable_player_physics(harness.host_world)
 		harness.disable_player_physics(harness.client_world)
 		await harness.cleanup()
@@ -30,6 +32,7 @@ func test_stamina_bar_visibility_and_regeneration() -> void:
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24568, 180)
 	harness.start_visual_capture("stamina_bar_authority")
+	await harness.wait_for_visual_capture_padding()
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript
@@ -69,6 +72,7 @@ func test_remote_stamina_bar_hidden_when_idle() -> void:
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24569, 180)
 	harness.start_visual_capture("stamina_bar_remote")
+	await harness.wait_for_visual_capture_padding()
 
 	var host_player = harness.host_player as PlayerScript
 	var client_remote_player = harness.client_remote_player as PlayerScript

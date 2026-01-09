@@ -29,6 +29,8 @@ func after_each() -> void:
 	Engine.time_scale = original_time_scale
 	InputTestUtils.release_input_actions()
 	if is_instance_valid(harness):
+		await harness.wait_for_visual_capture_padding()
+		harness.stop_visual_capture()
 		harness.disable_player_physics(harness.host_world)
 		harness.disable_player_physics(harness.client_world)
 		await harness.cleanup()
@@ -42,6 +44,7 @@ func test_door_open_syncs_to_client() -> void:
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24567, 180)
 	harness.start_visual_capture("door_open_sync")
+	await harness.wait_for_visual_capture_padding()
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript
@@ -89,6 +92,7 @@ func test_client_opens_door_and_can_pass_through() -> void:
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24572, 180)
 	harness.start_visual_capture("door_open_sync_client")
+	await harness.wait_for_visual_capture_padding()
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript

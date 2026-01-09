@@ -43,6 +43,7 @@ var visual_capture_ui_pending := false
 var visual_capture_pending_frame := false
 var visual_capture_ui_pending_frames := 0
 var visual_capture_ui_pending_limit := 10
+var visual_capture_padding_seconds := 0.5
 
 func setup(port: int) -> void:
 	Settings.network_backend = NetworkConfig.BACKEND_LOCAL
@@ -255,6 +256,7 @@ func start_visual_capture(test_name: String, fps: int = 30) -> void:
 	visual_capture_ui_pending = _apply_capture_ui_scale()
 	visual_capture_pending_frame = true
 	visual_capture_ui_pending_frames = 0
+	visual_capture_padding_seconds = _get_capture_padding_seconds()
 
 func stop_visual_capture() -> void:
 	visual_capture_active = false
@@ -277,6 +279,29 @@ func _get_capture_ui_max_percent() -> float:
 	if percent <= 0.0 or percent > 1.0:
 		return 0.2
 	return percent
+
+func _get_capture_padding_seconds() -> float:
+	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO_PADDING_SECONDS")
+	var seconds = float(value)
+	if seconds <= 0.0:
+		return 0.5
+	return seconds
+
+func wait_for_visual_capture_padding(seconds: float = -1.0) -> void:
+	if not visual_capture_active:
+		return
+	var padding = seconds if seconds >= 0.0 else visual_capture_padding_seconds
+	if padding <= 0.0:
+		return
+	var target_frames = int(ceil(padding * float(visual_capture_fps)))
+	var start_index = visual_capture_index
+	var waited = 0
+	var max_frames = _adjust_wait_frames(target_frames + 60)
+	while waited < max_frames:
+		if visual_capture_index - start_index >= target_frames:
+			return
+		await get_tree().process_frame
+		waited += 1
 
 func _setup_visual_capture() -> void:
 	if not _is_visual_capture_enabled():

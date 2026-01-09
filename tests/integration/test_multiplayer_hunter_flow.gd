@@ -22,6 +22,8 @@ func after_each() -> void:
 	Engine.time_scale = original_time_scale
 	InputTestUtils.release_input_actions()
 	if is_instance_valid(harness):
+		await harness.wait_for_visual_capture_padding()
+		harness.stop_visual_capture()
 		harness.disable_player_physics(harness.host_world)
 		harness.disable_player_physics(harness.client_world)
 		await harness.cleanup()
@@ -37,6 +39,7 @@ func test_start_sets_hunter_and_hides_start_button() -> void:
 	Engine.time_scale = 2.0
 	await _setup_harness(24582)
 	harness.start_visual_capture("hunter_start_flow")
+	await harness.wait_for_visual_capture_padding()
 
 	var host_world = harness.host_world
 	var client_world = harness.client_world
@@ -56,6 +59,7 @@ func test_hunter_attack_kills_target_on_both_peers() -> void:
 	Engine.time_scale = 2.0
 	await _setup_harness(24583)
 	harness.start_visual_capture("hunter_kill_flow")
+	await harness.wait_for_visual_capture_padding()
 	await _start_match()
 
 	var context = _resolve_hunter_context()

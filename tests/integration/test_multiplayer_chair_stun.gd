@@ -23,6 +23,8 @@ func after_each() -> void:
 	Engine.time_scale = original_time_scale
 	InputTestUtils.release_input_actions()
 	if is_instance_valid(harness):
+		await harness.wait_for_visual_capture_padding()
+		harness.stop_visual_capture()
 		harness.disable_player_physics(harness.host_world)
 		harness.disable_player_physics(harness.client_world)
 		await harness.cleanup()
@@ -38,6 +40,7 @@ func test_host_stuns_client_with_chair() -> void:
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24570, 180)
 	harness.start_visual_capture("chair_stun_host_to_client")
+	await harness.wait_for_visual_capture_padding()
 	await _setup_chairs()
 
 	var attacker = harness.host_player as PlayerScript
@@ -53,6 +56,7 @@ func test_client_stuns_host_with_chair() -> void:
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24571, 180)
 	harness.start_visual_capture("chair_stun_client_to_host")
+	await harness.wait_for_visual_capture_padding()
 	await _setup_chairs()
 
 	var attacker = harness.client_player as PlayerScript

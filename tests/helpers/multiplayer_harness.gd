@@ -9,7 +9,7 @@ const SpawnerScript = preload("res://globals/Spawner.gd")
 const CAPTURE_WIDTH := 480
 const CAPTURE_HEIGHT := 270
 const CAPTURE_LABEL_HEIGHT := 72
-const CAPTURE_LABEL_FONT_SIZE := 26
+const CAPTURE_LABEL_FONT_SIZE := 28
 
 var host_root: Node
 var client_root: Node
@@ -44,6 +44,7 @@ var visual_capture_pending_frame := false
 var visual_capture_ui_pending_frames := 0
 var visual_capture_ui_pending_limit := 10
 var visual_capture_padding_seconds := 0.5
+var visual_capture_settle_frames := 0
 
 func setup(port: int) -> void:
 	Settings.network_backend = NetworkConfig.BACKEND_LOCAL
@@ -233,6 +234,9 @@ func _process(delta: float) -> void:
 		if visual_capture_ui_pending and visual_capture_ui_pending_frames < visual_capture_ui_pending_limit:
 			return
 		visual_capture_ui_pending = false
+	if visual_capture_settle_frames > 0:
+		visual_capture_settle_frames -= 1
+		return
 	if visual_capture_pending_frame:
 		if _capture_frame():
 			visual_capture_pending_frame = false
@@ -257,6 +261,7 @@ func start_visual_capture(test_name: String, fps: int = 30) -> void:
 	visual_capture_pending_frame = true
 	visual_capture_ui_pending_frames = 0
 	visual_capture_padding_seconds = _get_capture_padding_seconds()
+	visual_capture_settle_frames = _get_capture_settle_frames()
 
 func stop_visual_capture() -> void:
 	visual_capture_active = false
@@ -277,7 +282,7 @@ func _get_capture_ui_max_percent() -> float:
 	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO_UI_MAX_PERCENT")
 	var percent = float(value)
 	if percent <= 0.0 or percent > 1.0:
-		return 0.2
+		return 0.15
 	return percent
 
 func _get_capture_padding_seconds() -> float:
@@ -286,6 +291,12 @@ func _get_capture_padding_seconds() -> float:
 	if seconds <= 0.0:
 		return 0.5
 	return seconds
+
+func _get_capture_settle_frames() -> int:
+	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO_SETTLE_SECONDS")
+	var seconds = float(value)
+	var settle = seconds if seconds > 0.0 else 0.2
+	return int(ceil(settle * float(visual_capture_fps)))
 
 func wait_for_visual_capture_padding(seconds: float = -1.0) -> void:
 	if not visual_capture_active:
@@ -341,22 +352,44 @@ func _create_label_viewport(name: String, width: int, height: int) -> SubViewpor
 	viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_ALWAYS
 	viewport.transparent_bg = false
 	var root = Control.new()
-	root.size = Vector2(width, height)
+	root.anchor_left = 0.0
+	root.anchor_top = 0.0
 	root.anchor_right = 1.0
 	root.anchor_bottom = 1.0
+	root.offset_left = 0.0
+	root.offset_top = 0.0
+	root.offset_right = 0.0
+	root.offset_bottom = 0.0
+	root.size = Vector2(width, height)
 	var background = ColorRect.new()
+	background.anchor_left = 0.0
+	background.anchor_top = 0.0
+	background.anchor_right = 1.0
+	background.anchor_bottom = 1.0
+	background.offset_left = 0.0
+	background.offset_top = 0.0
+	background.offset_right = 0.0
+	background.offset_bottom = 0.0
 	background.size = Vector2(width, height)
 	background.color = Color(0, 0, 0, 1)
 	root.add_child(background)
 	visual_capture_label = Label.new()
 	visual_capture_label.text = ""
+	visual_capture_label.anchor_left = 0.0
+	visual_capture_label.anchor_top = 0.0
+	visual_capture_label.anchor_right = 1.0
+	visual_capture_label.anchor_bottom = 1.0
+	visual_capture_label.offset_left = 0.0
+	visual_capture_label.offset_top = 0.0
+	visual_capture_label.offset_right = 0.0
+	visual_capture_label.offset_bottom = 0.0
 	visual_capture_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	visual_capture_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	visual_capture_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	visual_capture_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	visual_capture_label.add_theme_constant_override("outline_size", 3)
 	visual_capture_label.add_theme_font_size_override("font_size", CAPTURE_LABEL_FONT_SIZE)
 	visual_capture_label.size = Vector2(width, height)
-	visual_capture_label.anchor_right = 1.0
-	visual_capture_label.anchor_bottom = 1.0
 	root.add_child(visual_capture_label)
 	viewport.add_child(root)
 	return viewport

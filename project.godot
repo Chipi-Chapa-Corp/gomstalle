@@ -26,6 +26,7 @@ SteamManager="*res://globals/SteamManager.gd"
 GameState="*res://globals/GameState.gd"
 MultiplayerManager="*res://globals/MultiplayerManager.gd"
 Utils="*res://globals/Utils.gd"
+Generator="*res://globals/Generator.gd"
 
 [editor_plugins]
 

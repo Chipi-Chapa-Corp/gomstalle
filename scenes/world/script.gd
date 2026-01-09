@@ -29,6 +29,7 @@ func _ready():
 	var result := MultiplayerManager.join_multiplayer(multiplayer)
 	if result != OK:
 		push_error("Error: Failed to create or connect to server")
+	Generator.generate_for_world(self)
 	shrine_utils.register_shrines()
 
 func _on_start_pressed():

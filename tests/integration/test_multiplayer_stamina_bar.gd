@@ -31,18 +31,55 @@ func test_stamina_bar_visibility_and_regeneration() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24568, 180)
-	harness.start_visual_capture("stamina_bar_authority")
+	harness.start_visual_capture("Host stamina bar")
 	await harness.wait_for_visual_capture_padding()
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript
 
+	client_player.set_physics_process(false)
+	client_player.set_process_input(false)
+
+	var stamina_bar = host_player.stamina_bar
+	assert_not_null(stamina_bar, "Stamina bar should exist")
+	await _exercise_stamina_bar(stamina_bar)
+
+func test_remote_stamina_bar_hidden_when_idle() -> void:
+	Engine.time_scale = 2.0
+
+	harness = MultiplayerHarnessScript.new()
+	add_child_autoqfree(harness)
+	await harness.setup_with_players(24569, 180)
+	harness.start_visual_capture("Client stamina bar")
+	await harness.wait_for_visual_capture_padding()
+
+	var host_player = harness.host_player as PlayerScript
+	var client_player = harness.client_player as PlayerScript
+	var host_remote_player = harness.host_remote_player as PlayerScript
+
 	host_player.set_physics_process(false)
 	host_player.set_process_input(false)
 
-	var stamina_bar = client_player.stamina_bar
-	assert_not_null(stamina_bar, "Stamina bar should exist")
+	var client_stamina_bar = client_player.stamina_bar
+	assert_not_null(client_stamina_bar, "Client stamina bar should exist")
+	var remote_stamina_bar = host_remote_player.stamina_bar
+	assert_not_null(remote_stamina_bar, "Remote stamina bar should exist")
 
+	await harness.wait_for_physics_condition(
+		func(): return not remote_stamina_bar.is_visible_in_tree(),
+		120,
+		"remote_stamina_hidden_when_idle"
+	)
+
+	await _exercise_stamina_bar(client_stamina_bar)
+
+	await harness.wait_for_physics_condition(
+		func(): return not remote_stamina_bar.is_visible_in_tree(),
+		120,
+		"remote_stamina_hidden_when_running"
+	)
+
+func _exercise_stamina_bar(stamina_bar: TextureProgressBar) -> void:
 	await harness.wait_for_physics_condition(
 		func(): return not stamina_bar.visible and stamina_bar.value >= 99.0,
 		120,
@@ -63,28 +100,4 @@ func test_stamina_bar_visibility_and_regeneration() -> void:
 		func(): return not stamina_bar.visible and stamina_bar.value >= 99.0,
 		240,
 		"stamina_regenerates_and_hides"
-	)
-
-func test_remote_stamina_bar_hidden_when_idle() -> void:
-	Engine.time_scale = 2.0
-
-	harness = MultiplayerHarnessScript.new()
-	add_child_autoqfree(harness)
-	await harness.setup_with_players(24569, 180)
-	harness.start_visual_capture("stamina_bar_remote")
-	await harness.wait_for_visual_capture_padding()
-
-	var host_player = harness.host_player as PlayerScript
-	var client_remote_player = harness.client_remote_player as PlayerScript
-
-	host_player.set_physics_process(false)
-	host_player.set_process_input(false)
-
-	var remote_stamina_bar = client_remote_player.stamina_bar
-	assert_not_null(remote_stamina_bar, "Remote stamina bar should exist")
-
-	await harness.wait_for_physics_condition(
-		func(): return not remote_stamina_bar.is_visible_in_tree(),
-		120,
-		"remote_stamina_hidden_when_idle"
 	)

@@ -5,11 +5,13 @@ class_name MultiplayerHarness
 const WorldScene = preload("res://scenes/world/scene.tscn")
 const MultiplayerManagerScript = preload("res://globals/MultiplayerManager.gd")
 const SpawnerScript = preload("res://globals/Spawner.gd")
+const InputTestUtils = preload("res://tests/helpers/input_test_utils.gd")
 
 const CAPTURE_WIDTH := 480
 const CAPTURE_HEIGHT := 270
 const CAPTURE_LABEL_HEIGHT := 72
 const CAPTURE_LABEL_FONT_SIZE := 28
+const CAPTURE_LABEL_FONT := preload("res://assets/fonts/MedievalSharp-Regular.ttf")
 
 var host_root: Node
 var client_root: Node
@@ -45,6 +47,7 @@ var visual_capture_ui_pending_frames := 0
 var visual_capture_ui_pending_limit := 10
 var visual_capture_padding_seconds := 0.5
 var visual_capture_settle_frames := 0
+var visual_capture_ready := false
 
 func setup(port: int) -> void:
 	Settings.network_backend = NetworkConfig.BACKEND_LOCAL
@@ -193,6 +196,48 @@ func disable_player_physics(world: Node) -> void:
 		child.set_physics_process(false)
 		child.set_process_input(false)
 
+func disable_other_interactibles(world: Node, keep: PhysicsBody3D) -> void:
+	var root = world.get_node("Interactibles") as Node
+	assert(root != null)
+	var stack: Array[Node] = [root]
+	while not stack.is_empty():
+		var current = stack.pop_back()
+		for child in current.get_children():
+			stack.append(child)
+		var body = current as PhysicsBody3D
+		if body == null or body == keep:
+			continue
+		if body.is_in_group("interactible"):
+			body.remove_from_group("interactible")
+
+func resolve_ground_position(world: Node3D, position: Vector3, fallback_y: float, exclude: Array = []) -> Vector3:
+	var resolved = position
+	var space = world.get_world_3d().direct_space_state
+	var from = position + Vector3(0, 6.0, 0)
+	var to = position + Vector3(0, -6.0, 0)
+	var query = PhysicsRayQueryParameters3D.create(from, to)
+	var exclude_rids = InputTestUtils.resolve_exclude_rids(exclude)
+	if not exclude_rids.is_empty():
+		query.exclude = exclude_rids
+	var hit = space.intersect_ray(query)
+	if hit.is_empty():
+		resolved.y = fallback_y
+		return resolved
+	if hit.has("position"):
+		var hit_position = hit["position"] as Vector3
+		resolved.y = hit_position.y
+		return resolved
+	resolved.y = fallback_y
+	return resolved
+
+func resolve_player_world(player: Node) -> Node3D:
+	if host_world != null and host_world.is_ancestor_of(player):
+		return host_world
+	if client_world != null and client_world.is_ancestor_of(player):
+		return client_world
+	assert(false, "Player world missing in harness")
+	return host_world
+
 func cleanup() -> void:
 	var host_peer = host_multiplayer.multiplayer_peer
 	var client_peer = client_multiplayer.multiplayer_peer
@@ -228,17 +273,21 @@ func _strip_scatter_nodes(world: Node) -> void:
 func _process(delta: float) -> void:
 	if not visual_capture_active:
 		return
+	var pending_now = _apply_capture_ui_scale()
 	if visual_capture_ui_pending:
 		visual_capture_ui_pending_frames += 1
-		visual_capture_ui_pending = _apply_capture_ui_scale()
-		if visual_capture_ui_pending and visual_capture_ui_pending_frames < visual_capture_ui_pending_limit:
+		if pending_now and visual_capture_ui_pending_frames < visual_capture_ui_pending_limit:
 			return
 		visual_capture_ui_pending = false
 	if visual_capture_settle_frames > 0:
 		visual_capture_settle_frames -= 1
 		return
+	if not visual_capture_ready and not visual_capture_ui_pending:
+		visual_capture_ready = true
+		visual_capture_pending_frame = true
+		return
 	if visual_capture_pending_frame:
-		if _capture_frame():
+		if visual_capture_ready and _capture_frame():
 			visual_capture_pending_frame = false
 	visual_capture_accum += delta
 	var interval = 1.0 / float(visual_capture_fps)
@@ -254,14 +303,21 @@ func start_visual_capture(test_name: String, fps: int = 30) -> void:
 	visual_capture_fps = fps if fps > 0 else _get_capture_fps()
 	visual_capture_accum = 0.0
 	visual_capture_index = 0
-	visual_capture_frames_dir = _prepare_capture_dirs(test_name)
-	_set_label_text(test_name)
+	var label_text = test_name.strip_edges()
+	if label_text.is_empty():
+		label_text = "Visual test"
+	var dir_name = _sanitize_capture_name(label_text)
+	if dir_name.is_empty():
+		dir_name = "visual-test"
+	visual_capture_frames_dir = _prepare_capture_dirs(dir_name)
+	_set_label_text(label_text)
 	visual_capture_ui_max_percent = _get_capture_ui_max_percent()
 	visual_capture_ui_pending = _apply_capture_ui_scale()
-	visual_capture_pending_frame = true
 	visual_capture_ui_pending_frames = 0
 	visual_capture_padding_seconds = _get_capture_padding_seconds()
 	visual_capture_settle_frames = _get_capture_settle_frames()
+	visual_capture_pending_frame = false
+	visual_capture_ready = false
 
 func stop_visual_capture() -> void:
 	visual_capture_active = false
@@ -282,7 +338,7 @@ func _get_capture_ui_max_percent() -> float:
 	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO_UI_MAX_PERCENT")
 	var percent = float(value)
 	if percent <= 0.0 or percent > 1.0:
-		return 0.15
+		return 0.1
 	return percent
 
 func _get_capture_padding_seconds() -> float:
@@ -295,7 +351,7 @@ func _get_capture_padding_seconds() -> float:
 func _get_capture_settle_frames() -> int:
 	var value = OS.get_environment("GOMSTALLE_TEST_VIDEO_SETTLE_SECONDS")
 	var seconds = float(value)
-	var settle = seconds if seconds > 0.0 else 0.2
+	var settle = seconds if seconds > 0.0 else 0.4
 	return int(ceil(settle * float(visual_capture_fps)))
 
 func wait_for_visual_capture_padding(seconds: float = -1.0) -> void:
@@ -327,6 +383,8 @@ func _setup_visual_capture() -> void:
 	visual_capture_root.add_child(visual_capture_host_viewport)
 	visual_capture_root.add_child(visual_capture_client_viewport)
 	visual_capture_root.add_child(visual_capture_label_viewport)
+	visual_capture_host_viewport.add_child(_create_view_overlay("HOST", CAPTURE_WIDTH, CAPTURE_HEIGHT))
+	visual_capture_client_viewport.add_child(_create_view_overlay("CLIENT", CAPTURE_WIDTH, CAPTURE_HEIGHT))
 	if host_root.get_parent() != null:
 		host_root.get_parent().remove_child(host_root)
 	visual_capture_host_viewport.add_child(host_root)
@@ -354,8 +412,8 @@ func _create_label_viewport(name: String, width: int, height: int) -> SubViewpor
 	var root = Control.new()
 	root.anchor_left = 0.0
 	root.anchor_top = 0.0
-	root.anchor_right = 1.0
-	root.anchor_bottom = 1.0
+	root.anchor_right = 0.0
+	root.anchor_bottom = 0.0
 	root.offset_left = 0.0
 	root.offset_top = 0.0
 	root.offset_right = 0.0
@@ -364,8 +422,8 @@ func _create_label_viewport(name: String, width: int, height: int) -> SubViewpor
 	var background = ColorRect.new()
 	background.anchor_left = 0.0
 	background.anchor_top = 0.0
-	background.anchor_right = 1.0
-	background.anchor_bottom = 1.0
+	background.anchor_right = 0.0
+	background.anchor_bottom = 0.0
 	background.offset_left = 0.0
 	background.offset_top = 0.0
 	background.offset_right = 0.0
@@ -377,26 +435,67 @@ func _create_label_viewport(name: String, width: int, height: int) -> SubViewpor
 	visual_capture_label.text = ""
 	visual_capture_label.anchor_left = 0.0
 	visual_capture_label.anchor_top = 0.0
-	visual_capture_label.anchor_right = 1.0
-	visual_capture_label.anchor_bottom = 1.0
+	visual_capture_label.anchor_right = 0.0
+	visual_capture_label.anchor_bottom = 0.0
 	visual_capture_label.offset_left = 0.0
 	visual_capture_label.offset_top = 0.0
 	visual_capture_label.offset_right = 0.0
 	visual_capture_label.offset_bottom = 0.0
 	visual_capture_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	visual_capture_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	visual_capture_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	visual_capture_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	visual_capture_label.add_theme_constant_override("outline_size", 3)
-	visual_capture_label.add_theme_font_size_override("font_size", CAPTURE_LABEL_FONT_SIZE)
+	var label_settings = LabelSettings.new()
+	label_settings.font = CAPTURE_LABEL_FONT
+	label_settings.font_size = CAPTURE_LABEL_FONT_SIZE
+	label_settings.font_color = Color(1, 1, 1, 1)
+	label_settings.outline_color = Color(0, 0, 0, 1)
+	label_settings.outline_size = 3
+	visual_capture_label.label_settings = label_settings
 	visual_capture_label.size = Vector2(width, height)
 	root.add_child(visual_capture_label)
 	viewport.add_child(root)
 	return viewport
 
+func _create_view_overlay(text: String, viewport_width: int, viewport_height: int) -> CanvasLayer:
+	var layer = CanvasLayer.new()
+	layer.layer = 1
+	var container = Control.new()
+	container.anchor_left = 0.0
+	container.anchor_top = 0.0
+	container.anchor_right = 0.0
+	container.anchor_bottom = 0.0
+	container.offset_left = 0.0
+	container.offset_top = 0.0
+	container.offset_right = 0.0
+	container.offset_bottom = 0.0
+	container.size = Vector2(viewport_width, viewport_height)
+	var background = ColorRect.new()
+	background.color = Color(0, 0, 0, 0.6)
+	var label = Label.new()
+	label.text = text
+	label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_override("font", CAPTURE_LABEL_FONT)
+	var label_size = label.get_combined_minimum_size()
+	if label_size == Vector2.ZERO:
+		label_size = Vector2(72, 22)
+	var padding = Vector2(10, 6)
+	background.size = label_size + padding * 2.0
+	background.position = Vector2(
+		viewport_width - background.size.x - 10.0,
+		viewport_height - background.size.y - 10.0
+	)
+	label.position = background.position + padding
+	container.add_child(background)
+	container.add_child(label)
+	layer.add_child(container)
+	return layer
+
 func _set_label_text(text: String) -> void:
 	if visual_capture_label != null:
 		visual_capture_label.text = text
+		visual_capture_label.queue_redraw()
+	if visual_capture_label_viewport != null:
+		visual_capture_label_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
 func _prepare_capture_dirs(test_name: String) -> String:
 	var root = _get_capture_root_dir()
@@ -416,6 +515,26 @@ func _prepare_capture_dirs(test_name: String) -> String:
 		dir.list_dir_end()
 	return frames_dir
 
+func _sanitize_capture_name(value: String) -> String:
+	var lowered = value.to_lower()
+	var result := ""
+	var last_was_separator = false
+	for index in lowered.length():
+		var code = lowered.unicode_at(index)
+		var is_letter = code >= 97 and code <= 122
+		var is_number = code >= 48 and code <= 57
+		if is_letter or is_number:
+			result += String.chr(code)
+			last_was_separator = false
+		elif not last_was_separator:
+			result += "_"
+			last_was_separator = true
+	while result.begins_with("_"):
+		result = result.substr(1)
+	while result.ends_with("_"):
+		result = result.substr(0, result.length() - 1)
+	return result
+
 func _get_capture_root_dir() -> String:
 	var root = OS.get_environment("GOMSTALLE_TEST_VIDEO_DIR")
 	if root.is_empty():
@@ -425,9 +544,16 @@ func _get_capture_root_dir() -> String:
 func _capture_frame() -> bool:
 	if visual_capture_frames_dir.is_empty():
 		return false
-	var host_image = visual_capture_host_viewport.get_texture().get_image()
-	var client_image = visual_capture_client_viewport.get_texture().get_image()
-	var label_image = visual_capture_label_viewport.get_texture().get_image()
+	if DisplayServer.get_name() == "headless":
+		return false
+	var host_texture = visual_capture_host_viewport.get_texture()
+	var client_texture = visual_capture_client_viewport.get_texture()
+	var label_texture = visual_capture_label_viewport.get_texture()
+	if not _is_texture_ready(host_texture) or not _is_texture_ready(client_texture) or not _is_texture_ready(label_texture):
+		return false
+	var host_image = host_texture.get_image()
+	var client_image = client_texture.get_image()
+	var label_image = label_texture.get_image()
 	if host_image == null or client_image == null or label_image == null:
 		return false
 	host_image.convert(Image.FORMAT_RGBA8)
@@ -444,15 +570,23 @@ func _capture_frame() -> bool:
 	visual_capture_index += 1
 	return true
 
+func _is_texture_ready(texture: Texture2D) -> bool:
+	if texture == null:
+		return false
+	var texture_rid = texture.get_rid()
+	return texture_rid.is_valid()
+
 func _apply_capture_ui_scale() -> bool:
 	var pending = false
 	var viewport_size = Vector2(float(CAPTURE_WIDTH), float(CAPTURE_HEIGHT))
+	var compact_percent = visual_capture_ui_max_percent * 0.8
+	var list_percent = minf(visual_capture_ui_max_percent * 1.4, 0.28)
 	if host_world != null:
-		pending = _scale_control_to_percent(host_world.get("start_button") as Control, viewport_size) or pending
-		pending = _scale_control_to_percent(host_world.get("player_list") as Control, viewport_size) or pending
+		pending = _scale_control_to_percent(host_world.get("start_button") as Control, viewport_size, compact_percent) or pending
+		pending = _scale_control_to_percent(host_world.get("player_list") as Control, viewport_size, list_percent) or pending
 	if client_world != null:
-		pending = _scale_control_to_percent(client_world.get("start_button") as Control, viewport_size) or pending
-		pending = _scale_control_to_percent(client_world.get("player_list") as Control, viewport_size) or pending
+		pending = _scale_control_to_percent(client_world.get("start_button") as Control, viewport_size, compact_percent) or pending
+		pending = _scale_control_to_percent(client_world.get("player_list") as Control, viewport_size, list_percent) or pending
 	if host_player != null:
 		pending = _scale_control_to_percent(host_player.get("stamina_bar") as Control, viewport_size) or pending
 		pending = _scale_control_to_percent(host_player.get("inventory_wood_label") as Control, viewport_size) or pending
@@ -461,14 +595,17 @@ func _apply_capture_ui_scale() -> bool:
 		pending = _scale_control_to_percent(client_player.get("inventory_wood_label") as Control, viewport_size) or pending
 	return pending
 
-func _scale_control_to_percent(control: Control, viewport_size: Vector2) -> bool:
+func _scale_control_to_percent(control: Control, viewport_size: Vector2, max_percent: float = -1.0) -> bool:
 	if control == null:
 		return false
 	var size = _get_control_size(control)
 	if size.x <= 0.0 or size.y <= 0.0:
 		return true
-	var max_width = viewport_size.x * visual_capture_ui_max_percent
-	var max_height = viewport_size.y * visual_capture_ui_max_percent
+	var percent = visual_capture_ui_max_percent
+	if max_percent > 0.0:
+		percent = max_percent
+	var max_width = viewport_size.x * percent
+	var max_height = viewport_size.y * percent
 	var scale = 1.0
 	if size.x > 0.0:
 		scale = minf(scale, max_width / size.x)
@@ -484,17 +621,9 @@ func _get_control_size(control: Control) -> Vector2:
 	return size
 
 func _apply_control_scale(control: Control, scale: float) -> void:
-	if is_equal_approx(scale, 1.0):
-		control.scale = Vector2.ONE
-		return
 	var reference_point = _get_reference_point(control)
-	var original_transform = control.get_global_transform()
-	var reference_global = original_transform * reference_point
+	control.pivot_offset = reference_point
 	control.scale = Vector2(scale, scale)
-	var scaled_transform = control.get_global_transform()
-	var scaled_reference_global = scaled_transform * reference_point
-	var delta = reference_global - scaled_reference_global
-	control.global_position += delta
 
 func _get_reference_point(control: Control) -> Vector2:
 	var size = _get_control_size(control)
@@ -505,9 +634,6 @@ func _get_reference_point(control: Control) -> Vector2:
 
 func _get_reference_component(anchor_min: float, anchor_max: float, size: float) -> float:
 	if not is_equal_approx(anchor_min, anchor_max):
-		return 0.0
-	if anchor_min <= 0.0:
-		return 0.0
-	if anchor_min >= 1.0:
-		return size
-	return size * 0.5
+		return size * 0.5
+	var clamped = clampf(anchor_min, 0.0, 1.0)
+	return size * clamped

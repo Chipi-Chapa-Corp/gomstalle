@@ -1,9 +1,7 @@
 extends GutTest
 
 const MultiplayerHarnessScript = preload("res://tests/helpers/multiplayer_harness.gd")
-const DoorScene = preload("res://scenes/door/scene.tscn")
 const InputTestUtils = preload("res://tests/helpers/input_test_utils.gd")
-const TestArenaFactory = preload("res://tests/helpers/test_arena_factory.gd")
 const PlayerScript = preload("res://scenes/player/script.gd")
 const GutErrorGuard = preload("res://tests/helpers/gut_error_guard.gd")
 
@@ -11,15 +9,14 @@ var harness
 var original_time_scale: float
 var original_engine_error_treatment: int
 
+
 class DoorPair:
 	var host_door: Node3D
 	var client_door: Node3D
-	var target_position: Vector3
 
-	func _init(host: Node3D, client: Node3D, target: Vector3) -> void:
+	func _init(host: Node3D, client: Node3D) -> void:
 		host_door = host
 		client_door = client
-		target_position = target
 
 func before_each() -> void:
 	original_engine_error_treatment = GutErrorGuard.suppress_engine_errors(self)
@@ -43,45 +40,82 @@ func test_door_open_syncs_to_client() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24567, 180)
-	harness.start_visual_capture("door_open_sync")
+	harness.start_visual_capture("Host opens door")
 	await harness.wait_for_visual_capture_padding()
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript
 	var host_client_player = harness.host_remote_player as PlayerScript
+	var client_host_player = harness.client_remote_player as PlayerScript
 
 	assert_not_null(host_player, "Host player should exist")
 	assert_not_null(client_player, "Client player should exist")
 	assert_not_null(host_client_player, "Host should have client player")
+	assert_not_null(client_host_player, "Client should have host player")
 
-	host_player.set_physics_process(false)
-	host_player.set_process_input(false)
-
-	var arena_origin = Vector3(1000, 0, 1000)
-	var door_local_position = Vector3(0, 0, 3)
-	var door_pair = _create_door_pair(arena_origin, door_local_position)
+	var door_pair = _resolve_door_pair(host_player.global_position)
 	var host_door = door_pair.host_door
 	var client_door = door_pair.client_door
-	var client_door_target = door_pair.target_position
-	await get_tree().process_frame
+	harness.disable_other_interactibles(harness.host_world, host_door)
+	harness.disable_other_interactibles(harness.client_world, client_door)
+	var door_target = _get_interactable_target_position(host_door)
+	var door_axis = _get_door_axis(host_door)
+	var interaction_offset = _get_interaction_offset(host_player, host_door)
+	var approach_offset = interaction_offset + 0.8
+	var passage_offset = _get_passage_offset(host_player, host_door)
+	var passage_distance = 0.6
+	var safe_offset = _get_safe_offset(client_player, host_door)
+	var host_ground = harness.resolve_ground_position(harness.host_world, door_target, host_player.global_position.y, [host_door.get_rid()])
+	var client_ground = harness.resolve_ground_position(harness.client_world, _get_interactable_target_position(client_door), client_player.global_position.y, [client_door.get_rid()])
+	var door_forward = _select_clear_axis(harness.host_world, host_ground, door_axis, _get_door_excludes(host_door))
+	var host_start = _calculate_side_position(host_ground, door_forward, approach_offset)
+	var host_interact = _calculate_side_position(host_ground, door_forward, interaction_offset)
+	var client_start = _calculate_side_position(client_ground, door_forward, -safe_offset)
 
-	await _position_player_for_interaction(client_player, client_door, client_door_target)
+	_set_player_position(host_player, host_start)
+	_set_player_position(client_player, client_start)
+	await get_tree().physics_frame
+	host_start = host_player.global_position
+	client_start = client_player.global_position
+	await _wait_for_player_sync(host_client_player, client_player, "client_initial_position_synced")
+	await _wait_for_player_sync(client_host_player, host_player, "host_initial_position_synced")
+	await harness.wait_for_visual_capture_padding()
 
-	await InputTestUtils.press_action(get_tree(), "interact")
+	_set_player_active(client_player, false)
+	await _move_player_towards(host_player, host_interact, 0.2, _max_frames_for_distance(_horizontal_distance(host_player.global_position, host_interact), host_player.base_move_speed), "host_interact", false)
+	await harness.wait_for_physics_condition(
+		func(): return host_player.closest_item == host_door,
+		120,
+		"host_door_is_closest_interactable"
+	)
+	await InputTestUtils.press_interact_for_player(get_tree(), host_player)
+	_set_player_active(client_player, true)
+	await harness.wait_for_visual_capture_padding()
 
 	await harness.wait_for_physics_condition(
 		func(): return host_door.is_opened and client_door.is_opened,
 		120,
 		"door_opened_on_both_peers"
 	)
-
 	await harness.wait_for_physics_condition(
-		func(): return host_client_player.position.distance_to(client_player.position) <= 0.01,
+		func(): return _horizontal_distance(client_player.global_position, client_start) <= 0.05,
 		120,
-		"client_position_replicated_to_host"
+		"client_not_pushed_by_door"
 	)
-	var position_delta = host_client_player.position.distance_to(client_player.position)
-	assert_almost_eq(position_delta, 0.0, 0.01, "Host should mirror client position")
+	await harness.wait_for_visual_capture_padding()
+
+	var host_passage_target = _calculate_side_position(host_ground, door_forward, -passage_offset)
+	await _move_player_towards(host_player, host_passage_target, passage_distance, _max_frames_for_distance(_horizontal_distance(host_player.global_position, host_passage_target), host_player.run_move_speed), "host_passage", true)
+	await _wait_for_player_sync(client_host_player, host_player, "host_passage_synced")
+	await harness.wait_for_visual_capture_padding()
+
+	_set_player_active(host_player, false)
+	var client_passage_target = _calculate_side_position(client_ground, door_forward, passage_offset)
+	await _move_player_towards(client_player, client_passage_target, passage_distance, _max_frames_for_distance(_horizontal_distance(client_player.global_position, client_passage_target), client_player.run_move_speed), "client_passage", true)
+	await _wait_for_player_sync(host_client_player, client_player, "client_passage_synced")
+	_set_player_active(host_player, true)
+	await harness.wait_for_visual_capture_padding()
+
 	assert_true(host_door.is_opened, "Host door should be open")
 	assert_true(client_door.is_opened, "Client door should be open")
 
@@ -91,34 +125,55 @@ func test_client_opens_door_and_can_pass_through() -> void:
 	harness = MultiplayerHarnessScript.new()
 	add_child_autoqfree(harness)
 	await harness.setup_with_players(24572, 180)
-	harness.start_visual_capture("door_open_sync_client")
+	harness.start_visual_capture("Client opens door")
 	await harness.wait_for_visual_capture_padding()
 
 	var host_player = harness.host_player as PlayerScript
 	var client_player = harness.client_player as PlayerScript
 	var host_client_player = harness.host_remote_player as PlayerScript
+	var client_host_player = harness.client_remote_player as PlayerScript
 
 	assert_not_null(host_player, "Host player should exist")
 	assert_not_null(client_player, "Client player should exist")
 	assert_not_null(host_client_player, "Host should have client player")
+	assert_not_null(client_host_player, "Client should have host player")
 
-	host_player.set_physics_process(false)
-	host_player.set_process_input(false)
-
-	var arena_origin = Vector3(1100, 0, 1100)
-	var door_local_position = Vector3(0, 0, 3)
-	var door_pair = _create_door_pair(arena_origin, door_local_position)
+	var door_pair = _resolve_door_pair(client_player.global_position)
 	var host_door = door_pair.host_door
 	var client_door = door_pair.client_door
-	var client_door_target = door_pair.target_position
-	await get_tree().process_frame
+	harness.disable_other_interactibles(harness.host_world, host_door)
+	harness.disable_other_interactibles(harness.client_world, client_door)
+	var door_target = _get_interactable_target_position(client_door)
+	var door_axis = _get_door_axis(client_door)
+	var interaction_offset = _get_interaction_offset(client_player, client_door)
+	var approach_offset = interaction_offset + 0.8
+	var passage_offset = _get_passage_offset(client_player, client_door)
+	var passage_distance = 0.6
+	var safe_offset = _get_safe_offset(host_player, client_door)
+	var client_ground = harness.resolve_ground_position(harness.client_world, door_target, client_player.global_position.y, [client_door.get_rid()])
+	var host_ground = harness.resolve_ground_position(harness.host_world, _get_interactable_target_position(host_door), host_player.global_position.y, [host_door.get_rid()])
+	var door_forward = _select_clear_axis(harness.client_world, client_ground, door_axis, _get_door_excludes(client_door))
+	var client_start = _calculate_side_position(client_ground, door_forward, approach_offset)
+	var client_interact = _calculate_side_position(client_ground, door_forward, interaction_offset)
+	var host_start = _calculate_side_position(host_ground, door_forward, -safe_offset)
 
-	await _position_player_for_interaction(client_player, client_door, client_door_target)
+	_set_player_position(client_player, client_start)
+	_set_player_position(host_player, host_start)
+	await get_tree().physics_frame
+	client_start = client_player.global_position
+	host_start = host_player.global_position
+	await _wait_for_player_sync(host_client_player, client_player, "client_initial_position_synced")
+	await _wait_for_player_sync(client_host_player, host_player, "host_initial_position_synced")
+	await harness.wait_for_visual_capture_padding()
+
+	_set_player_active(host_player, false)
+	await _move_player_towards(client_player, client_interact, 0.2, _max_frames_for_distance(_horizontal_distance(client_player.global_position, client_interact), client_player.base_move_speed), "client_interact", false)
+	await InputTestUtils.press_interact_for_player(get_tree(), client_player)
+	_set_player_active(host_player, true)
+	await harness.wait_for_visual_capture_padding()
 
 	assert_true(client_door.multiplayer.has_multiplayer_peer(), "Client door should have multiplayer peer")
 	assert_false(client_door.multiplayer.is_server(), "Client door should be non-authority")
-
-	await InputTestUtils.press_action(get_tree(), "interact")
 
 	await harness.wait_for_physics_condition(
 		func(): return host_door.is_opened,
@@ -130,59 +185,58 @@ func test_client_opens_door_and_can_pass_through() -> void:
 		120,
 		"client_door_rotation_open"
 	)
-
-	var passage_offset = client_player.interact_radius + 1.0
-	var passage_target = _calculate_passage_position(client_door, passage_offset)
-	var passage_distance = _horizontal_distance(client_player.global_position, passage_target)
-	var passage_frames = _max_frames_for_distance(passage_distance, client_player.run_move_speed)
-	await _move_player_towards(client_player, passage_target, 0.2, passage_frames, "passage")
-
 	await harness.wait_for_physics_condition(
-		func(): return host_client_player.position.distance_to(client_player.position) <= 0.05,
+		func(): return _horizontal_distance(host_player.global_position, host_start) <= 0.05,
 		120,
-		"client_position_passed_door_on_host"
+		"host_not_pushed_by_door"
 	)
+	await harness.wait_for_visual_capture_padding()
+
+	var client_passage_target = _calculate_side_position(client_ground, door_forward, -passage_offset)
+	await _move_player_towards(client_player, client_passage_target, passage_distance, _max_frames_for_distance(_horizontal_distance(client_player.global_position, client_passage_target), client_player.run_move_speed), "client_passage", true)
+	await _wait_for_player_sync(host_client_player, client_player, "client_passage_synced")
+	await harness.wait_for_visual_capture_padding()
+
+	_set_player_active(client_player, false)
+	var host_passage_target = _calculate_side_position(host_ground, door_forward, passage_offset)
+	await _move_player_towards(host_player, host_passage_target, passage_distance, _max_frames_for_distance(_horizontal_distance(host_player.global_position, host_passage_target), host_player.run_move_speed), "host_passage", true)
+	await _wait_for_player_sync(client_host_player, host_player, "host_passage_synced")
+	_set_player_active(client_player, true)
+	await harness.wait_for_visual_capture_padding()
 
 func _horizontal_distance(from: Vector3, to: Vector3) -> float:
 	return Vector2(from.x, from.z).distance_to(Vector2(to.x, to.z))
 
-func _create_door_pair(arena_origin: Vector3, door_local_position: Vector3) -> DoorPair:
-	var host_arena = TestArenaFactory.create(harness.host_world, arena_origin)
-	var client_arena = TestArenaFactory.create(harness.client_world, arena_origin)
-	var host_door = _spawn_test_door(host_arena, door_local_position)
-	var client_door = _spawn_test_door(client_arena, door_local_position)
-	var target_position = _get_interactable_target_position(client_door)
-	return DoorPair.new(host_door, client_door, target_position)
+func _resolve_door_pair(origin: Vector3) -> DoorPair:
+	var host_root = _find_nearest_door_root(harness.host_world, origin)
+	var door_name = host_root.name
+	var host_door = _get_world_door_receiver(harness.host_world, door_name)
+	var client_door = _get_world_door_receiver(harness.client_world, door_name)
+	return DoorPair.new(host_door, client_door)
 
-func _position_player_for_interaction(player: PlayerScript, door: Node3D, target_position: Vector3) -> void:
-	var start_offset = player.interact_radius + 1.0
-	var start_position = _calculate_start_position(door, start_offset)
-	player.global_position = start_position
-	player.velocity = Vector3.ZERO
-	await get_tree().physics_frame
+func _find_nearest_door_root(world: Node, origin: Vector3) -> Node3D:
+	var doors_root = world.get_node("Interactibles/Doors") as Node
+	assert(doors_root != null)
+	var closest: Node3D = null
+	var best_distance := INF
+	for child in doors_root.get_children():
+		var door_root = child as Node3D
+		if door_root == null:
+			continue
+		var receiver = door_root.get_node_or_null("Receiver") as Node3D
+		if receiver == null:
+			continue
+		var distance = receiver.global_position.distance_to(origin)
+		if distance < best_distance:
+			best_distance = distance
+			closest = door_root
+	assert(closest != null)
+	return closest
 
-	var vertical_distance = absf(player.global_position.y - target_position.y)
-	var max_horizontal = sqrt(maxf(player.interact_radius * player.interact_radius - vertical_distance * vertical_distance, 0.01))
-	var target_distance = maxf(max_horizontal * 0.9, 0.1)
-	var initial_distance = _horizontal_distance(player.global_position, target_position)
-	var max_frames = _max_frames_for_distance(initial_distance - target_distance, player.run_move_speed)
-	await _move_player_towards(player, target_position, target_distance, max_frames, "door")
-
-	await harness.wait_for_physics_condition(
-		func(): return player.closest_item == door,
-		120,
-		"door_is_closest_interactable"
-	)
-
-	var distance_to_door = player.global_position.distance_to(target_position)
-	assert_true(distance_to_door <= player.interact_radius, "Player should be within interact radius")
-
-func _spawn_test_door(arena: Node3D, local_position: Vector3) -> Node3D:
-	var door_instance = DoorScene.instantiate()
-	door_instance.name = "TestDoor"
-	door_instance.position = local_position
-	arena.add_child(door_instance)
-	var receiver = door_instance.get_node("Receiver") as Node3D
+func _get_world_door_receiver(world: Node, door_name: String) -> Node3D:
+	var door_root = world.get_node("Interactibles/Doors/%s" % door_name) as Node3D
+	assert(door_root != null)
+	var receiver = door_root.get_node("Receiver") as Node3D
 	assert(receiver != null)
 	return receiver
 
@@ -191,24 +245,40 @@ func _get_interactable_target_position(door: Node3D) -> Vector3:
 	assert(collider != null)
 	return collider.global_position
 
-func _calculate_start_position(door: Node3D, offset_distance: float) -> Vector3:
-	var door_position = _get_interactable_target_position(door)
-	var forward = door.global_transform.basis.z.normalized()
-	return door_position - forward * offset_distance
+func _get_door_axis(door: Node3D) -> Vector3:
+	var parent = door.get_parent() as Node3D
+	assert(parent != null)
+	if is_equal_approx(parent.rotation.y, 0.0):
+		return Vector3(0, 0, 1)
+	return Vector3(1, 0, 0)
 
-func _calculate_passage_position(door: Node3D, offset_distance: float) -> Vector3:
-	var door_position = _get_interactable_target_position(door)
-	var forward = door.global_transform.basis.z.normalized()
-	return door_position + forward * offset_distance
+func _get_door_excludes(door: Node3D) -> Array:
+	var body = door.get("body") as CollisionObject3D
+	assert(body != null)
+	return [door.get_rid(), body.get_rid()]
 
-func _input_vector_towards(player: CharacterBody3D, target_position: Vector3) -> Vector2:
-	var offset = target_position - player.global_position
-	offset.y = 0.0
-	if offset.length() == 0.0:
-		return Vector2.ZERO
-	var direction = offset.normalized()
-	var input_direction = direction.rotated(Vector3.UP, -player.camera_utils.camera_yaw_offset)
-	return Vector2(input_direction.x, input_direction.z)
+func _select_clear_axis(world: Node3D, origin: Vector3, axis: Vector3, exclude: Array) -> Vector3:
+	var space = world.get_world_3d().direct_space_state
+	var normalized = axis.normalized()
+	var start = origin + Vector3(0, 1.0, 0)
+	var distance = 3.5
+	var exclude_rids = InputTestUtils.resolve_exclude_rids(exclude)
+	var forward_clear = _is_ray_clear(space, start, normalized, distance, exclude_rids)
+	var backward_clear = _is_ray_clear(space, start, -normalized, distance, exclude_rids)
+	if forward_clear and not backward_clear:
+		return normalized
+	if backward_clear and not forward_clear:
+		return -normalized
+	return normalized
+
+func _is_ray_clear(space, start: Vector3, direction: Vector3, distance: float, exclude_rids: Array) -> bool:
+	var query = PhysicsRayQueryParameters3D.create(start, start + direction * distance)
+	if not exclude_rids.is_empty():
+		query.exclude = exclude_rids
+	return space.intersect_ray(query).is_empty()
+
+func _calculate_side_position(target_position: Vector3, forward: Vector3, offset_distance: float) -> Vector3:
+	return target_position + forward * offset_distance
 
 func _max_frames_for_distance(distance: float, speed: float) -> int:
 	var remaining_distance = maxf(distance, 0.0)
@@ -218,22 +288,44 @@ func _max_frames_for_distance(distance: float, speed: float) -> int:
 	var estimated_frames = int(ceil((remaining_distance / resolved_speed) * ticks_per_second / time_scale * 1.5))
 	return maxi(estimated_frames, 30)
 
-func _move_player_towards(player: CharacterBody3D, target_position: Vector3, target_distance: float, max_frames: int, label: String) -> void:
-	var input_vector = _input_vector_towards(player, target_position)
-	InputTestUtils.apply_movement_input(input_vector, true)
-	var frames = 0
-	var distance = _horizontal_distance(player.global_position, target_position)
-	while frames < max_frames and distance > target_distance:
-		await get_tree().physics_frame
-		distance = _horizontal_distance(player.global_position, target_position)
-		frames += 1
-	InputTestUtils.release_movement_inputs()
-	if distance > target_distance and _is_visual_capture_enabled():
-		player.global_position = target_position
-		player.velocity = Vector3.ZERO
-		await get_tree().physics_frame
-		distance = _horizontal_distance(player.global_position, target_position)
+func _move_player_towards(player: PlayerScript, target_position: Vector3, target_distance: float, max_frames: int, label: String, run: bool) -> void:
+	var distance = await InputTestUtils.move_player_towards(get_tree(), player, target_position, run, target_distance, max_frames)
 	assert_true(distance <= target_distance, "Player should reach %s" % label)
+
+func _set_player_active(player: PlayerScript, active: bool) -> void:
+	player.set_physics_process(active)
+	player.set_process_input(active)
+
+func _set_player_position(player: PlayerScript, position: Vector3) -> void:
+	player.global_position = position
+	player.velocity = Vector3.ZERO
+
+func _wait_for_player_sync(remote_player: PlayerScript, source_player: PlayerScript, label: String) -> void:
+	await harness.wait_for_physics_condition(
+		func(): return remote_player.global_position.distance_to(source_player.global_position) <= 0.05,
+		120,
+		label
+	)
+
+func _get_safe_offset(player: PlayerScript, door: Node3D) -> float:
+	var collider = door.get_node("CollisionShape3D") as CollisionShape3D
+	assert(collider != null)
+	var shape = collider.shape as BoxShape3D
+	assert(shape != null)
+	return player.interact_radius + maxf(shape.size.x, shape.size.z)
+
+func _get_interaction_offset(player: PlayerScript, door: Node3D) -> float:
+	var collider = door.get_node("CollisionShape3D") as CollisionShape3D
+	assert(collider != null)
+	var vertical_distance = absf(collider.global_position.y - player.global_position.y)
+	var radius = player.interact_radius
+	var max_horizontal = radius
+	if vertical_distance < radius:
+		max_horizontal = sqrt(radius * radius - vertical_distance * vertical_distance)
+	return maxf(max_horizontal * 0.8, 0.4)
+
+func _get_passage_offset(player: PlayerScript, door: Node3D) -> float:
+	return player.interact_radius + 1.0
 
 func _is_visual_capture_enabled() -> bool:
 	return harness != null and harness.is_visual_capture_enabled()

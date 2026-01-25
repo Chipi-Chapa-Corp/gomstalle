@@ -85,7 +85,7 @@ func _update_collision_ignore() -> void:
 func _try_stun_collisions(previous_velocity: Vector3) -> void:
 	if not multiplayer.has_multiplayer_peer():
 		return
-	if multiplayer.get_unique_id() != 1:
+	if not multiplayer.is_server():
 		return
 	var impact_velocity = previous_velocity
 	if chair.linear_velocity.length() > impact_velocity.length():

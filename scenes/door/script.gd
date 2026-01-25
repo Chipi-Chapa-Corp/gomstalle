@@ -30,9 +30,10 @@ func perform_interact(enable: bool, metadata: Dictionary) -> void:
 	var player_position: Vector3 = metadata.get("position", Vector3.ZERO)
 	var door_position: Vector3 = body.global_transform.origin
 	var axis_value: float = (player_position.z - door_position.z) if ORIENTATION == "horizontal" else (player_position.x - door_position.x)
-	var is_currently_open = not is_equal_approx(open_rotation_degrees, 0.0)
-	var target: float = 0.0 if is_currently_open else signf(axis_value) * 90.0 if enable else 0.0
-	open_rotation_degrees = target
+	var target_rotation := 0.0
+	if enable and not is_opened:
+		target_rotation = signf(axis_value) * 90.0
+	open_rotation_degrees = target_rotation
 
 func _apply_rotation(target: float) -> void:
 	is_opened = not is_equal_approx(target, 0.0)

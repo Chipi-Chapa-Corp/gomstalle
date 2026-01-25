@@ -9,8 +9,8 @@ extends CharacterBody3D
 @onready var portal_indicator_utils := CharacterPortalIndicatorUtils.new(self)
 
 @onready var inventory := CharacterInventory.new(self)
-@onready var hud: Control = $"2D/HUD"
 
+@export var hud: Control
 @export var inventory_wood_label: Label
 @export var wall_through_material_override: Material
 @export var hider_parts: Node3D
@@ -96,7 +96,6 @@ func _on_before_spawn(data: Dictionary) -> void:
 
 func _ready() -> void:
 	add_child(inventory)
-	add_to_group("players")
 	assert(camera != null)
 	assert(portal_indicator != null)
 	assert(portal_indicator_through_walls != null)
@@ -169,7 +168,6 @@ func set_dead(state: bool) -> void:
 @rpc("any_peer", "call_local", "reliable")
 func apply_attack_kill(target_peer_id: int) -> void:
 	var target = Utils.find_player_in_branch(target_peer_id, multiplayer)
-	assert(target != null)
 	target.set_dead(true)
 
 func _on_game_state_changed(state: GameState.State) -> void:

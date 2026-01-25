@@ -28,8 +28,6 @@ func _ready():
 		multiplayer_manager = MultiplayerManager
 	if spawner == null:
 		spawner = Spawner
-	assert(multiplayer_manager != null)
-	assert(spawner != null)
 	player_list_utils = WorldPlayerListUtils.new(self, spawner)
 	portal_utils = WorldPortalUtils.new(self)
 	shrine_utils = WorldShrineUtils.new(self)
@@ -44,7 +42,7 @@ func _ready():
 	shrine_utils.register_shrines()
 
 func _on_start_pressed():
-	if not multiplayer.is_server():
+	if not multiplayer_manager.is_host:
 		return
 	start_button.visible = false
 	var result := GameState.start_game()

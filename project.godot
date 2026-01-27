@@ -26,6 +26,7 @@ SteamManager="*res://globals/SteamManager.gd"
 GameState="*res://globals/GameState.gd"
 MultiplayerManager="*res://globals/MultiplayerManager.gd"
 Utils="*res://globals/Utils.gd"
+WwiseRuntimeManager="*res://addons/Wwise/runtime/wwise_runtime_manager.gd"
 
 [editor_plugins]
 
@@ -109,3 +110,8 @@ skill_1={
 
 3d/physics_engine="Jolt Physics"
 3d/default_gravity=12.0
+
+[wwise]
+
+common_user_settings/root_output_path="res://soundbanks"
+project_settings/create_subfolders_for_generated_files=true

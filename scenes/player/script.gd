@@ -10,6 +10,7 @@ extends CharacterBody3D
 
 @onready var inventory := CharacterInventory.new(self)
 
+@export var hud: Control
 @export var inventory_wood_label: Label
 @export var wall_through_material_override: Material
 @export var hider_parts: Node3D
@@ -98,6 +99,7 @@ func _ready() -> void:
 	assert(camera != null)
 	assert(portal_indicator != null)
 	assert(portal_indicator_through_walls != null)
+	hud.visible = is_multiplayer_authority()
 	hand.transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
 	camera_utils.initialize(deg_to_rad(45.0))
 	if is_multiplayer_authority():

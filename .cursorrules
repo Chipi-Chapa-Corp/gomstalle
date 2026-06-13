@@ -19,6 +19,8 @@ STRICTLY FOLLOW THESE INSTRUCTIONS:
 - Never use single-letter variables, instead use only descriptive names. This applies to all variables including lambda arguments
 - Never create relay/empty functions
 - Never write "just in case" code which is not necessary (such as extra nullifying)
+- Do not create or edit Godot UIDs by hand; generate them only via Godot import
+- Avoid defensive null checks on critical objects; if something essential is missing, fail fast instead of hiding the issue
 
 STRICTLY FOLLOW THESE COMMIT CONVENTIONS:
 - Always use `feat: message` for new features. Never add "implement" or "add", write the feature right after feat:

@@ -17,22 +17,27 @@ extends Node3D
 @export var portal_camera_return_duration: float = 1.5
 @export var portal_open_hold_duration: float = 1.0
 
-@onready var player_list_utils := WorldPlayerListUtils.new(self)
-@onready var portal_utils := WorldPortalUtils.new(self)
-@onready var shrine_utils := WorldShrineUtils.new(self)
+var multiplayer_manager: Node = MultiplayerManager
+var spawner: Node = Spawner
+var player_list_utils: WorldPlayerListUtils
+var portal_utils: WorldPortalUtils
+var shrine_utils: WorldShrineUtils
 
 func _ready():
+	player_list_utils = WorldPlayerListUtils.new(self, spawner)
+	portal_utils = WorldPortalUtils.new(self)
+	shrine_utils = WorldShrineUtils.new(self)
 	player_list_utils.initialize()
-	Spawner.set_path(player_container.get_path())
-	MultiplayerManager.peer_connected.connect(player_list_utils.handle_peer_connected)
-	MultiplayerManager.peer_list_changed.connect(player_list_utils.handle_peer_list_changed)
-	var result := MultiplayerManager.join_multiplayer(multiplayer)
+	spawner.set_path(player_container.get_path())
+	multiplayer_manager.peer_connected.connect(player_list_utils.handle_peer_connected)
+	multiplayer_manager.peer_list_changed.connect(player_list_utils.handle_peer_list_changed)
+	var result = multiplayer_manager.join_multiplayer(multiplayer)
 	if result != OK:
 		push_error("Error: Failed to create or connect to server")
 	shrine_utils.register_shrines()
 
 func _on_start_pressed():
-	if not MultiplayerManager.is_host:
+	if not multiplayer_manager.is_host:
 		return
 	start_button.visible = false
 	var result := GameState.start_game()
@@ -50,8 +55,8 @@ func _on_quit_pressed() -> void:
 	GameState.quit(multiplayer)
 
 func _exit_tree() -> void:
-	MultiplayerManager.peer_connected.disconnect(player_list_utils.handle_peer_connected)
-	MultiplayerManager.peer_list_changed.disconnect(player_list_utils.handle_peer_list_changed)
+	multiplayer_manager.peer_connected.disconnect(player_list_utils.handle_peer_connected)
+	multiplayer_manager.peer_list_changed.disconnect(player_list_utils.handle_peer_list_changed)
 	shrine_utils.cleanup()
 
 @rpc("any_peer", "call_local", "reliable")

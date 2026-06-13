@@ -87,6 +87,10 @@ func handle_attacked_body(body: Node3D) -> void:
 	if character.is_dead or not character.is_hunter:
 		return
 	if body is CharacterBody3D and not body.is_hunter:
-		body.set_dead(true)
+		var peer_id = body.get_multiplayer_authority()
+		var peer_id_value = body.get("peer_id")
+		if peer_id_value != null:
+			peer_id = int(peer_id_value)
+		character.rpc("apply_attack_kill", peer_id)
 	elif body.is_in_group("attackable"):
 		body.on_attacked()

@@ -25,12 +25,24 @@ func join_multiplayer(multiplayer_api: MultiplayerAPI) -> Error:
 		multiplayer_api.peer_connected.connect(_on_peer_connected)
 	if not multiplayer_api.peer_disconnected.is_connected(_on_peer_disconnected):
 		multiplayer_api.peer_disconnected.connect(_on_peer_disconnected)
+	if not multiplayer_api.connected_to_server.is_connected(_on_connected_to_server):
+		multiplayer_api.connected_to_server.connect(_on_connected_to_server)
 	var result := _create_server(multiplayer_api) if is_host else _connect_to_server(multiplayer_api)
-	if result == OK:
+	if result == OK and is_host:
 		_seed_players(multiplayer_api)
 	return result
 
 func _create_server(multiplayer_api: MultiplayerAPI) -> Error:
+	if _is_local_backend():
+		return _create_local_server(multiplayer_api)
+	return _create_steam_server(multiplayer_api)
+
+func _connect_to_server(multiplayer_api: MultiplayerAPI) -> Error:
+	if _is_local_backend():
+		return _connect_local_server(multiplayer_api)
+	return _connect_steam_server(multiplayer_api)
+
+func _create_steam_server(multiplayer_api: MultiplayerAPI) -> Error:
 	var peer = SteamMultiplayerPeer.new()
 	var result := peer.host_with_lobby(SteamManager.current_lobby_id)
 	if result == OK:
@@ -41,7 +53,7 @@ func _create_server(multiplayer_api: MultiplayerAPI) -> Error:
 		push_error("Error: Failed to host with lobby")
 		return FAILED
 
-func _connect_to_server(multiplayer_api: MultiplayerAPI) -> Error:
+func _connect_steam_server(multiplayer_api: MultiplayerAPI) -> Error:
 	var peer = SteamMultiplayerPeer.new()
 	var result := peer.connect_to_lobby(SteamManager.current_lobby_id)
 	if result == OK:
@@ -51,10 +63,36 @@ func _connect_to_server(multiplayer_api: MultiplayerAPI) -> Error:
 		push_error("Error: Failed to connect to lobby")
 		return FAILED
 
+func _create_local_server(multiplayer_api: MultiplayerAPI) -> Error:
+	var peer := ENetMultiplayerPeer.new()
+	var result := peer.create_server(Settings.local_port, Settings.local_max_clients)
+	if result == OK:
+		multiplayer_api.multiplayer_peer = peer
+		peer_connected.emit(multiplayer_api.get_unique_id())
+		return OK
+	push_error("Error: Failed to create local server")
+	return FAILED
+
+func _connect_local_server(multiplayer_api: MultiplayerAPI) -> Error:
+	var peer := ENetMultiplayerPeer.new()
+	var result := peer.create_client(Settings.local_host, Settings.local_port)
+	if result == OK:
+		multiplayer_api.multiplayer_peer = peer
+		return OK
+	push_error("Error: Failed to connect to local server")
+	return FAILED
+
+func _is_local_backend() -> bool:
+	return Settings.network_backend == NetworkConfig.BACKEND_LOCAL
+
 func _on_peer_connected(peer_id: int) -> void:
 	_add_player_metadata(peer_id)
 	peer_list_changed.emit(connected_players_metadata)
 	peer_connected.emit(peer_id)
+
+func _on_connected_to_server() -> void:
+	_add_player_metadata(multiplayer.get_unique_id())
+	peer_list_changed.emit(connected_players_metadata)
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	_remove_player_metadata(peer_id)

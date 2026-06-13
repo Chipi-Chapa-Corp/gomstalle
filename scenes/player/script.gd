@@ -103,7 +103,10 @@ func _ready() -> void:
 	if is_multiplayer_authority():
 		camera.set_as_top_level(true)
 		camera.make_current()
-		label.text = Steam.getPersonaName()
+		if SteamManager.is_ready():
+			label.text = Steam.getPersonaName()
+		else:
+			label.text = str(peer_id)
 		label.visible = false
 	else:
 		camera.current = false
@@ -112,8 +115,6 @@ func _ready() -> void:
 	portal_indicator.top_level = true
 	portal_indicator.visible = false
 	portal_indicator_through_walls.visible = false
-
-	print("player ready, process %s" % is_physics_processing())
 
 	attack_hitbox.monitoring = false
 

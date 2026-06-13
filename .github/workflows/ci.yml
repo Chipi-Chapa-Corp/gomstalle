@@ -103,6 +103,89 @@ jobs:
             exit 1
           fi
 
+  visual-tests:
+    name: GUT Visual Tests (mp4)
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.5.1
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Trust workspace for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          SOUND_PKG="libasound2"
+          if apt-cache show libasound2t64 >/dev/null 2>&1; then
+            SOUND_PKG="libasound2t64"
+          fi
+          apt-get install -y curl tar python3 unzip xz-utils \
+            libgl1-mesa-dev libx11-6 libxext6 libxi6 libxrandr2 libxrender1 \
+            libxcursor1 libxinerama1 libfreetype6 libfontconfig1 "$SOUND_PKG" \
+            libxkbcommon0 \
+            libwayland-client0 libwayland-cursor0 libwayland-egl1 libdecor-0-0 \
+            libdbus-1-3 libgtk-3-0 \
+            xvfb ffmpeg
+
+      - name: Run visual tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPORT_DIR="$GITHUB_WORKSPACE/.ci"
+          VIDEO_DIR="$REPORT_DIR/visual-tests"
+          VIDEO_FPS=10
+          mkdir -p "$VIDEO_DIR"
+          STEAM_APP_ID=480
+          echo "$STEAM_APP_ID" > steam_appid.txt
+          GODOT_LOG_LEVEL=warn \
+          USE_STEAMGODOT=1 \
+          GODOT_HEADLESS=0 \
+            GODOT_IMPORT_DISABLE_EDITOR_PLUGINS=1 \
+            STEAM_APP_ID="$STEAM_APP_ID" \
+            GOMSTALLE_TEST_VIDEO=1 \
+            GOMSTALLE_TEST_VIDEO_FPS="$VIDEO_FPS" \
+            GOMSTALLE_TEST_VIDEO_DIR="$VIDEO_DIR" \
+            GODOT_RUNNER="xvfb-run -a" \
+            ./scripts/run_tests.sh
+
+          if [ -d "$VIDEO_DIR" ]; then
+            concat_list="$VIDEO_DIR/concat.txt"
+            : > "$concat_list"
+            for test_dir in "$VIDEO_DIR"/*; do
+              frames_dir="$test_dir/frames"
+              if [ -d "$frames_dir" ] && ls "$frames_dir"/frame_*.png >/dev/null 2>&1; then
+                test_name="$(basename "$test_dir")"
+                ffmpeg -y -framerate "$VIDEO_FPS" -i "$frames_dir/frame_%06d.png" \
+                  -c:v libx264 -pix_fmt yuv420p "$test_dir/${test_name}.mp4"
+                rm -rf "$frames_dir"
+                printf "file '%s'\n" "$test_dir/${test_name}.mp4" >> "$concat_list"
+              elif [ -d "$frames_dir" ]; then
+                rm -rf "$frames_dir"
+              fi
+            done
+            if [ -s "$concat_list" ]; then
+              ffmpeg -y -f concat -safe 0 -i "$concat_list" -c:v libx264 -pix_fmt yuv420p \
+                "$REPORT_DIR/gomstalle-visual-tests.mp4"
+            else
+              echo "No visual frames captured"
+              exit 1
+            fi
+          fi
+
+      - name: Upload visual artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gomstalle-visual-tests.mp4
+          path: ${{ github.workspace }}/.ci/gomstalle-visual-tests.mp4
+          if-no-files-found: error
+
   build:
     name: Build ${{ matrix.config_name }} ${{ matrix.platform_name }} artifact
     runs-on: ubuntu-24.04

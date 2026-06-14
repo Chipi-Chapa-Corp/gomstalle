@@ -71,14 +71,9 @@ func _collect_floor_candidates() -> Array[PortalCandidate]:
 	var candidates: Array[PortalCandidate] = []
 	if world.grid_map == null or world.grid_map.mesh_library == null:
 		return candidates
-	var used_cells: Array[Vector3i] = world.grid_map.get_used_cells()
-	for cell in used_cells:
+	var floor_cells = Utils.get_floor_cells(world.grid_map)
+	for cell in floor_cells:
 		var item_id = world.grid_map.get_cell_item(cell)
-		if item_id < 0:
-			continue
-		var item_name = world.grid_map.mesh_library.get_item_name(item_id)
-		if not item_name.begins_with("floor_"):
-			continue
 		var candidate_position = world.grid_map.to_global(world.grid_map.map_to_local(cell))
 		candidates.append(PortalCandidate.new(cell, item_id, candidate_position))
 	return candidates
@@ -140,7 +135,7 @@ func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 	var direction = world.grid_map.global_transform.basis.x
 	if direction.length() == 0.0:
 		direction = Vector3.RIGHT
-	var down = -world.grid_map.global_transform.basis.y
+	var down = - world.grid_map.global_transform.basis.y
 	if down.length() == 0.0:
 		down = Vector3.DOWN
 	return (direction.normalized() * tile_size + down.normalized() * tile_height * 0.25) * world.portal_tile_slide_distance_multiplier

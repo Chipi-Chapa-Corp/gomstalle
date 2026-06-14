@@ -13,8 +13,9 @@ CLIENT_DIR="$OUTPUT_DIR/client"
 HOST_RESULT="$OUTPUT_DIR/host_result.json"
 CLIENT_RESULT="$OUTPUT_DIR/client_result.json"
 
-rm -rf "$OUTPUT_DIR"
+rm -rf "$OUTPUT_DIR" 2>/dev/null || true
 mkdir -p "$HOST_DIR" "$CLIENT_DIR"
+rm -f "$HOST_DIR"/frame_*.png "$CLIENT_DIR"/frame_*.png "$OUTPUT_DIR"/pair_*.png 2>/dev/null || true
 
 if [ "$USE_STEAMGODOT" != "0" ]; then
   ./scripts/setup_godot_steam.sh

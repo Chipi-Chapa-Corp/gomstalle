@@ -7,8 +7,19 @@ extends NinePatchRect
 @export var lobby_fetch_timer: Timer
 
 func _ready() -> void:
-	SteamManager.lobby_match_list_updated.connect(_set_rooms)
-	lobby_fetch_timer.timeout.connect(func(): SteamManager.refresh_lobby_list())
+	NetworkManager.lobby_match_list_updated.connect(_set_rooms)
+	lobby_fetch_timer.timeout.connect(func(): NetworkManager.refresh_lobby_list())
+	_handle_dev_autostart()
+
+func _handle_dev_autostart() -> void:
+	if not NetworkManager.is_dev_mode():
+		return
+	var args := OS.get_cmdline_args()
+	var connect_index := args.find("+connect_lobby")
+	if connect_index != -1 and connect_index + 1 < args.size():
+		_on_join_room_pressed({"id": int(args[connect_index + 1])})
+	elif args.has("--host"):
+		_on_host_pressed()
 
 func _on_join_pressed() -> void:
 	join_section.visible = true
@@ -51,4 +62,4 @@ func _on_start() -> void:
 	GameState.enter_lobby()
 
 func _exit_tree() -> void:
-	SteamManager.lobby_match_list_updated.disconnect(_set_rooms)
+	NetworkManager.lobby_match_list_updated.disconnect(_set_rooms)

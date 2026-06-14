@@ -8,7 +8,7 @@ var _original_room_id: int = 0
 var _original_is_paused := false
 
 func before_each() -> void:
-	_original_metadata = MultiplayerManager.connected_players_metadata.duplicate(true)
+	_original_metadata = NetworkManager.connected_players_metadata.duplicate(true)
 	_original_hunter_id = GameState.hunter_peer_id
 	_original_state = GameState.game_state
 	_original_positions = GameState.start_positions.duplicate(true)
@@ -16,9 +16,9 @@ func before_each() -> void:
 	_original_is_paused = GameState.is_paused
 
 func after_each() -> void:
-	MultiplayerManager.connected_players_metadata.clear()
+	NetworkManager.connected_players_metadata.clear()
 	for metadata in _original_metadata:
-		MultiplayerManager.connected_players_metadata.append(metadata)
+		NetworkManager.connected_players_metadata.append(metadata)
 	GameState.hunter_peer_id = _original_hunter_id
 	GameState.game_state = _original_state
 	GameState.start_positions = _original_positions.duplicate(true)
@@ -26,9 +26,9 @@ func after_each() -> void:
 	GameState.is_paused = _original_is_paused
 
 func _set_peers(peer_ids: Array[int]) -> void:
-	MultiplayerManager.connected_players_metadata.clear()
+	NetworkManager.connected_players_metadata.clear()
 	for peer_id in peer_ids:
-		MultiplayerManager.connected_players_metadata.append({"peer_id": peer_id})
+		NetworkManager.connected_players_metadata.append({"peer_id": peer_id})
 
 func test_calculate_positions_single_player() -> void:
 	_set_peers([1])

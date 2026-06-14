@@ -103,7 +103,10 @@ func _ready() -> void:
 	if is_multiplayer_authority():
 		camera.set_as_top_level(true)
 		camera.make_current()
-		label.text = Steam.getPersonaName()
+		if not NetworkManager.is_dev_mode() and NetworkManager.is_ready():
+			label.text = Steam.getPersonaName()
+		else:
+			label.text = str(peer_id)
 		label.visible = false
 	else:
 		camera.current = false
@@ -112,8 +115,6 @@ func _ready() -> void:
 	portal_indicator.top_level = true
 	portal_indicator.visible = false
 	portal_indicator_through_walls.visible = false
-
-	print("player ready, process %s" % is_physics_processing())
 
 	attack_hitbox.monitoring = false
 
@@ -147,6 +148,52 @@ func _physics_process(delta: float) -> void:
 
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)
+
+func request_stun(timeout: float) -> void:
+	if is_dead or is_stunned:
+		return
+	rpc_id(1, "_stun_request", timeout)
+
+@rpc("any_peer", "call_local", "reliable")
+func _stun_request(timeout: float) -> void:
+	if not multiplayer.is_server() or is_dead or is_stunned:
+		return
+	rpc("apply_stun", timeout)
+
+@rpc("any_peer", "call_local", "reliable")
+func apply_stun(timeout: float) -> void:
+	if is_dead or is_stunned:
+		return
+	stun_effect.play()
+	is_stunned = true
+	anim_tree.set("parameters/IW/Walk/blend_position", Vector2.ZERO)
+	anim_tree.set("parameters/IW/Run/blend_position", Vector2.ZERO)
+	anim_tree.set("parameters/IW/MovementState/blend_amount", 0.0)
+	anim_tree.set("parameters/IW/Stun_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	await get_tree().create_timer(timeout).timeout
+	is_stunned = false
+
+func request_kill(target_peer_id: int) -> void:
+	rpc_id(1, "_kill_request", target_peer_id)
+
+@rpc("any_peer", "call_local", "reliable")
+func _kill_request(target_peer_id: int) -> void:
+	if not multiplayer.is_server() or is_dead or not is_hunter:
+		return
+	var target := _find_player(target_peer_id)
+	if target == null or target.is_hunter or target.is_dead:
+		return
+	target.rpc("apply_kill")
+
+@rpc("any_peer", "call_local", "reliable")
+func apply_kill() -> void:
+	set_dead(true)
+
+func _find_player(target_peer_id: int) -> CharacterBody3D:
+	for node in get_tree().get_nodes_in_group("players"):
+		if node.get("peer_id") == target_peer_id:
+			return node
+	return null
 
 func _on_game_state_changed(state: GameState.State) -> void:
 	if state == GameState.State.STARTED:

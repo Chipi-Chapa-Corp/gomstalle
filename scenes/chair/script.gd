@@ -27,8 +27,10 @@ func get_hunter_can_interact() -> bool:
 	return false
 
 func get_can_stun(target: CharacterBody3D, normal: Vector3) -> bool:
-	var relative_velocity = chair.linear_velocity - target.velocity
-	var impact = relative_velocity.dot(normal.normalized())
+	if not can_stun:
+		return false
+	var relative_velocity := chair.linear_velocity - target.velocity
+	var impact := relative_velocity.dot(normal.normalized())
 	return impact >= min_stun_impact
 
 func on_stun() -> void:
@@ -53,48 +55,35 @@ func _physics_process(_delta: float) -> void:
 	if chair.linear_velocity.length() < min_stun_impact and can_stun:
 		can_stun = false
 
-func perform_interact(enable: bool, metadata: Dictionary):
-	var interaction_data := metadata.duplicate(true)
-	var hand: RemoteTransform3D = Utils.resolve_node(interaction_data.get("hand"))
-	var target: CharacterBody3D = Utils.resolve_node(interaction_data.get("target"))
-	if hand == null:
-		return
-	interaction_data["transform"] = chair.global_transform
+func _build_authoritative_payload(enable: bool, metadata: Dictionary, sender_id: int) -> Dictionary:
+	var payload := super._build_authoritative_payload(enable, metadata, sender_id)
+	payload["transform"] = chair.global_transform
 	if not enable:
-		var throw_direction: Vector3 = interaction_data.get("direction", Vector3.ZERO)
-		var throw_velocity := Vector3.ZERO
-		if throw_direction != Vector3.ZERO:
-			throw_velocity = throw_direction.normalized() * THROW_SPEED
-		interaction_data["linear_velocity"] = throw_velocity
-		interaction_data["angular_velocity"] = Vector3(randf() * 4.0, randf() * 4.0, randf() * 4.0)
-	_apply_interaction(enable, hand, target, interaction_data)
-	rpc("sync_interaction", enable, interaction_data)
+		var throw_direction: Vector3 = payload.get("direction", Vector3.ZERO)
+		payload["linear_velocity"] = throw_direction.normalized() * THROW_SPEED if throw_direction != Vector3.ZERO else Vector3.ZERO
+		payload["angular_velocity"] = Vector3(randf() * 4.0, randf() * 4.0, randf() * 4.0)
+	return payload
 
-@rpc("any_peer", "reliable")
-func sync_interaction(enable: bool, metadata: Dictionary) -> void:
-	if multiplayer.is_server():
+func do_interact(enable: bool, payload: Dictionary) -> void:
+	var caller: CharacterBody3D = payload.get("caller")
+	if caller == null:
 		return
-	var hand: RemoteTransform3D = Utils.resolve_node(metadata.get("hand"))
+	var hand := caller.hand as RemoteTransform3D
 	if hand == null:
 		return
-	var target: CharacterBody3D = Utils.resolve_node(metadata.get("target"))
-	_apply_interaction(enable, hand, target, metadata)
-
-func _apply_interaction(enable: bool, hand: RemoteTransform3D, target: CharacterBody3D, metadata: Dictionary) -> void:
-	var chair_transform: Transform3D = metadata.get("transform", chair.global_transform)
-	chair.global_transform = chair_transform
+	chair.global_transform = payload.get("transform", chair.global_transform)
 	if enable:
 		chair.freeze = true
 		hand.remote_path = get_path()
-		_set_collision_exclusion(target, true)
+		_set_collision_exclusion(caller, true)
 		chair.collision_layer = 1 << 0
 		return
 	chair.freeze = false
 	hand.remote_path = ""
-	_set_collision_exclusion(target, false)
+	_set_collision_exclusion(caller, false)
 	chair.collision_layer = collision_layer_enabled
-	chair.linear_velocity = metadata.get("linear_velocity", Vector3.ZERO)
-	chair.angular_velocity = metadata.get("angular_velocity", Vector3.ZERO)
+	chair.linear_velocity = payload.get("linear_velocity", Vector3.ZERO)
+	chair.angular_velocity = payload.get("angular_velocity", Vector3.ZERO)
 	await get_tree().create_timer(0.1).timeout
 	can_stun = true
 

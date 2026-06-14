@@ -14,21 +14,23 @@ func get_is_static() -> bool:
 func get_hunter_can_interact() -> bool:
 	return false
 
-func perform_interact(_enable: bool, metadata: Dictionary) -> void:
-	var target = Utils.resolve_node(metadata.get("target"))
-	if target == null:
+func _can_interact(_enable: bool, _payload: Dictionary) -> bool:
+	return current_amount > 0
+
+func do_interact(_enable: bool, payload: Dictionary) -> void:
+	var caller: CharacterBody3D = payload.get("caller")
+	if caller == null:
 		return
-	var amount: int = min(metadata.get("amount", 1), current_amount)
-	target.inventory.add_item(CharacterInventory.InventoryItem.WOOD, amount)
-	rpc("sync_take", amount)
+	var amount: int = min(payload.get("amount", 1), current_amount)
+	if amount <= 0:
+		return
+	if multiplayer.is_server():
+		caller.inventory.add_item(CharacterInventory.InventoryItem.WOOD, amount)
+	current_amount -= amount
+	label.text = str(current_amount)
+	if current_amount <= 0:
+		get_parent().queue_free()
 
 func _ready():
 	super._ready()
 	label.text = str(current_amount)
-
-@rpc("any_peer", "call_local", "reliable")
-func sync_take(amount: int) -> void:
-	current_amount -= amount
-	label.text = str(current_amount)
-	if current_amount <= 0:
-		get_parent().queue_free() # TODO: Sync

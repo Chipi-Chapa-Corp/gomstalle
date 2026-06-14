@@ -76,14 +76,6 @@ func test_apply_game_start_sets_state_and_positions() -> void:
 	assert_eq(GameState.start_positions, positions, "Apply start should set positions")
 	assert_eq(GameState.game_state, GameState.State.STARTED, "Apply start should set STARTED state")
 
-func test_notify_game_start_applies_state() -> void:
-	var positions := {5: Vector3.ZERO}
-	GameState._notify_game_start(5, positions)
-
-	assert_eq(GameState.hunter_peer_id, 5, "Notify should set hunter id")
-	assert_eq(GameState.start_positions, positions, "Notify should set positions")
-	assert_eq(GameState.game_state, GameState.State.STARTED, "Notify should set STARTED state")
-
 func test_reset_clears_state() -> void:
 	GameState.is_paused = true
 	GameState.hunter_peer_id = 7

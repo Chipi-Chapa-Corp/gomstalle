@@ -27,6 +27,7 @@ func test_do_spawn_player_calls_before_spawn() -> void:
 	assert_not_null(entity, "Spawner should instantiate entity")
 	assert_eq(entity.position, Vector3(1, 2, 3), "Spawn data should set position")
 	assert_eq(entity.peer_id, 7, "Spawn data should set peer id")
+	assert_eq(entity.name, "7", "Spawned node should be named by peer id for branch-local lookup")
 
 func test_do_spawn_without_before_spawn_is_safe() -> void:
 	var spawner := SpawnerScript.new()

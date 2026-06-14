@@ -2,7 +2,7 @@ extends Node
 class_name LocalBackend
 
 const MAX_MEMBERS: int = 10
-const SERVER_PORT: int = 24545
+const DEFAULT_SERVER_PORT: int = 24545
 const DEFAULT_HOST: String = "127.0.0.1"
 const JOIN_RESPONSE_SUCCESS: int = 1
 const DEVELOPMENT_LOBBY_ID: int = 1
@@ -19,6 +19,12 @@ var _peer: ENetMultiplayerPeer
 var _known_lobbies: Dictionary = {}
 var _pending_join_lobby_id: int = 0
 
+func _server_port() -> int:
+	var override := OS.get_environment("GOMSTALLE_LOCAL_PORT")
+	if override.is_valid_int() and int(override) > 0:
+		return int(override)
+	return DEFAULT_SERVER_PORT
+
 func is_ready() -> bool:
 	return _ready_ok
 
@@ -26,7 +32,7 @@ func create_lobby() -> void:
 	leave_lobby()
 
 	_peer = ENetMultiplayerPeer.new()
-	var error := _peer.create_server(SERVER_PORT, MAX_MEMBERS)
+	var error := _peer.create_server(_server_port(), MAX_MEMBERS)
 	if error != OK:
 		lobby_created.emit("Failed to create lobby: " + error_string(error))
 		return
@@ -40,7 +46,7 @@ func join_lobby(_lobby_id: int) -> void:
 	leave_lobby()
 
 	_peer = ENetMultiplayerPeer.new()
-	var error := _peer.create_client(DEFAULT_HOST, SERVER_PORT)
+	var error := _peer.create_client(DEFAULT_HOST, _server_port())
 	if error != OK:
 		lobby_joined.emit("Could not reach the host.")
 		return

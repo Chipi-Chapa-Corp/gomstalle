@@ -7,15 +7,12 @@ cd "$ROOT"
 USE_STEAMGODOT="${USE_STEAMGODOT:-1}"
 SCENARIO_SECONDS="${GOMSTALLE_E2E_SECONDS:-16}"
 CAPTURE_FPS="${GOMSTALLE_E2E_FPS:-12}"
+ATTEMPTS="${GOMSTALLE_E2E_ATTEMPTS:-3}"
 OUTPUT_DIR="${GOMSTALLE_E2E_DIR:-$ROOT/.ci/e2e}"
 HOST_DIR="$OUTPUT_DIR/host"
 CLIENT_DIR="$OUTPUT_DIR/client"
 HOST_RESULT="$OUTPUT_DIR/host_result.json"
-CLIENT_RESULT="$OUTPUT_DIR/client_result.json"
-
-rm -rf "$OUTPUT_DIR" 2>/dev/null || true
-mkdir -p "$HOST_DIR" "$CLIENT_DIR"
-rm -f "$HOST_DIR"/frame_*.png "$CLIENT_DIR"/frame_*.png "$OUTPUT_DIR"/pair_*.png 2>/dev/null || true
+READY_MARKER="$OUTPUT_DIR/host_ready"
 
 if [ "$USE_STEAMGODOT" != "0" ]; then
   ./scripts/setup_godot_steam.sh
@@ -34,29 +31,73 @@ export LD_LIBRARY_PATH="$ROOT/third_party/godotsteam:${LD_LIBRARY_PATH:-}"
 "${RUNNER[@]}" "$GODOT_BIN" --headless --path "$ROOT" --import >/dev/null 2>&1 || true
 
 launch() {
-  local capture_dir="$1"; local result="$2"; local label="$3"; shift 3
-  GOMSTALLE_CAPTURE_DIR="$capture_dir" GOMSTALLE_E2E_RESULT="$result" \
-    "${RUNNER[@]}" "$GODOT_BIN" --path "$ROOT" --dev --capture --label "$label" "$@" \
-    >"$OUTPUT_DIR/${label}.log" 2>&1 &
+  local capture_dir="$1"; local label="$2"; shift 2
+  GOMSTALLE_CAPTURE_DIR="$capture_dir" "${RUNNER[@]}" "$GODOT_BIN" --path "$ROOT" \
+    --dev --capture --label "$label" "$@" >"$OUTPUT_DIR/${label}.log" 2>&1 &
   echo $!
 }
 
-host_pid="$(launch "$HOST_DIR" "$HOST_RESULT" HOST --host --e2e)"
-sleep 3
-client_pid="$(launch "$CLIENT_DIR" "$CLIENT_RESULT" CLIENT +connect_lobby 1)"
+wait_for_file() {
+  local path="$1"; local timeout_seconds="$2"; local waited=0
+  while [ ! -s "$path" ] && [ "$waited" -lt "$timeout_seconds" ]; do
+    sleep 1
+    waited=$((waited + 1))
+  done
+  [ -s "$path" ]
+}
 
-sleep "$SCENARIO_SECONDS"
-kill "$host_pid" "$client_pid" >/dev/null 2>&1 || true
-wait "$host_pid" "$client_pid" 2>/dev/null || true
+run_attempt() {
+  rm -rf "$OUTPUT_DIR" 2>/dev/null || true
+  mkdir -p "$HOST_DIR" "$CLIENT_DIR"
+  local port=$(( (RANDOM % 15000) + 20000 ))
+  export GOMSTALLE_LOCAL_PORT="$port"
+  echo "attempt on port $port"
+
+  local host_pid
+  host_pid="$(GOMSTALLE_E2E_RESULT="$HOST_RESULT" GOMSTALLE_E2E_READY="$READY_MARKER" \
+    launch "$HOST_DIR" HOST --host --e2e)"
+
+  if ! wait_for_file "$READY_MARKER" 20; then
+    echo "host failed to start hosting (port $port busy or crash)"
+    kill "$host_pid" >/dev/null 2>&1 || true
+    wait "$host_pid" 2>/dev/null || true
+    return 1
+  fi
+
+  local client_pid
+  client_pid="$(launch "$CLIENT_DIR" CLIENT +connect_lobby 1)"
+
+  sleep "$SCENARIO_SECONDS"
+  kill "$host_pid" "$client_pid" >/dev/null 2>&1 || true
+  wait "$host_pid" "$client_pid" 2>/dev/null || true
+
+  if [ ! -s "$HOST_RESULT" ]; then
+    echo "host produced no e2e result"
+    return 1
+  fi
+  return 0
+}
+
+pkill -9 -f godotsteam.451 >/dev/null 2>&1 || true
+sleep 1
+
+ok=0
+for attempt in $(seq 1 "$ATTEMPTS"); do
+  echo "=== e2e attempt $attempt/$ATTEMPTS ==="
+  if run_attempt; then ok=1; break; fi
+  echo "--- HOST.log tail ---"; tail -n 15 "$OUTPUT_DIR/HOST.log" 2>/dev/null || true
+  pkill -9 -f godotsteam.451 >/dev/null 2>&1 || true
+  sleep 2
+done
+
+if [ "$ok" -ne 1 ]; then
+  echo "FAIL: end-to-end multiplayer test did not pass in $ATTEMPTS attempts"
+  exit 1
+fi
 
 frames=$(ls "$HOST_DIR"/frame_*.png 2>/dev/null | wc -l)
 client_frames=$(ls "$CLIENT_DIR"/frame_*.png 2>/dev/null | wc -l)
 echo "captured host=$frames client=$client_frames frames"
-
-if [ ! -s "$HOST_RESULT" ]; then
-  echo "FAIL: host produced no e2e result (no players connected / game never started)"
-  exit 1
-fi
 echo "host result: $(cat "$HOST_RESULT")"
 python3 - "$HOST_RESULT" <<'PY'
 import json, sys

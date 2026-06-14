@@ -8,6 +8,8 @@ var _e2e_enabled := false
 var _label := ""
 var _capture_dir := ""
 var _result_path := ""
+var _ready_path := ""
+var _ready_written := false
 var _frame_index := 0
 var _capture_accumulator := 0.0
 var _scenario_started := false
@@ -25,6 +27,7 @@ func _ready() -> void:
 		_label = args[label_index + 1]
 	_capture_dir = OS.get_environment("GOMSTALLE_CAPTURE_DIR")
 	_result_path = OS.get_environment("GOMSTALLE_E2E_RESULT")
+	_ready_path = OS.get_environment("GOMSTALLE_E2E_READY")
 
 	if _capture_enabled and not _capture_dir.is_empty():
 		DirAccess.make_dir_recursive_absolute(_capture_dir)
@@ -33,8 +36,15 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not _capture_enabled and not _e2e_enabled:
 		return
-	if _e2e_enabled and NetworkManager.is_host() and not _scenario_done:
-		_advance_host_scenario()
+	if _e2e_enabled and NetworkManager.is_host():
+		if not _ready_written and not _ready_path.is_empty():
+			_ready_written = true
+			var ready_file := FileAccess.open(_ready_path, FileAccess.WRITE)
+			if ready_file != null:
+				ready_file.store_string("hosting")
+				ready_file.close()
+		if not _scenario_done:
+			_advance_host_scenario()
 	if _capture_enabled and not _capture_dir.is_empty():
 		_capture_accumulator += delta
 		if _capture_accumulator >= 1.0 / CAPTURE_FPS:

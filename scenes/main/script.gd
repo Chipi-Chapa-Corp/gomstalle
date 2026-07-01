@@ -9,7 +9,7 @@ extends NinePatchRect
 func _ready() -> void:
 	NetworkManager.lobby_match_list_updated.connect(_set_rooms)
 	lobby_fetch_timer.timeout.connect(func(): NetworkManager.refresh_lobby_list())
-	_handle_dev_autostart()
+	_handle_dev_autostart.call_deferred()
 
 func _handle_dev_autostart() -> void:
 	if not NetworkManager.is_dev_mode():
@@ -51,6 +51,7 @@ func _set_rooms(rooms: Array) -> void:
 
 	for child in join_lobby_list.get_children():
 		join_lobby_list.remove_child(child)
+		child.queue_free()
 
 	for room in rooms:
 		var button = Button.new()

@@ -83,7 +83,7 @@ func _set_state(state: State) -> void:
 	game_state = state
 	state_changed.emit(game_state)
 
-@rpc("any_peer")
+@rpc("authority", "call_remote", "reliable")
 func _notify_game_start(new_hunter_peer_id: int, new_positions: Dictionary) -> void:
 	_apply_game_start(new_hunter_peer_id, new_positions)
 

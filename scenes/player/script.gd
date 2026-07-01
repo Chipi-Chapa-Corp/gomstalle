@@ -164,7 +164,7 @@ func _stun_request(timeout: float) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func apply_stun(timeout: float) -> void:
-	if is_dead or is_stunned:
+	if not _is_server_call() or is_dead or is_stunned:
 		return
 	stun_effect.play()
 	is_stunned = true
@@ -189,7 +189,13 @@ func _kill_request(target_peer_id: int) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func apply_kill() -> void:
+	if not _is_server_call():
+		return
 	set_dead(true)
+
+func _is_server_call() -> bool:
+	var sender_id := multiplayer.get_remote_sender_id()
+	return sender_id == 0 or sender_id == MultiplayerPeer.TARGET_PEER_SERVER
 
 func _find_player(target_peer_id: int) -> CharacterBody3D:
 	for node in get_tree().get_nodes_in_group("players"):

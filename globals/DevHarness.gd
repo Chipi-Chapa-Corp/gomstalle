@@ -45,6 +45,8 @@ func _process(delta: float) -> void:
 				ready_file.close()
 		if not _scenario_done:
 			_advance_host_scenario()
+	elif _e2e_enabled and not _scenario_done:
+		_observe_client_scenario()
 	if _capture_enabled and not _capture_dir.is_empty():
 		_capture_accumulator += delta
 		if _capture_accumulator >= 1.0 / CAPTURE_FPS:
@@ -87,21 +89,36 @@ func _advance_host_scenario() -> void:
 	if GameState.game_state != GameState.State.STARTED:
 		return
 	_run_door_demo(world)
-	_write_result(world, player_container.get_child_count())
+	_write_result(player_container.get_child_count())
+	_scenario_done = true
+
+func _observe_client_scenario() -> void:
+	var world := _find_world()
+	if world == null:
+		return
+	var player_container = world.get("player_container")
+	if player_container == null or player_container.get_child_count() < 2:
+		return
+	if GameState.game_state != GameState.State.STARTED:
+		return
+	var door := _find_door()
+	if door == null or is_equal_approx(door.get("open_target_degrees"), 0.0):
+		return
+	_write_result(player_container.get_child_count())
 	_scenario_done = true
 
 func _run_door_demo(world: Node) -> void:
-	var door := _find_door(world)
+	var door := _find_door()
 	if door == null:
 		return
 	var host_player := _host_player(world)
 	var position = host_player.global_position if host_player != null else Vector3.ZERO
 	door.interact(true, {"position": position, "direction": Vector3.FORWARD, "amount": 1})
 
-func _write_result(world: Node, player_count: int) -> void:
+func _write_result(player_count: int) -> void:
 	if _result_path.is_empty():
 		return
-	var door := _find_door(world)
+	var door := _find_door()
 	var summary := {
 		"label": _label,
 		"player_count": player_count,
@@ -119,7 +136,7 @@ func _find_world() -> Node:
 		return current
 	return null
 
-func _find_door(world: Node) -> Node:
+func _find_door() -> Node:
 	for node in get_tree().get_nodes_in_group("interactible"):
 		if node.has_method("get_hunter_can_interact") and node.get_is_static() and node.has_method("do_interact") and "open_target_degrees" in node:
 			return node

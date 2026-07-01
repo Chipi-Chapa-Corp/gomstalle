@@ -1,4 +1,5 @@
 extends Interactable
+class_name Door
 
 const ANIMATION_DURATION := 0.45
 const OPEN_DEGREES := 90.0

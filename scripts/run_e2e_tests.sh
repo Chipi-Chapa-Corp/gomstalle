@@ -12,6 +12,7 @@ OUTPUT_DIR="${GOMSTALLE_E2E_DIR:-$ROOT/.ci/e2e}"
 HOST_DIR="$OUTPUT_DIR/host"
 CLIENT_DIR="$OUTPUT_DIR/client"
 HOST_RESULT="$OUTPUT_DIR/host_result.json"
+CLIENT_RESULT="$OUTPUT_DIR/client_result.json"
 READY_MARKER="$OUTPUT_DIR/host_ready"
 
 if [ "$USE_STEAMGODOT" != "0" ]; then
@@ -65,7 +66,7 @@ run_attempt() {
   fi
 
   local client_pid
-  client_pid="$(launch "$CLIENT_DIR" CLIENT +connect_lobby 1)"
+  client_pid="$(GOMSTALLE_E2E_RESULT="$CLIENT_RESULT" launch "$CLIENT_DIR" CLIENT --e2e +connect_lobby 1)"
 
   sleep "$SCENARIO_SECONDS"
   kill "$host_pid" "$client_pid" >/dev/null 2>&1 || true
@@ -74,6 +75,10 @@ run_attempt() {
 
   if [ ! -s "$HOST_RESULT" ]; then
     echo "host produced no e2e result"
+    return 1
+  fi
+  if [ ! -s "$CLIENT_RESULT" ]; then
+    echo "client produced no e2e result (server state did not replicate)"
     return 1
   fi
   return 0
@@ -87,6 +92,7 @@ for attempt in $(seq 1 "$ATTEMPTS"); do
   echo "=== e2e attempt $attempt/$ATTEMPTS ==="
   if run_attempt; then ok=1; break; fi
   echo "--- HOST.log tail ---"; tail -n 15 "$OUTPUT_DIR/HOST.log" 2>/dev/null || true
+  echo "--- CLIENT.log tail ---"; tail -n 15 "$OUTPUT_DIR/CLIENT.log" 2>/dev/null || true
   pkill -9 -f "$GODOT_BIN" >/dev/null 2>&1 || true
   sleep 2
 done
@@ -100,13 +106,16 @@ frames=$(ls "$HOST_DIR"/frame_*.png 2>/dev/null | wc -l)
 client_frames=$(ls "$CLIENT_DIR"/frame_*.png 2>/dev/null | wc -l)
 echo "captured host=$frames client=$client_frames frames"
 echo "host result: $(cat "$HOST_RESULT")"
-python3 - "$HOST_RESULT" <<'PY'
+echo "client result: $(cat "$CLIENT_RESULT")"
+python3 - "$HOST_RESULT" "$CLIENT_RESULT" <<'PY'
 import json, sys
-result = json.load(open(sys.argv[1]))
-assert result["player_count"] >= 2, "host did not see two players: %s" % result
-assert result["game_started"], "host never started the match: %s" % result
-assert result["door_opened"], "host door interaction did not open the door: %s" % result
-print("E2E assertions passed:", result)
+for path in sys.argv[1:]:
+    result = json.load(open(path))
+    label = result["label"]
+    assert result["player_count"] >= 2, "%s did not see two players: %s" % (label, result)
+    assert result["game_started"], "%s never saw the match start: %s" % (label, result)
+    assert result["door_opened"], "%s never saw the door open: %s" % (label, result)
+    print("E2E assertions passed:", result)
 PY
 
 count=$(( frames < client_frames ? frames : client_frames ))

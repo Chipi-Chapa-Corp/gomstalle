@@ -27,6 +27,7 @@ func handle_player_joined(peer_id: int) -> void:
 func handle_peer_list_changed(peers: Array[Dictionary]) -> void:
 	for child in world.player_list.get_children():
 		world.player_list.remove_child(child)
+		child.queue_free()
 	for peer in peers:
 		var item = player_list_item_sample_persistent.duplicate()
 		item.get_node("Container/Label").text = peer["name"]

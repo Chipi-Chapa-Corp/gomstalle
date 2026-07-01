@@ -49,7 +49,7 @@ wait_for_file() {
 run_attempt() {
   rm -rf "$OUTPUT_DIR" 2>/dev/null || true
   mkdir -p "$HOST_DIR" "$CLIENT_DIR"
-  local port=$(( (RANDOM % 15000) + 20000 ))
+  local port=$(( (RANDOM % 10000) + 20000 ))
   export GOMSTALLE_LOCAL_PORT="$port"
   echo "attempt on port $port"
 
@@ -70,6 +70,7 @@ run_attempt() {
   sleep "$SCENARIO_SECONDS"
   kill "$host_pid" "$client_pid" >/dev/null 2>&1 || true
   wait "$host_pid" "$client_pid" 2>/dev/null || true
+  pkill -9 -f "$GODOT_BIN" >/dev/null 2>&1 || true
 
   if [ ! -s "$HOST_RESULT" ]; then
     echo "host produced no e2e result"
@@ -78,7 +79,7 @@ run_attempt() {
   return 0
 }
 
-pkill -9 -f godotsteam.451 >/dev/null 2>&1 || true
+pkill -9 -f "$GODOT_BIN" >/dev/null 2>&1 || true
 sleep 1
 
 ok=0
@@ -86,7 +87,7 @@ for attempt in $(seq 1 "$ATTEMPTS"); do
   echo "=== e2e attempt $attempt/$ATTEMPTS ==="
   if run_attempt; then ok=1; break; fi
   echo "--- HOST.log tail ---"; tail -n 15 "$OUTPUT_DIR/HOST.log" 2>/dev/null || true
-  pkill -9 -f godotsteam.451 >/dev/null 2>&1 || true
+  pkill -9 -f "$GODOT_BIN" >/dev/null 2>&1 || true
   sleep 2
 done
 

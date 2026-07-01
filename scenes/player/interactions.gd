@@ -13,8 +13,6 @@ func handle(_delta: float) -> void:
 		var forward_direction: Vector3 = character.model.global_transform.basis.z.normalized()
 		var metadata = {
 			"position": character.global_transform.origin,
-			"hand": character.hand.get_path(),
-			"target": character.get_path(),
 			"direction": forward_direction,
 			"amount": 1,
 		}

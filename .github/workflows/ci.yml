@@ -103,6 +103,56 @@ jobs:
             exit 1
           fi
 
+  e2e:
+    name: End-to-end multiplayer (mp4)
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.5.1
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Trust workspace for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          SOUND_PKG="libasound2"
+          if apt-cache show libasound2t64 >/dev/null 2>&1; then
+            SOUND_PKG="libasound2t64"
+          fi
+          apt-get install -y curl tar python3 unzip xz-utils \
+            libgl1-mesa-dev libx11-6 libxext6 libxi6 libxrandr2 libxrender1 \
+            libxcursor1 libxinerama1 libfreetype6 libfontconfig1 "$SOUND_PKG" \
+            libxkbcommon0 \
+            libwayland-client0 libwayland-cursor0 libwayland-egl1 libdecor-0-0 \
+            libdbus-1-3 libgtk-3-0 \
+            xvfb ffmpeg
+
+      - name: Run end-to-end multiplayer test
+        shell: bash
+        run: |
+          set -euo pipefail
+          STEAM_APP_ID=480
+          echo "$STEAM_APP_ID" > steam_appid.txt
+          USE_STEAMGODOT=1 \
+          GODOT_RUNNER="xvfb-run -a" \
+          GOMSTALLE_E2E_DIR="$GITHUB_WORKSPACE/.ci/e2e" \
+            ./scripts/run_e2e_tests.sh
+
+      - name: Upload e2e artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gomstalle-e2e.mp4
+          path: ${{ github.workspace }}/.ci/e2e/gomstalle-e2e.mp4
+          if-no-files-found: error
+
   build:
     name: Build ${{ matrix.config_name }} ${{ matrix.platform_name }} artifact
     runs-on: ubuntu-24.04

@@ -18,22 +18,23 @@ func get_is_static() -> bool:
 func get_hunter_can_interact() -> bool:
 	return false
 
-func perform_interact(_enable: bool, metadata: Dictionary) -> void:
-	var target = Utils.resolve_node(metadata.get("target"))
-	if target == null or not target.inventory.has_item(CharacterInventory.InventoryItem.WOOD, required_amount_per_use):
+func _can_interact(_enable: bool, payload: Dictionary) -> bool:
+	var caller := resolve_player(int(payload["peer_id"]))
+	return caller != null and caller.inventory.has_item(CharacterInventory.InventoryItem.WOOD, required_amount_per_use)
+
+func do_interact(_enable: bool, payload: Dictionary) -> void:
+	var caller: CharacterBody3D = payload.get("caller")
+	if caller == null:
 		return
-	target.inventory.remove_item(CharacterInventory.InventoryItem.WOOD, required_amount_per_use)
-	rpc("sync_interact")
-
-func _ready() -> void:
-	super._ready()
-	label.text = str(current_amount - required_amount)
-
-@rpc("any_peer", "call_local", "reliable")
-func sync_interact() -> void:
+	if multiplayer.is_server():
+		caller.inventory.remove_item(CharacterInventory.InventoryItem.WOOD, required_amount_per_use)
 	current_amount += required_amount_per_use
 	label.text = str(current_amount - required_amount)
 	if current_amount >= required_amount and not is_filled:
 		is_filled = true
 		filled.emit(self)
 		get_parent().queue_free()
+
+func _ready() -> void:
+	super._ready()
+	label.text = str(current_amount - required_amount)

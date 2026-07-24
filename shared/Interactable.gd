@@ -17,27 +17,52 @@ func get_outline_target() -> MeshInstance3D:
 func get_is_static() -> bool:
 	return true
 
-func perform_interact(_enable: bool, _metadata: Dictionary) -> void:
-	assert(false, "Interactable requires perform_interact override")
+func do_interact(_enable: bool, _payload: Dictionary) -> void:
+	assert(false, "Interactable requires do_interact override")
 
-# === INTERACTION ===
+# === INTERACTION (client requests, host decides, all execute) ===
 func notice(enable: bool):
 	set_show_outline(enable)
 
 func interact(enable: bool, metadata: Dictionary):
-	if not multiplayer.is_server():
-		rpc_id(1, "request_interact", enable, metadata)
-		return
+	rpc_id(1, "_interact_request", enable, metadata)
 
+@rpc("any_peer", "call_local", "reliable")
+func _interact_request(enable: bool, metadata: Dictionary) -> void:
+	if not multiplayer.is_server():
+		return
+	var sender_id := multiplayer.get_remote_sender_id()
+	if sender_id == 0:
+		sender_id = multiplayer.get_unique_id()
+	var payload := _build_authoritative_payload(enable, metadata, sender_id)
+	if not _can_interact(enable, payload):
+		return
+	rpc("_execute_interaction", enable, payload)
+
+@rpc("authority", "call_local", "reliable")
+func _execute_interaction(enable: bool, payload: Dictionary) -> void:
 	if not get_is_static():
 		set_show_outline(false)
+	var local_payload := payload.duplicate(true)
+	local_payload["caller"] = resolve_player(int(payload["peer_id"]))
+	do_interact(enable, local_payload)
 
-	perform_interact(enable, metadata)
+# === INTERACTION HOOKS ===
+func _can_interact(_enable: bool, _payload: Dictionary) -> bool:
+	return true
 
-@rpc("any_peer", "reliable")
-func request_interact(enable: bool, metadata: Dictionary) -> void:
-	if multiplayer.is_server():
-		interact(enable, metadata)
+func _build_authoritative_payload(_enable: bool, metadata: Dictionary, sender_id: int) -> Dictionary:
+	var payload := metadata.duplicate(true)
+	payload["peer_id"] = sender_id
+	payload.erase("hand")
+	payload.erase("target")
+	return payload
+
+func resolve_player(peer_id: int) -> CharacterBody3D:
+	for node in get_tree().get_nodes_in_group("players"):
+		if node.get("peer_id") == peer_id:
+			return node
+	return null
 
 # === OUTLINES ===
 func init_outline():

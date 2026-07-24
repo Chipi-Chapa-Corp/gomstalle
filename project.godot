@@ -22,10 +22,10 @@ config/windows_native_icon="res://icon.ico"
 
 Settings="*res://globals/Settings.gd"
 Spawner="*res://globals/Spawner.gd"
-SteamManager="*res://globals/SteamManager.gd"
 GameState="*res://globals/GameState.gd"
-MultiplayerManager="*res://globals/MultiplayerManager.gd"
+NetworkManager="*res://globals/NetworkManager.gd"
 Utils="*res://globals/Utils.gd"
+DevHarness="*res://globals/DevHarness.gd"
 Generator="*res://globals/Generator.gd"
 
 [editor_plugins]

@@ -24,22 +24,28 @@ extends Node3D
 func _ready():
 	player_list_utils.initialize()
 	Spawner.set_path(player_container.get_path())
-	MultiplayerManager.peer_connected.connect(player_list_utils.handle_peer_connected)
-	MultiplayerManager.peer_list_changed.connect(player_list_utils.handle_peer_list_changed)
-	var result := MultiplayerManager.join_multiplayer(multiplayer)
-	if result != OK:
-		push_error("Error: Failed to create or connect to server")
+	NetworkManager.player_joined.connect(player_list_utils.handle_player_joined)
+	NetworkManager.peer_list_changed.connect(player_list_utils.handle_peer_list_changed)
+	GameState.state_changed.connect(_on_game_state_changed)
 	Generator.generate_for_world(self)
 	shrine_utils.register_shrines()
+	player_list_utils.handle_peer_list_changed(NetworkManager.connected_players_metadata)
+	if multiplayer.is_server():
+		start_button.visible = true
+		player_list_utils.spawn_existing_players()
 
 func _on_start_pressed():
-	if not MultiplayerManager.is_host:
+	if not NetworkManager.is_host():
 		return
 	start_button.visible = false
 	var result := GameState.start_game()
 	if result != OK:
 		push_error("Error: Failed to start game")
 		# TODO: Show error
+
+func _on_game_state_changed(state: GameState.State) -> void:
+	if state == GameState.State.STARTED:
+		start_button.visible = false
 
 func _unhandled_input(event: InputEvent) -> void:
 	if GameState.game_state != GameState.State.IDLE and event.is_action_pressed("menu"):
@@ -51,8 +57,9 @@ func _on_quit_pressed() -> void:
 	GameState.quit(multiplayer)
 
 func _exit_tree() -> void:
-	MultiplayerManager.peer_connected.disconnect(player_list_utils.handle_peer_connected)
-	MultiplayerManager.peer_list_changed.disconnect(player_list_utils.handle_peer_list_changed)
+	NetworkManager.player_joined.disconnect(player_list_utils.handle_player_joined)
+	NetworkManager.peer_list_changed.disconnect(player_list_utils.handle_peer_list_changed)
+	GameState.state_changed.disconnect(_on_game_state_changed)
 	shrine_utils.cleanup()
 
 @rpc("any_peer", "call_local", "reliable")

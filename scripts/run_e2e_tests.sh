@@ -34,7 +34,7 @@ export LD_LIBRARY_PATH="$ROOT/third_party/godotsteam:${LD_LIBRARY_PATH:-}"
 launch() {
   local capture_dir="$1"; local label="$2"; shift 2
   GOMSTALLE_CAPTURE_DIR="$capture_dir" "${RUNNER[@]}" "$GODOT_BIN" --path "$ROOT" \
-    --dev --capture --label "$label" "$@" >"$OUTPUT_DIR/${label}.log" 2>&1 &
+    -- --dev --capture --label "$label" "$@" >"$OUTPUT_DIR/${label}.log" 2>&1 &
   echo $!
 }
 

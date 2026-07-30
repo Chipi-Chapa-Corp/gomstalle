@@ -1,0 +1,171 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scenes/runestone/script.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/runestone/runestone-stone.png" id="2_stone_texture"]
+
+[sub_resource type="StandardMaterial3D" id="StoneMaterial"]
+albedo_color = Color(0.72, 0.78, 0.8, 1)
+albedo_texture = ExtResource("2_stone_texture")
+roughness = 0.92
+uv1_scale = Vector3(1.5, 2.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="EdgeMaterial"]
+albedo_color = Color(0.23, 0.3, 0.31, 1)
+roughness = 0.84
+
+[sub_resource type="StandardMaterial3D" id="RuneMaterial"]
+albedo_color = Color(0.02, 0.42, 0.53, 1)
+emission_enabled = true
+emission = Color(0.01, 0.25, 0.33, 1)
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BaseMesh"]
+material = SubResource("EdgeMaterial")
+size = Vector3(2.65, 0.34, 0.9)
+
+[sub_resource type="CylinderMesh" id="DialBackMesh"]
+material = SubResource("EdgeMaterial")
+top_radius = 0.36
+bottom_radius = 0.36
+height = 0.12
+radial_segments = 16
+
+[sub_resource type="TorusMesh" id="DialRingMesh"]
+material = SubResource("StoneMaterial")
+inner_radius = 0.24
+outer_radius = 0.35
+ring_segments = 16
+rings = 8
+
+[sub_resource type="BoxMesh" id="RuneStemMesh"]
+material = SubResource("RuneMaterial")
+size = Vector3(0.055, 0.32, 0.045)
+
+[sub_resource type="BoxShape3D" id="RunestoneShape"]
+size = Vector3(2.65, 4.0, 0.9)
+
+[node name="Runestone" type="StaticBody3D" node_paths=PackedStringArray("mesh", "focus", "interaction_light") groups=["interactible"]]
+collision_layer = 17
+script = ExtResource("1_script")
+mesh = NodePath("TopDial/Ring")
+focus = NodePath("Focus")
+interaction_light = NodePath("InteractionLight")
+
+[node name="Base" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.17, 0)
+mesh = SubResource("BaseMesh")
+
+[node name="StoneCore" type="MeshInstance3D" parent="."]
+visible = false
+
+[node name="StoneSilhouette" type="CSGPolygon3D" parent="."]
+polygon = PackedVector2Array(-1.08, 0.25, -1.22, 0.6, -1.14, 1.25, -1.05, 2.05, -0.88, 2.8, -0.72, 3.5, -0.42, 3.9, 0.08, 4.08, 0.52, 3.82, 0.8, 3.3, 0.99, 2.45, 1.13, 1.55, 1.19, 0.7, 1.04, 0.24, 0.5, 0.12, -0.3, 0.1)
+mode = 0
+depth = 0.82
+material = SubResource("StoneMaterial")
+
+[node name="TopDial" type="Node3D" parent="."]
+position = Vector3(0, 2.78, 0.05)
+
+[node name="Back" type="MeshInstance3D" parent="TopDial"]
+rotation = Vector3(1.570796, 0, 0)
+mesh = SubResource("DialBackMesh")
+
+[node name="Ring" type="MeshInstance3D" parent="TopDial"]
+rotation = Vector3(1.570796, 0, 0)
+mesh = SubResource("DialRingMesh")
+
+[node name="Stem" type="MeshInstance3D" parent="TopDial"]
+position = Vector3(0, 0, 0.08)
+mesh = SubResource("RuneStemMesh")
+
+[node name="Branch" type="MeshInstance3D" parent="TopDial"]
+position = Vector3(0.09, 0.06, 0.08)
+rotation = Vector3(0, 0, -0.9)
+mesh = SubResource("RuneStemMesh")
+
+[node name="LowerBranch" type="MeshInstance3D" parent="TopDial"]
+position = Vector3(-0.09, -0.07, 0.08)
+rotation = Vector3(0, 0, 0.9)
+mesh = SubResource("RuneStemMesh")
+
+[node name="Crossbar" type="MeshInstance3D" parent="TopDial"]
+position = Vector3(0, -0.04, 0.08)
+rotation = Vector3(0, 0, 1.570796)
+mesh = SubResource("RuneStemMesh")
+
+[node name="LeftDial" type="Node3D" parent="."]
+position = Vector3(-0.5, 1.58, 0.05)
+
+[node name="Back" type="MeshInstance3D" parent="LeftDial"]
+rotation = Vector3(1.570796, 0, 0)
+mesh = SubResource("DialBackMesh")
+
+[node name="Ring" type="MeshInstance3D" parent="LeftDial"]
+rotation = Vector3(1.570796, 0, 0)
+mesh = SubResource("DialRingMesh")
+
+[node name="Stem" type="MeshInstance3D" parent="LeftDial"]
+position = Vector3(0, 0, 0.08)
+rotation = Vector3(0, 0, 0.72)
+mesh = SubResource("RuneStemMesh")
+
+[node name="Branch" type="MeshInstance3D" parent="LeftDial"]
+position = Vector3(-0.06, 0.09, 0.08)
+rotation = Vector3(0, 0, 1.55)
+mesh = SubResource("RuneStemMesh")
+
+[node name="UpperBranch" type="MeshInstance3D" parent="LeftDial"]
+position = Vector3(0.09, 0.08, 0.08)
+rotation = Vector3(0, 0, -0.92)
+mesh = SubResource("RuneStemMesh")
+
+[node name="Crossbar" type="MeshInstance3D" parent="LeftDial"]
+position = Vector3(-0.04, -0.09, 0.08)
+rotation = Vector3(0, 0, 1.570796)
+mesh = SubResource("RuneStemMesh")
+
+[node name="RightDial" type="Node3D" parent="."]
+position = Vector3(0.5, 1.58, 0.05)
+
+[node name="Back" type="MeshInstance3D" parent="RightDial"]
+rotation = Vector3(1.570796, 0, 0)
+mesh = SubResource("DialBackMesh")
+
+[node name="Ring" type="MeshInstance3D" parent="RightDial"]
+rotation = Vector3(1.570796, 0, 0)
+mesh = SubResource("DialRingMesh")
+
+[node name="Stem" type="MeshInstance3D" parent="RightDial"]
+position = Vector3(0, 0, 0.08)
+rotation = Vector3(0, 0, -0.72)
+mesh = SubResource("RuneStemMesh")
+
+[node name="Branch" type="MeshInstance3D" parent="RightDial"]
+position = Vector3(0.06, 0.09, 0.08)
+rotation = Vector3(0, 0, -1.55)
+mesh = SubResource("RuneStemMesh")
+
+[node name="LowerBranch" type="MeshInstance3D" parent="RightDial"]
+position = Vector3(-0.09, -0.07, 0.08)
+rotation = Vector3(0, 0, 0.9)
+mesh = SubResource("RuneStemMesh")
+
+[node name="Crossbar" type="MeshInstance3D" parent="RightDial"]
+position = Vector3(0, -0.06, 0.08)
+rotation = Vector3(0, 0, 1.570796)
+mesh = SubResource("RuneStemMesh")
+
+[node name="Focus" type="Marker3D" parent="."]
+position = Vector3(0, 2.1, 0)
+
+[node name="InteractionLight" type="OmniLight3D" parent="."]
+position = Vector3(0, 2.2, 0.9)
+light_color = Color(0.22, 0.7, 1, 1)
+light_energy = 0.0
+omni_range = 2.2
+omni_attenuation = 2.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 2, 0)
+shape = SubResource("RunestoneShape")

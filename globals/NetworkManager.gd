@@ -13,7 +13,7 @@ var _backend: Node
 var _is_dev_mode := false
 
 func _ready() -> void:
-	_is_dev_mode = OS.get_cmdline_args().has("--dev")
+	_is_dev_mode = OS.get_cmdline_user_args().has("--dev")
 	_backend = LocalBackend.new() if _is_dev_mode else SteamBackend.new()
 	_backend.lobby_created.connect(_on_backend_lobby_created)
 	_backend.lobby_joined.connect(func(error): lobby_joined.emit(error))

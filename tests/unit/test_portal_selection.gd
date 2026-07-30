@@ -38,3 +38,15 @@ func test_select_portal_candidate_index_farthest_from_players() -> void:
 	]
 	var result := portal_utils._find_candidate_index_farthest_from_players(candidates, players)
 	assert_eq(result, 1, "Should pick candidate with the greatest nearest-player distance")
+
+func test_portal_candidate_clearance_ignores_blocked_positions() -> void:
+	var world := Node3D.new()
+	_created_nodes.append(world)
+	var portal_utils := WorldPortalUtils.new(world)
+	_created_nodes.append(portal_utils)
+	var blockers: Array[Vector3] = [
+		Vector3(1.0, 0.0, 1.0),
+		Vector3(8.0, 0.0, 8.0)
+	]
+	assert_false(portal_utils._is_position_clear_of_blockers(Vector3.ZERO, blockers, 2.0))
+	assert_true(portal_utils._is_position_clear_of_blockers(Vector3(4.0, 0.0, 4.0), blockers, 2.0))

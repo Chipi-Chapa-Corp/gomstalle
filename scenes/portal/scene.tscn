@@ -1,85 +1,205 @@
-[gd_scene load_steps=10 format=3 uid="uid://z28uh1grau7rh"]
+[gd_scene load_steps=17 format=3 uid="uid://z28uh1grau7rh"]
 
+[ext_resource type="Script" path="res://scenes/portal/script.gd" id="1_portal_script"]
 [ext_resource type="Shader" uid="uid://42jrfi1et5ehr" path="res://scenes/portal/portal_shader.gdshader" id="2_portal_shader"]
-
-[sub_resource type="Gradient" id="Gradient_portal"]
-offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
-colors = PackedColorArray(0.45, 0.08, 0.9, 0.7, 0.4, 0.2, 1, 0.65, 0.5, 0.25, 1, 0.6, 0.65, 0.2, 0.95, 0.0)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_portal"]
-gradient = SubResource("Gradient_portal")
-width = 256
-
-[sub_resource type="Gradient" id="Gradient_portal_alpha"]
-offsets = PackedFloat32Array(0, 0.6, 1)
-colors = PackedColorArray(1, 1, 1, 0.9, 1, 1, 1, 0.4, 1, 1, 1, 0.0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_portal_alpha"]
-gradient = SubResource("Gradient_portal_alpha")
-width = 128
-height = 128
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_portal_surface"]
 shader = ExtResource("2_portal_shader")
-shader_parameter/color_a = Color(0.3, 0.06, 0.85, 1)
-shader_parameter/color_b = Color(0.5, 0.12, 1, 1)
-shader_parameter/color_c = Color(0.7, 0.18, 1, 1)
-shader_parameter/emission_strength = 2.8
-shader_parameter/swirl_speed = 0.7
-shader_parameter/swirl_strength = 2.6
-shader_parameter/radius = 0.98
-shader_parameter/edge_softness = 0.04
-shader_parameter/noise_scale = 6.5
-shader_parameter/pulse_strength = 0.35
+shader_parameter/void_color = Color(0.006, 0.002, 0.014, 1)
+shader_parameter/color_a = Color(0.11, 0.015, 0.28, 1)
+shader_parameter/color_b = Color(0.52, 0.06, 0.72, 1)
+shader_parameter/color_c = Color(0.78, 0.12, 0.28, 1)
+shader_parameter/emission_strength = 1.35
+shader_parameter/swirl_speed = 0.42
+shader_parameter/swirl_strength = 1.8
+shader_parameter/noise_scale = 3.8
+shader_parameter/reveal_progress = 0.0
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_portal"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frame"]
+albedo_color = Color(0.12, 0.115, 0.105, 1)
+metallic = 0.12
+roughness = 0.78
+
+[sub_resource type="BoxMesh" id="BoxMesh_frame"]
+material = SubResource("StandardMaterial3D_frame")
+size = Vector3(1, 0.08, 0.11)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_inner_wall"]
+albedo_color = Color(0.018, 0.012, 0.028, 1)
+metallic = 0.15
+roughness = 0.7
+
+[sub_resource type="BoxMesh" id="BoxMesh_inner_wall"]
+material = SubResource("StandardMaterial3D_inner_wall")
+size = Vector3(0.78, 0.22, 0.035)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_glow"]
+shading_mode = 2
+blend_mode = 1
+cull_mode = 2
+albedo_color = Color(0.24, 0.025, 0.45, 1)
+emission_enabled = true
+emission = Color(0.34, 0.035, 0.68, 1)
+emission_energy_multiplier = 1.45
+
+[sub_resource type="BoxMesh" id="BoxMesh_glow_strip"]
+material = SubResource("StandardMaterial3D_glow")
+size = Vector3(0.24, 0.014, 0.014)
+
+[sub_resource type="Gradient" id="Gradient_wisps"]
+offsets = PackedFloat32Array(0, 0.42, 1)
+colors = PackedColorArray(0.16, 0.02, 0.38, 0, 0.52, 0.08, 0.82, 0.7, 0.95, 0.32, 0.08, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_wisps"]
+gradient = SubResource("Gradient_wisps")
+width = 128
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_particle"]
 shading_mode = 2
 transparency = 1
 blend_mode = 1
 cull_mode = 2
-albedo_texture = SubResource("GradientTexture2D_portal_alpha")
 albedo_color = Color(1, 1, 1, 1)
 vertex_color_use_as_albedo = true
+emission_enabled = true
+emission = Color(0.42, 0.08, 0.78, 1)
+emission_energy_multiplier = 1.25
 billboard_mode = 3
-
-[sub_resource type="QuadMesh" id="QuadMesh_portal"]
-size = Vector2(0.2, 0.2)
-material = SubResource("StandardMaterial3D_portal")
 
 [sub_resource type="QuadMesh" id="QuadMesh_portal_surface"]
 size = Vector2(1, 1)
 material = SubResource("ShaderMaterial_portal_surface")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_portal"]
+[sub_resource type="QuadMesh" id="QuadMesh_particle"]
+material = SubResource("StandardMaterial3D_particle")
+size = Vector2(0.055, 0.055)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_wisps"]
 emission_shape = 3
-emission_box_extents = Vector3(0.7, 0.04, 0.7)
+emission_box_extents = Vector3(0.34, 0.015, 0.34)
 direction = Vector3(0, 1, 0)
-initial_velocity_min = 0.05
-initial_velocity_max = 0.35
-angle_min = -12.0
-angle_max = 12.0
-gravity = Vector3(0, -0.15, 0)
-scale_min = 0.15
-scale_max = 0.4
+spread = 28.0
+initial_velocity_min = 0.12
+initial_velocity_max = 0.38
+gravity = Vector3(0, 0.04, 0)
+scale_min = 0.45
+scale_max = 1.0
 color = Color(1, 1, 1, 1)
-color_ramp = SubResource("GradientTexture1D_portal")
+color_ramp = SubResource("GradientTexture1D_wisps")
 
-[node name="Portal" type="Node3D"]
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_burst"]
+emission_shape = 3
+emission_box_extents = Vector3(0.36, 0.015, 0.36)
+direction = Vector3(0, 1, 0)
+spread = 70.0
+initial_velocity_min = 0.45
+initial_velocity_max = 0.9
+gravity = Vector3(0, -0.55, 0)
+scale_min = 0.35
+scale_max = 0.75
+color = Color(0.62, 0.18, 1, 1)
+color_ramp = SubResource("GradientTexture1D_wisps")
 
-[node name="PortalSurface" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.02, 0)
+[node name="Portal" type="Node3D" node_paths=PackedStringArray("visuals", "reveal_root", "portal_surface", "steady_particles", "burst_particles", "portal_light")]
+script = ExtResource("1_portal_script")
+visuals = NodePath("Visuals")
+reveal_root = NodePath("Visuals/Reveal")
+portal_surface = NodePath("Visuals/Reveal/PortalSurface")
+steady_particles = NodePath("Visuals/Reveal/SteadyParticles")
+burst_particles = NodePath("Visuals/Reveal/BurstParticles")
+portal_light = NodePath("Visuals/Reveal/PortalLight")
+idle_light_energy = 0.65
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="Reveal" type="Node3D" parent="Visuals"]
+
+[node name="PortalSurface" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0, -0.08, 0)
 rotation_degrees = Vector3(-90, 0, 0)
 mesh = SubResource("QuadMesh_portal_surface")
 
-[node name="Particles" type="GPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+[node name="FrameNorth" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0, 0, -0.445)
+mesh = SubResource("BoxMesh_frame")
+
+[node name="FrameSouth" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0, 0, 0.445)
+mesh = SubResource("BoxMesh_frame")
+
+[node name="FrameWest" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(-0.445, 0, 0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("BoxMesh_frame")
+
+[node name="FrameEast" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0.445, 0, 0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("BoxMesh_frame")
+
+[node name="InnerWallNorth" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0, -0.11, -0.382)
+mesh = SubResource("BoxMesh_inner_wall")
+
+[node name="InnerWallSouth" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0, -0.11, 0.382)
+mesh = SubResource("BoxMesh_inner_wall")
+
+[node name="InnerWallWest" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(-0.382, -0.11, 0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("BoxMesh_inner_wall")
+
+[node name="InnerWallEast" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0.382, -0.11, 0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("BoxMesh_inner_wall")
+
+[node name="GlowNorth" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0, 0.048, -0.382)
+mesh = SubResource("BoxMesh_glow_strip")
+
+[node name="GlowSouth" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0, 0.048, 0.382)
+mesh = SubResource("BoxMesh_glow_strip")
+
+[node name="GlowWest" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(-0.382, 0.048, 0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("BoxMesh_glow_strip")
+
+[node name="GlowEast" type="MeshInstance3D" parent="Visuals/Reveal"]
+position = Vector3(0.382, 0.048, 0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("BoxMesh_glow_strip")
+
+[node name="SteadyParticles" type="GPUParticles3D" parent="Visuals/Reveal"]
+position = Vector3(0, 0.08, 0)
 emitting = true
-amount = 90
-lifetime = 1.4
+amount = 42
+lifetime = 1.8
 one_shot = false
 randomness = 0.7
-process_material = SubResource("ParticleProcessMaterial_portal")
-draw_pass_1 = SubResource("QuadMesh_portal")
+visibility_aabb = AABB(-0.7, -0.2, -0.7, 1.4, 1.6, 1.4)
+process_material = SubResource("ParticleProcessMaterial_wisps")
+draw_pass_1 = SubResource("QuadMesh_particle")
+
+[node name="BurstParticles" type="GPUParticles3D" parent="Visuals/Reveal"]
+position = Vector3(0, 0.08, 0)
+emitting = false
+amount = 54
+lifetime = 1.1
+one_shot = true
+explosiveness = 0.92
+randomness = 0.8
+visibility_aabb = AABB(-1, -0.5, -1, 2, 2, 2)
+process_material = SubResource("ParticleProcessMaterial_burst")
+draw_pass_1 = SubResource("QuadMesh_particle")
+
+[node name="PortalLight" type="OmniLight3D" parent="Visuals/Reveal"]
+position = Vector3(0, 0.32, 0)
+light_color = Color(0.42, 0.12, 0.78, 1)
+light_energy = 0.0
+omni_range = 3.2
+omni_attenuation = 1.4
+shadow_enabled = false

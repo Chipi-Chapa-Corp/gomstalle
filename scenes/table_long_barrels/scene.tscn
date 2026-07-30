@@ -2,4 +2,4 @@
 
 [ext_resource type="PackedScene" uid="uid://bm5elxjs7u62x" path="res://assets/dungeon/models/table_long_decorated_C.gltf" id="1_kfbsr"]
 
-[node name="Table Long with Barrels" instance=ExtResource("1_kfbsr")]
+[node name="Table Long with Barrels" groups=["portal_blocker"] instance=ExtResource("1_kfbsr")]

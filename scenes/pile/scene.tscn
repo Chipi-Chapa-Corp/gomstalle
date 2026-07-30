@@ -49,7 +49,7 @@ points = PackedVector3Array(-0.5941892, 0.009164619, -0.62544715, 0.7992983, 0.1
 height = 1.5820313
 radius = 2.0219727
 
-[node name="Pile" type="Node3D"]
+[node name="Pile" type="Node3D" groups=["portal_blocker"]]
 
 [node name="Label3D" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0432081, 0)

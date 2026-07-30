@@ -1,6 +1,9 @@
 extends Node
 class_name WorldPortalUtils
 
+const MIN_PORTAL_WALL_DISTANCE := 3.0
+const PORTAL_CLEARANCE_FACTOR := 1.1
+
 class PortalCandidate:
 	var cell: Vector3i
 	var item_id: int
@@ -41,25 +44,26 @@ func spawn_portal(cell: Vector3i, item_id: int) -> void:
 	tile_instance.global_transform = cell_transform
 	container.add_child(tile_instance)
 	world.grid_map.set_cell_item(cell, -1)
-	var portal_instance = world.portal_scene.instantiate()
+	var portal_instance: EscapePortal = world.portal_scene.instantiate()
 	container.add_child(portal_instance)
-	if portal_instance is Node3D:
-		var portal_node: Node3D = portal_instance
-		portal_node.visible = false
-		portal_node.global_position = cell_transform.origin + Vector3(0, -world.portal_depth_offset, 0)
-		_scale_portal_surface(portal_node, tile_instance)
-		await _run_portal_sequence(tile_instance, portal_node, cell_transform.origin, cell)
+	portal_instance.visible = false
+	portal_instance.global_position = cell_transform.origin + Vector3(0, -world.portal_depth_offset, 0)
+	_scale_portal(portal_instance, tile_instance)
+	await _run_portal_sequence(tile_instance, portal_instance, cell_transform.origin, cell)
 
-func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D, portal_position: Vector3, portal_cell: Vector3i) -> void:
+func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: EscapePortal, portal_position: Vector3, portal_cell: Vector3i) -> void:
 	var local_player = _get_local_player()
 	_start_portal_camera_cinematic(local_player, portal_position, portal_cell)
 	await world.get_tree().create_timer(world.portal_camera_focus_duration).timeout
-	portal_instance.visible = true
+	portal_instance.open(world.portal_tile_slide_duration)
 	GameState.portal_position = portal_position
 	GameState.portal_active = true
 	var slide_offset = _get_portal_slide_offset(tile_instance)
+	var lift_offset = _get_portal_lift_offset(tile_instance)
+	var tile_start_position = tile_instance.global_position
 	var tween = world.create_tween()
-	tween.tween_property(tile_instance, "global_position", tile_instance.global_position + slide_offset, world.portal_tile_slide_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(tile_instance, "global_position", tile_start_position + lift_offset, world.portal_tile_slide_duration * 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(tile_instance, "global_position", tile_start_position + slide_offset, world.portal_tile_slide_duration * 0.8).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
 	await world.get_tree().create_timer(world.portal_open_hold_duration).timeout
 	if local_player != null:
@@ -71,12 +75,51 @@ func _collect_floor_candidates() -> Array[PortalCandidate]:
 	var candidates: Array[PortalCandidate] = []
 	if world.grid_map == null or world.grid_map.mesh_library == null:
 		return candidates
+	var blocker_positions = _get_portal_blocker_positions()
+	var grid_bounds = _get_grid_bounds()
 	var floor_cells = Utils.get_floor_cells(world.grid_map)
 	for cell in floor_cells:
 		var item_id = world.grid_map.get_cell_item(cell)
 		var candidate_position = world.grid_map.to_global(world.grid_map.map_to_local(cell))
+		var clearance = _get_portal_clearance(item_id)
+		if not _is_position_clear_of_blockers(candidate_position, blocker_positions, clearance):
+			continue
+		if _get_nearest_wall_distance(cell, grid_bounds) < MIN_PORTAL_WALL_DISTANCE:
+			continue
 		candidates.append(PortalCandidate.new(cell, item_id, candidate_position))
 	return candidates
+
+func _get_portal_blocker_positions() -> Array[Vector3]:
+	var positions: Array[Vector3] = []
+	for node in world.get_tree().get_nodes_in_group("portal_blocker"):
+		assert(node is Node3D)
+		var blocker := node as Node3D
+		positions.append(blocker.global_position)
+	return positions
+
+func _get_portal_clearance(item_id: int) -> float:
+	var tile_mesh = world.grid_map.mesh_library.get_item_mesh(item_id)
+	var tile_size = tile_mesh.get_aabb().size
+	return maxf(tile_size.x, tile_size.z) * PORTAL_CLEARANCE_FACTOR
+
+func _is_position_clear_of_blockers(position: Vector3, blocker_positions: Array[Vector3], clearance: float) -> bool:
+	var floor_position = Vector2(position.x, position.z)
+	for blocker_position in blocker_positions:
+		if floor_position.distance_to(Vector2(blocker_position.x, blocker_position.z)) < clearance:
+			return false
+	return true
+
+func _get_nearest_wall_distance(cell: Vector3i, bounds: Dictionary) -> float:
+	var nearest_distance := INF
+	var directions: Array[Vector3i] = [
+		Vector3i(1, 0, 0),
+		Vector3i(-1, 0, 0),
+		Vector3i(0, 0, 1),
+		Vector3i(0, 0, -1),
+	]
+	for direction in directions:
+		nearest_distance = minf(nearest_distance, _distance_to_wall(cell, direction, bounds))
+	return nearest_distance
 
 func _select_portal_candidate_farthest_from_players() -> PortalCandidate:
 	var candidates = _collect_floor_candidates()
@@ -140,6 +183,13 @@ func _get_portal_slide_offset(tile_instance: MeshInstance3D) -> Vector3:
 		down = Vector3.DOWN
 	return (direction.normalized() * tile_size + down.normalized() * tile_height * 0.25) * world.portal_tile_slide_distance_multiplier
 
+func _get_portal_lift_offset(tile_instance: MeshInstance3D) -> Vector3:
+	var tile_height = world.grid_map.cell_size.y
+	if tile_instance != null:
+		tile_height = max(tile_height, tile_instance.get_aabb().size.y)
+	var up = world.grid_map.global_transform.basis.y
+	return up.normalized() * tile_height * 0.12
+
 func _start_portal_camera_cinematic(local_player: Node, portal_position: Vector3, portal_cell: Vector3i) -> void:
 	assert(local_player != null)
 	GameState.portal_cinematic_active = true
@@ -153,24 +203,15 @@ func _finish_portal_camera_cinematic(local_player: Node) -> void:
 	var return_damping_time_constant = SmoothDamp.damping_time_constant_for_progress_fraction(world.portal_camera_return_duration)
 	camera_utils.set_temporary_camera_damping_time_constant(return_damping_time_constant, world.portal_camera_return_duration)
 
-func _scale_portal_surface(portal_node: Node3D, tile_instance: MeshInstance3D) -> void:
-	if portal_node == null or tile_instance == null or world.grid_map == null:
+func _scale_portal(portal: EscapePortal, tile_instance: MeshInstance3D) -> void:
+	if tile_instance == null or world.grid_map == null:
 		return
-	var surface_node = portal_node.get_node_or_null("PortalSurface")
-	if surface_node == null or not surface_node is MeshInstance3D:
-		return
-	var surface_mesh = surface_node.mesh
-	var base_size = 1.0
-	if surface_mesh is QuadMesh:
-		var quad_mesh: QuadMesh = surface_mesh
-		base_size = maxf(quad_mesh.size.x, quad_mesh.size.y)
 	var tile_bounds = tile_instance.get_aabb().size
 	var cell_size = world.grid_map.cell_size
 	var portal_size = maxf(maxf(tile_bounds.x, tile_bounds.z), maxf(cell_size.x, cell_size.z))
-	if portal_size <= 0.0 or base_size <= 0.0:
+	if portal_size <= 0.0:
 		return
-	var scale_factor = (portal_size / base_size) * 1.05
-	surface_node.scale = Vector3.ONE * scale_factor
+	portal.fit_to_size(portal_size * 1.05)
 
 func _get_portal_corner_direction(portal_cell: Vector3i) -> Vector3:
 	if world.grid_map == null:

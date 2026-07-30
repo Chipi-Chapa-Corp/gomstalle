@@ -1,53 +1,86 @@
 shader_type spatial;
-render_mode unshaded, cull_disabled, blend_add, depth_prepass_alpha;
+render_mode unshaded, cull_disabled, blend_mix, depth_prepass_alpha;
 
-uniform vec4 color_a : source_color = vec4(0.25, 0.05, 0.7, 1.0);
-uniform vec4 color_b : source_color = vec4(0.2, 0.7, 1.0, 1.0);
-uniform vec4 color_c : source_color = vec4(0.7, 0.2, 1.0, 1.0);
-uniform float emission_strength = 2.6;
-uniform float swirl_speed = 0.7;
-uniform float swirl_strength = 2.6;
-uniform float radius = 0.48;
-uniform float edge_softness = 0.08;
-uniform float noise_scale = 6.5;
-uniform float pulse_strength = 0.35;
+uniform vec4 void_color : source_color = vec4(0.006, 0.002, 0.014, 1.0);
+uniform vec4 color_a : source_color = vec4(0.11, 0.015, 0.28, 1.0);
+uniform vec4 color_b : source_color = vec4(0.52, 0.06, 0.72, 1.0);
+uniform vec4 color_c : source_color = vec4(0.78, 0.12, 0.28, 1.0);
+uniform float emission_strength = 1.35;
+uniform float swirl_speed = 0.42;
+uniform float swirl_strength = 1.8;
+uniform float noise_scale = 3.8;
+uniform float reveal_progress : hint_range(0.0, 1.0) = 0.0;
 
-float hash2(vec2 position) {
+float hash(vec2 position) {
 	return fract(sin(dot(position, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
-float noise2(vec2 position) {
+float noise(vec2 position) {
 	vec2 base = floor(position);
 	vec2 fraction = fract(position);
-	float a = hash2(base);
-	float b = hash2(base + vec2(1.0, 0.0));
-	float c = hash2(base + vec2(0.0, 1.0));
-	float d = hash2(base + vec2(1.0, 1.0));
+	float a = hash(base);
+	float b = hash(base + vec2(1.0, 0.0));
+	float c = hash(base + vec2(0.0, 1.0));
+	float d = hash(base + vec2(1.0, 1.0));
 	vec2 smooth_factor = fraction * fraction * (3.0 - 2.0 * fraction);
-	float mix_ab = mix(a, b, smooth_factor.x);
-	float mix_cd = mix(c, d, smooth_factor.x);
-	return mix(mix_ab, mix_cd, smooth_factor.y);
+	return mix(mix(a, b, smooth_factor.x), mix(c, d, smooth_factor.x), smooth_factor.y);
+}
+
+float layered_noise(vec2 position) {
+	float value = 0.0;
+	float amplitude = 0.55;
+	for (int octave = 0; octave < 3; octave++) {
+		value += noise(position) * amplitude;
+		position = position * 2.07 + vec2(3.1, 1.7);
+		amplitude *= 0.45;
+	}
+	return value;
+}
+
+float rounded_box_distance(vec2 point, vec2 bounds, float corner_radius) {
+	vec2 offset = abs(point) - bounds + corner_radius;
+	return min(max(offset.x, offset.y), 0.0) + length(max(offset, vec2(0.0))) - corner_radius;
+}
+
+mat2 rotation_matrix(float angle) {
+	float sine = sin(angle);
+	float cosine = cos(angle);
+	return mat2(vec2(cosine, -sine), vec2(sine, cosine));
 }
 
 void fragment() {
-	vec2 uv = UV * 2.0 - 1.0;
-	vec2 uv_swirl = uv * 1.41421356;
-	float distance = length(uv_swirl);
-	float angle = atan(uv_swirl.y, uv_swirl.x);
-	float swirl = angle * 3.0 + distance * (swirl_strength * 6.0) - TIME * swirl_speed;
-	vec2 flow_uv = vec2(cos(swirl), sin(swirl)) * distance + uv_swirl;
-	float flow = noise2(flow_uv * noise_scale + TIME * 0.2);
-	float wave = sin(swirl + flow * 3.0) * 0.5 + 0.5;
-	float pulse = sin(TIME * 2.2 + length(uv) * 10.0) * 0.5 + 0.5;
-	float square_distance = max(abs(uv.x), abs(uv.y));
-	float edge = smoothstep(radius + edge_softness, radius - edge_softness, square_distance);
-	float center_fade = smoothstep(0.0, radius * 0.08, length(uv));
-	float mask = edge * center_fade;
-	vec3 base_color = mix(color_a.rgb, color_b.rgb, wave);
-	base_color = mix(base_color, color_c.rgb, flow * 0.7);
-	base_color *= 0.7 + pulse_strength * pulse;
-	float alpha = mask * (0.8 + 0.2 * wave);
-	ALBEDO = base_color;
-	EMISSION = base_color * emission_strength * mask;
-	ALPHA = alpha;
+	vec2 portal_uv = UV * 2.0 - 1.0;
+	float square_radius = max(abs(portal_uv.x), abs(portal_uv.y));
+	float shape_distance = rounded_box_distance(portal_uv, vec2(0.82), 0.09);
+	float shape_mask = 1.0 - smoothstep(-0.015, 0.015, shape_distance);
+	float reveal_eased = reveal_progress * reveal_progress * (3.0 - 2.0 * reveal_progress);
+	float reveal_radius = reveal_eased * 1.18;
+	float reveal_mask = 1.0 - smoothstep(reveal_radius - 0.1, reveal_radius, square_radius);
+
+	float rotation = TIME * swirl_speed + (1.0 - square_radius) * swirl_strength;
+	vec2 flow_uv = rotation_matrix(rotation) * portal_uv * noise_scale;
+	float flow = layered_noise(flow_uv + vec2(TIME * 0.14, -TIME * 0.1));
+	float radial_distance = max(length(portal_uv), 0.025);
+	float angle = atan(portal_uv.y, portal_uv.x);
+	float filament_wave = sin(angle * 4.0 - log(radial_distance) * 6.2 - TIME * 1.15 + flow * 3.4) * 0.5 + 0.5;
+	float filament = smoothstep(0.48, 0.92, filament_wave) * (0.42 + flow * 0.58);
+	float tunnel_phase = fract(-log(radial_distance) * 1.15 - TIME * 0.16);
+	float depth_ring = pow(1.0 - abs(tunnel_phase * 2.0 - 1.0), 3.0);
+	depth_ring *= smoothstep(0.06, 0.26, radial_distance) * (1.0 - smoothstep(0.56, 0.82, radial_distance));
+	float inner_rim = 1.0 - smoothstep(0.0, 0.035, abs(square_radius - 0.73));
+	float outer_rim = 1.0 - smoothstep(0.0, 0.035, abs(shape_distance));
+	float center_fade = smoothstep(0.04, 0.5, square_radius);
+	float pulse = sin(TIME * 1.7 + flow * 2.0) * 0.5 + 0.5;
+
+	vec3 portal_color = mix(void_color.rgb, color_a.rgb, flow * 0.16 * center_fade);
+	portal_color += mix(color_a.rgb, color_b.rgb, flow) * filament * (0.08 + center_fade * 0.34);
+	portal_color += color_c.rgb * depth_ring * 0.09;
+	portal_color += mix(color_b.rgb, color_c.rgb, 0.12 + flow * 0.08) * inner_rim * 0.42;
+	portal_color += color_b.rgb * outer_rim * 0.2;
+	portal_color *= 0.88 + pulse * 0.12;
+
+	float energy = 0.32 + filament * 0.42 + depth_ring * 0.16 + inner_rim * 0.62 + outer_rim * 0.28;
+	ALBEDO = portal_color;
+	EMISSION = portal_color * emission_strength * energy;
+	ALPHA = shape_mask * reveal_mask;
 }

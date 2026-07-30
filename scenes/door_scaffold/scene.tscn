@@ -137,5 +137,5 @@ volume_db = -10.0
 unit_size = 5.0
 max_distance = 20.0
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." groups=["round_synchronizers"]]
 replication_config = SubResource("SceneReplicationConfig_h7n2b")

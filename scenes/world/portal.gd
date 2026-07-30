@@ -52,9 +52,12 @@ func spawn_portal(cell: Vector3i, item_id: int) -> void:
 
 func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D, portal_position: Vector3, portal_cell: Vector3i) -> void:
 	var local_player = _get_local_player()
+	var escape_area: Area3D = portal_instance.get_node("EscapeArea")
+	escape_area.body_entered.connect(_on_escape_area_body_entered)
 	_start_portal_camera_cinematic(local_player, portal_position, portal_cell)
 	await world.get_tree().create_timer(world.portal_camera_focus_duration).timeout
 	portal_instance.visible = true
+	escape_area.monitoring = true
 	GameState.portal_position = portal_position
 	GameState.portal_active = true
 	var slide_offset = _get_portal_slide_offset(tile_instance)
@@ -66,6 +69,11 @@ func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D
 		_finish_portal_camera_cinematic(local_player)
 		await world.get_tree().create_timer(world.portal_camera_return_duration).timeout
 		GameState.portal_cinematic_active = false
+
+func _on_escape_area_body_entered(body: Node3D) -> void:
+	if not world.multiplayer.is_server() or not body.is_in_group("players") or body.is_hunter or body.is_dead:
+		return
+	GameState.hider_escaped(body.peer_id)
 
 func _collect_floor_candidates() -> Array[PortalCandidate]:
 	var candidates: Array[PortalCandidate] = []

@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 USE_STEAMGODOT="${USE_STEAMGODOT:-1}"
-SCENARIO_SECONDS="${GOMSTALLE_E2E_SECONDS:-16}"
+SCENARIO_SECONDS="${GOMSTALLE_E2E_SECONDS:-60}"
 CAPTURE_FPS="${GOMSTALLE_E2E_FPS:-12}"
 ATTEMPTS="${GOMSTALLE_E2E_ATTEMPTS:-3}"
 OUTPUT_DIR="${GOMSTALLE_E2E_DIR:-$ROOT/.ci/e2e}"
@@ -33,7 +33,7 @@ export LD_LIBRARY_PATH="$ROOT/third_party/godotsteam:${LD_LIBRARY_PATH:-}"
 
 launch() {
   local capture_dir="$1"; local label="$2"; shift 2
-  GOMSTALLE_CAPTURE_DIR="$capture_dir" "${RUNNER[@]}" "$GODOT_BIN" --path "$ROOT" \
+  GOMSTALLE_CAPTURE_DIR="$capture_dir" "${RUNNER[@]}" "$GODOT_BIN" --audio-driver Dummy --path "$ROOT" \
     --dev --capture --label "$label" "$@" >"$OUTPUT_DIR/${label}.log" 2>&1 &
   echo $!
 }
@@ -45,6 +45,15 @@ wait_for_file() {
     waited=$((waited + 1))
   done
   [ -s "$path" ]
+}
+
+wait_for_results() {
+  local timeout_seconds="$1"; local waited=0
+  while { [ ! -s "$HOST_RESULT" ] || [ ! -s "$CLIENT_RESULT" ]; } && [ "$waited" -lt "$timeout_seconds" ]; do
+    sleep 1
+    waited=$((waited + 1))
+  done
+  [ -s "$HOST_RESULT" ] && [ -s "$CLIENT_RESULT" ]
 }
 
 run_attempt() {
@@ -68,11 +77,15 @@ run_attempt() {
   local client_pid
   client_pid="$(GOMSTALLE_E2E_RESULT="$CLIENT_RESULT" launch "$CLIENT_DIR" CLIENT --e2e +connect_lobby 1)"
 
-  sleep "$SCENARIO_SECONDS"
+  wait_for_results "$SCENARIO_SECONDS" || true
   kill "$host_pid" "$client_pid" >/dev/null 2>&1 || true
   wait "$host_pid" "$client_pid" 2>/dev/null || true
   pkill -9 -f "$GODOT_BIN" >/dev/null 2>&1 || true
 
+  if grep -Eq 'ERROR:|SCRIPT ERROR|Assertion failed' "$OUTPUT_DIR/HOST.log" "$OUTPUT_DIR/CLIENT.log"; then
+    echo "Godot reported errors during the scenario"
+    return 1
+  fi
   if [ ! -s "$HOST_RESULT" ]; then
     echo "host produced no e2e result"
     return 1
@@ -113,8 +126,11 @@ for path in sys.argv[1:]:
     result = json.load(open(path))
     label = result["label"]
     assert result["player_count"] >= 2, "%s did not see two players: %s" % (label, result)
-    assert result["game_started"], "%s never saw the match start: %s" % (label, result)
+    assert result["rounds_started"] == 2, "%s did not start two rounds: %s" % (label, result)
     assert result["door_opened"], "%s never saw the door open: %s" % (label, result)
+    assert result["hunter_victory"], "%s missed the hunter victory: %s" % (label, result)
+    assert result["hider_victory"], "%s missed the hider victory: %s" % (label, result)
+    assert result["lobby_restarts"] == 2, "%s did not return to the lobby twice: %s" % (label, result)
     print("E2E assertions passed:", result)
 PY
 

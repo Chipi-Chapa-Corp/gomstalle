@@ -3,6 +3,8 @@ extends Node3D
 @export var start_button: Button
 @export var menu: Control
 @export var hud: Control
+@export var match_result_overlay: Control
+@export var match_result_label: Label
 @export var player_container: Node
 @export var player_list: VBoxContainer
 @export var player_list_item_sample: Control
@@ -16,6 +18,8 @@ extends Node3D
 @export var portal_camera_zoom_fov: float = 55.0
 @export var portal_camera_return_duration: float = 1.5
 @export var portal_open_hold_duration: float = 1.0
+
+const LOBBY_RESTART_DELAY_SECONDS := 3.0
 
 @onready var player_list_utils := WorldPlayerListUtils.new(self)
 @onready var portal_utils := WorldPortalUtils.new(self)
@@ -33,6 +37,7 @@ func _ready():
 	if multiplayer.is_server():
 		start_button.visible = true
 		player_list_utils.spawn_existing_players()
+	GameState.lobby_ready()
 
 func _on_start_pressed():
 	if not NetworkManager.is_host():
@@ -46,6 +51,11 @@ func _on_start_pressed():
 func _on_game_state_changed(state: GameState.State) -> void:
 	if state == GameState.State.STARTED:
 		start_button.visible = false
+	elif state == GameState.State.FINISHED:
+		match_result_label.text = "Hunter wins!" if GameState.winner == GameState.Winner.HUNTER else "Penguins win!"
+		match_result_overlay.visible = true
+		if multiplayer.is_server():
+			get_tree().create_timer(LOBBY_RESTART_DELAY_SECONDS).timeout.connect(GameState.restart_lobby)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if GameState.game_state != GameState.State.IDLE and event.is_action_pressed("menu"):

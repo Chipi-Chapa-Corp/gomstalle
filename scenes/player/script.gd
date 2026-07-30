@@ -138,7 +138,9 @@ func _physics_process(delta: float) -> void:
 
 	forces.handle(delta)
 	var can_process_input = not is_stunned and not is_dead and not GameState.is_paused
-	if can_process_input and not GameState.portal_cinematic_active:
+	if GameState.game_state == GameState.State.FINISHED:
+		movement.handle_input_locked(delta)
+	elif can_process_input and not GameState.portal_cinematic_active:
 		movement.handle(delta)
 		interactions.handle(delta)
 		actions.handle(delta)
@@ -192,6 +194,8 @@ func apply_kill() -> void:
 	if not _is_server_call():
 		return
 	set_dead(true)
+	if multiplayer.is_server():
+		GameState.hider_killed(peer_id)
 
 func _is_server_call() -> bool:
 	var sender_id := multiplayer.get_remote_sender_id()

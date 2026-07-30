@@ -12,8 +12,14 @@ var _ready_path := ""
 var _ready_written := false
 var _frame_index := 0
 var _capture_accumulator := 0.0
-var _scenario_started := false
 var _scenario_done := false
+var _last_game_state := GameState.State.IDLE
+var _rounds_started := 0
+var _lobby_restarts := 0
+var _round_action_done := false
+var _door_opened := false
+var _hunter_victory_observed := false
+var _hider_victory_observed := false
 
 func _ready() -> void:
 	var args := OS.get_cmdline_args()
@@ -29,6 +35,8 @@ func _ready() -> void:
 	_result_path = OS.get_environment("GOMSTALLE_E2E_RESULT")
 	_ready_path = OS.get_environment("GOMSTALLE_E2E_READY")
 
+	if _e2e_enabled:
+		GameState.state_changed.connect(_on_game_state_changed)
 	if _capture_enabled and not _capture_dir.is_empty():
 		DirAccess.make_dir_recursive_absolute(_capture_dir)
 		_add_label_overlay()
@@ -82,15 +90,19 @@ func _advance_host_scenario() -> void:
 	var player_container = world.get("player_container")
 	if player_container == null or player_container.get_child_count() < 2:
 		return
-	if not _scenario_started:
-		_scenario_started = true
+	if GameState.game_state == GameState.State.LOBBY and _lobby_restarts < 2:
 		world.call("_on_start_pressed")
 		return
-	if GameState.game_state != GameState.State.STARTED:
-		return
-	_run_door_demo(world)
-	_write_result(player_container.get_child_count())
-	_scenario_done = true
+	if GameState.game_state == GameState.State.STARTED and not _round_action_done:
+		_round_action_done = true
+		if _rounds_started == 1:
+			_door_opened = _run_door_demo(world)
+			_run_hunter_victory()
+		else:
+			_run_hider_victory(world)
+	elif GameState.game_state == GameState.State.LOBBY and _lobby_restarts == 2:
+		_write_result(player_container.get_child_count())
+		_scenario_done = true
 
 func _observe_client_scenario() -> void:
 	var world := _find_world()
@@ -99,31 +111,63 @@ func _observe_client_scenario() -> void:
 	var player_container = world.get("player_container")
 	if player_container == null or player_container.get_child_count() < 2:
 		return
-	if GameState.game_state != GameState.State.STARTED:
-		return
-	var door := _find_door()
-	if door == null or is_equal_approx(door.get("open_target_degrees"), 0.0):
-		return
-	_write_result(player_container.get_child_count())
-	_scenario_done = true
+	if not _door_opened:
+		var door := _find_door()
+		_door_opened = door != null and not is_equal_approx(door.get("open_target_degrees"), 0.0)
+	if GameState.game_state == GameState.State.LOBBY and _lobby_restarts == 2:
+		_write_result(player_container.get_child_count())
+		_scenario_done = true
 
-func _run_door_demo(world: Node) -> void:
+func _on_game_state_changed(state: GameState.State) -> void:
+	if state == GameState.State.STARTED:
+		_rounds_started += 1
+		_round_action_done = false
+	elif state == GameState.State.FINISHED:
+		if GameState.winner == GameState.Winner.HUNTER:
+			_hunter_victory_observed = true
+		elif GameState.winner == GameState.Winner.HIDERS:
+			_hider_victory_observed = true
+	elif state == GameState.State.LOBBY and _last_game_state == GameState.State.FINISHED:
+		_lobby_restarts += 1
+	_last_game_state = state
+
+func _run_door_demo(world: Node) -> bool:
 	var door := _find_door()
 	if door == null:
-		return
+		return false
 	var host_player := _host_player(world)
 	var position = host_player.global_position if host_player != null else Vector3.ZERO
 	door.interact(true, {"position": position, "direction": Vector3.FORWARD, "amount": 1})
+	return not is_equal_approx(door.get("open_target_degrees"), 0.0)
+
+func _run_hunter_victory() -> void:
+	var hunter: Node
+	var hiders: Array[Node] = []
+	for player in get_tree().get_nodes_in_group("players"):
+		if player.is_hunter:
+			hunter = player
+		else:
+			hiders.append(player)
+	for hider in hiders:
+		hunter.request_kill(hider.peer_id)
+
+func _run_hider_victory(world: Node) -> void:
+	for player in get_tree().get_nodes_in_group("players"):
+		if not player.is_hunter:
+			world.portal_utils._on_escape_area_body_entered(player)
+			return
 
 func _write_result(player_count: int) -> void:
 	if _result_path.is_empty():
 		return
-	var door := _find_door()
 	var summary := {
 		"label": _label,
 		"player_count": player_count,
-		"game_started": GameState.game_state == GameState.State.STARTED,
-		"door_opened": door != null and not is_equal_approx(door.get("open_target_degrees"), 0.0),
+		"rounds_started": _rounds_started,
+		"door_opened": _door_opened,
+		"hunter_victory": _hunter_victory_observed,
+		"hider_victory": _hider_victory_observed,
+		"lobby_restarts": _lobby_restarts,
 	}
 	var file := FileAccess.open(_result_path, FileAccess.WRITE)
 	if file != null:

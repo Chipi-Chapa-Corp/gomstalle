@@ -106,11 +106,13 @@ albedo_texture = ExtResource("24_53vc2")
 material = SubResource("StandardMaterial3D_egm64")
 size = Vector3(50, 1, 200)
 
-[node name="World" type="Node3D" node_paths=PackedStringArray("start_button", "menu", "hud", "player_container", "player_list", "player_list_item_sample", "grid_map", "portal_container")]
+[node name="World" type="Node3D" node_paths=PackedStringArray("start_button", "menu", "hud", "match_result_overlay", "match_result_label", "player_container", "player_list", "player_list_item_sample", "grid_map", "portal_container")]
 script = ExtResource("1_0rkgh")
 start_button = NodePath("UI/HUD/Start")
 menu = NodePath("UI/Menu")
 hud = NodePath("UI/HUD")
+match_result_overlay = NodePath("UI/Result")
+match_result_label = NodePath("UI/Result/Label")
 player_container = NodePath("Players")
 player_list = NodePath("UI/HUD/Player List")
 player_list_item_sample = NodePath("UI/HUD/Player List/Sample")
@@ -226,6 +228,40 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 30
 text = "Sack of Bones"
+
+[node name="Result" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_0rkgh")
+
+[node name="ColorRect" type="ColorRect" parent="UI/Result"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Label" type="Label" parent="UI/Result"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 64
+text = "Hunter wins!"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="GridMap" type="GridMap" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 2)

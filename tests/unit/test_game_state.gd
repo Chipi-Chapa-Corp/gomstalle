@@ -3,17 +3,21 @@ extends GutTest
 var _original_metadata: Array[Dictionary] = []
 var _original_hunter_id: int = 0
 var _original_state: GameState.State = GameState.State.IDLE
+var _original_winner: GameState.Winner = GameState.Winner.NONE
 var _original_positions: Dictionary = {}
 var _original_room_id: int = 0
 var _original_is_paused := false
+var _original_alive_hider_peer_ids: Array[int] = []
 
 func before_each() -> void:
 	_original_metadata = NetworkManager.connected_players_metadata.duplicate(true)
 	_original_hunter_id = GameState.hunter_peer_id
 	_original_state = GameState.game_state
+	_original_winner = GameState.winner
 	_original_positions = GameState.start_positions.duplicate(true)
 	_original_room_id = GameState.room_id
 	_original_is_paused = GameState.is_paused
+	_original_alive_hider_peer_ids = GameState._alive_hider_peer_ids.duplicate()
 
 func after_each() -> void:
 	NetworkManager.connected_players_metadata.clear()
@@ -21,9 +25,11 @@ func after_each() -> void:
 		NetworkManager.connected_players_metadata.append(metadata)
 	GameState.hunter_peer_id = _original_hunter_id
 	GameState.game_state = _original_state
+	GameState.winner = _original_winner
 	GameState.start_positions = _original_positions.duplicate(true)
 	GameState.room_id = _original_room_id
 	GameState.is_paused = _original_is_paused
+	GameState._alive_hider_peer_ids.assign(_original_alive_hider_peer_ids)
 
 func _set_peers(peer_ids: Array[int]) -> void:
 	NetworkManager.connected_players_metadata.clear()
@@ -74,18 +80,68 @@ func test_apply_game_start_sets_state_and_positions() -> void:
 
 	assert_eq(GameState.hunter_peer_id, 2, "Apply start should set hunter id")
 	assert_eq(GameState.start_positions, positions, "Apply start should set positions")
+	assert_eq(GameState._alive_hider_peer_ids, [1], "Apply start should track living hiders")
 	assert_eq(GameState.game_state, GameState.State.STARTED, "Apply start should set STARTED state")
+
+func test_hunter_wins_after_last_hider_is_killed() -> void:
+	GameState._apply_game_start(1, {1: Vector3.ZERO, 2: Vector3.RIGHT, 3: Vector3.LEFT})
+
+	GameState.hider_killed(2)
+	assert_eq(GameState.game_state, GameState.State.STARTED, "Round should continue while a hider is alive")
+
+	GameState.hider_killed(3)
+	assert_eq(GameState.winner, GameState.Winner.HUNTER, "Hunter should win after killing every hider")
+	assert_eq(GameState.game_state, GameState.State.FINISHED, "Hunter victory should finish the round")
+
+func test_hiders_win_when_living_hider_escapes() -> void:
+	GameState._apply_game_start(1, {1: Vector3.ZERO, 2: Vector3.RIGHT})
+
+	GameState.hider_escaped(2)
+
+	assert_eq(GameState.winner, GameState.Winner.HIDERS, "Hiders should win by escaping")
+	assert_eq(GameState.game_state, GameState.State.FINISHED, "Escape should finish the round")
+
+func test_killed_hider_cannot_win_by_escaping() -> void:
+	GameState._apply_game_start(1, {1: Vector3.ZERO, 2: Vector3.RIGHT, 3: Vector3.LEFT})
+
+	GameState.hider_killed(2)
+	GameState.hider_escaped(2)
+
+	assert_eq(GameState.winner, GameState.Winner.NONE, "Killed hider should not trigger an escape victory")
+	assert_eq(GameState.game_state, GameState.State.STARTED, "Invalid escape should not finish the round")
+
+func test_first_result_wins() -> void:
+	GameState._apply_game_start(1, {1: Vector3.ZERO, 2: Vector3.RIGHT})
+
+	GameState._apply_game_finish(GameState.Winner.HUNTER)
+	GameState._apply_game_finish(GameState.Winner.HIDERS)
+
+	assert_eq(GameState.winner, GameState.Winner.HUNTER, "Finished round should keep its first result")
+
+func test_round_reset_preserves_lobby() -> void:
+	GameState.room_id = 42
+	GameState.winner = GameState.Winner.HIDERS
+
+	GameState._reset_round(GameState.State.LOBBY)
+
+	assert_eq(GameState.room_id, 42, "Round reset should keep the current lobby")
+	assert_eq(GameState.winner, GameState.Winner.NONE, "Round reset should clear the winner")
+	assert_eq(GameState.game_state, GameState.State.LOBBY, "Round reset should set lobby state")
 
 func test_reset_clears_state() -> void:
 	GameState.is_paused = true
 	GameState.hunter_peer_id = 7
 	GameState.room_id = 42
+	GameState.winner = GameState.Winner.HIDERS
 	GameState.start_positions = {1: Vector3(1, 0, 0)}
+	GameState._alive_hider_peer_ids = [1]
 
 	GameState.reset(GameState.State.LOBBY)
 
 	assert_false(GameState.is_paused, "Reset should clear pause")
 	assert_eq(GameState.hunter_peer_id, 0, "Reset should clear hunter id")
 	assert_eq(GameState.room_id, 0, "Reset should clear room id")
+	assert_eq(GameState.winner, GameState.Winner.NONE, "Reset should clear winner")
 	assert_eq(GameState.start_positions.size(), 0, "Reset should clear positions")
+	assert_true(GameState._alive_hider_peer_ids.is_empty(), "Reset should clear living hiders")
 	assert_eq(GameState.game_state, GameState.State.LOBBY, "Reset should set state")

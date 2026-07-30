@@ -14,7 +14,7 @@ func _ready() -> void:
 func _handle_dev_autostart() -> void:
 	if not NetworkManager.is_dev_mode():
 		return
-	var args := OS.get_cmdline_args()
+	var args := OS.get_cmdline_user_args()
 	var connect_index := args.find("+connect_lobby")
 	if connect_index != -1 and connect_index + 1 < args.size():
 		_on_join_room_pressed({"id": int(args[connect_index + 1])})

@@ -16,7 +16,7 @@ var _scenario_started := false
 var _scenario_done := false
 
 func _ready() -> void:
-	var args := OS.get_cmdline_args()
+	var args := OS.get_cmdline_user_args()
 	_capture_enabled = args.has("--capture")
 	_e2e_enabled = args.has("--e2e")
 	if not _capture_enabled and not _e2e_enabled:

@@ -17,6 +17,8 @@ var camera_override_target: Vector3 = Vector3.ZERO
 var camera_override_direction: Vector3 = Vector3.ZERO
 var camera_override_fov: float = 0.0
 var camera_override_damping_time_constant: float = 0.0
+var camera_override_uses_custom_offset: bool = false
+var camera_override_custom_offset: Vector3 = Vector3.ZERO
 var camera_temporary_damping_time_constant: float = 0.0
 var camera_temporary_damping_duration_remaining: float = 0.0
 
@@ -51,6 +53,16 @@ func set_camera_override(target: Vector3, direction: Vector3, fov: float, dampin
 		camera_override_direction = flattened_direction.normalized()
 	camera_override_fov = maxf(fov, 1.0)
 	camera_override_damping_time_constant = maxf(damping_time_constant, 0.0)
+	camera_override_uses_custom_offset = false
+	camera_velocity = Vector3.ZERO
+
+func set_camera_override_with_offset(target: Vector3, offset: Vector3, fov: float, damping_time_constant: float) -> void:
+	camera_override_active = true
+	camera_override_target = target
+	camera_override_custom_offset = offset
+	camera_override_uses_custom_offset = true
+	camera_override_fov = maxf(fov, 1.0)
+	camera_override_damping_time_constant = maxf(damping_time_constant, 0.0)
 	camera_velocity = Vector3.ZERO
 
 func clear_camera_override() -> void:
@@ -59,6 +71,8 @@ func clear_camera_override() -> void:
 	camera_override_direction = Vector3.ZERO
 	camera_override_fov = base_camera_fov
 	camera_override_damping_time_constant = 0.0
+	camera_override_uses_custom_offset = false
+	camera_override_custom_offset = Vector3.ZERO
 	camera_velocity = Vector3.ZERO
 
 func set_temporary_camera_damping_time_constant(damping_time_constant: float, duration: float) -> void:
@@ -72,7 +86,7 @@ func _get_camera_target_position() -> Vector3:
 	var offset = camera_offset
 	if camera_override_active:
 		focus_position = camera_override_target
-		offset = _get_camera_override_offset()
+		offset = camera_override_custom_offset if camera_override_uses_custom_offset else _get_camera_override_offset()
 	return focus_position + offset
 
 func _get_camera_override_offset() -> Vector3:

@@ -25,6 +25,7 @@
 [ext_resource type="Script" uid="uid://cbh6i475pyy45" path="res://addons/proton_scatter/src/shapes/box_shape.gd" id="23_jnn3q"]
 [ext_resource type="Texture2D" uid="uid://drdh36j6mu3ah" path="res://addons/proton_scatter/demos/assets/textures/t_rock_dirty.png" id="24_53vc2"]
 [ext_resource type="PackedScene" uid="uid://d28j7v7rw0oih" path="res://scenes/table_long_barrels/scene.tscn" id="25_mty66"]
+[ext_resource type="PackedScene" path="res://scenes/runestone/scene.tscn" id="26_runestone"]
 
 [sub_resource type="Environment" id="Environment_k3o70"]
 ambient_light_source = 2
@@ -1285,6 +1286,10 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12, 4, 70)
 
 [node name="Piles" type="Node" parent="."]
+
+[node name="Runestone" parent="." instance=ExtResource("26_runestone")]
+position = Vector3(-8.4, 0, 2)
+rotation = Vector3(0, 1.570796, 0)
 
 [node name="Shrines" type="Node" parent="."]
 

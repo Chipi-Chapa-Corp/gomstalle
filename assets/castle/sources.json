@@ -53,10 +53,44 @@
       "heraldic rugs",
       "alchemy ward rings",
       "wooden crate parkour platforms",
-      "kitchen hearth",
       "astronomical orrery",
       "parlor game board"
     ]
   },
-  "license_notice": "KayKit-derived textures and models retain their source CC0 license; see KayKit-License.txt. New original compositions and assemblies were created for the Gomstalle project."
+  "license_notice": "KayKit-derived textures and models retain their source CC0 license; see KayKit-License.txt. New original compositions and assemblies were created for the Gomstalle project.",
+  "interrupted_midnight_feast": {
+    "files": [
+      "feast_hearth.glb",
+      "feast_preparation.glb",
+      "feast_table_full.glb",
+      "feast_table_spilled.glb",
+      "feast_sideboard.glb",
+      "feast_pantry.glb",
+      "feast_wash.glb",
+      "feast_dais.glb",
+      "feast_serving_hatch.glb",
+      "feast_cookware.glb",
+      "feast_grain_station.glb",
+      "feast_banquet_architecture.glb",
+      "feast_cook_station.glb"
+    ],
+    "source": "scripts/art/build_feast.py",
+    "design": "Original kitchen workflow from pantry and grain milling through food preparation, roasting, washing, and service; banquet tables with distinct full and interrupted settings, silver display, and royal dais.",
+    "processing": "Joined material meshes, applied transforms, sRGB palette converted to linear shader values, separate non-overlapping lightmap UVs.",
+    "triangles": {
+      "feast_hearth": 2296,
+      "feast_preparation": 3336,
+      "feast_table_full": 7376,
+      "feast_table_spilled": 6424,
+      "feast_sideboard": 4164,
+      "feast_pantry": 6012,
+      "feast_wash": 3172,
+      "feast_dais": 2532,
+      "feast_serving_hatch": 4136,
+      "feast_cookware": 1336,
+      "feast_grain_station": 1252,
+      "feast_banquet_architecture": 9072,
+      "feast_cook_station": 2516
+    }
+  }
 }

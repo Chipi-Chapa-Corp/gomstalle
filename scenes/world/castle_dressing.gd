@@ -12,7 +12,7 @@ const BRASS := Color("a17c43")
 const TIMBER := Color("4b332c")
 const IRON := Color("252e39")
 const STONE := Color("595e70")
-const CUSTOM_MODELS: Array[String] = ["clock", "mirror", "lectern", "sarcophagus", "soul_cage", "brazier", "alembic", "preparation", "herb_rack", "wash_station"]
+const CUSTOM_MODELS: Array[String] = ["clock", "mirror", "lectern", "sarcophagus", "soul_cage", "brazier", "alembic", "preparation", "herb_rack", "wash_station", "feast_hearth", "feast_preparation", "feast_table_full", "feast_table_spilled", "feast_sideboard", "feast_pantry", "feast_wash", "feast_dais", "feast_serving_hatch", "feast_cookware", "feast_grain_station", "feast_banquet_architecture", "feast_cook_station"]
 const SPOOKY_MODELS: Array[String] = ["skull", "skull_candle", "bone_A", "bone_B", "bone_C", "ribcage", "coffin", "coffin_decorated", "bench", "lantern_standing", "lantern_hanging", "shrine_candles", "plaque_candles", "pumpkin_orange_small", "pumpkin_orange_jackolantern"]
 const RESOURCE_MODELS: Array[String] = ["Copper_Nuggets", "Copper_Bars", "Iron_Bars", "Gold_Bars_Stack_Small", "Silver_Bars", "Parts_Cog", "Textiles_Stack_Small"]
 const SMALL_MODELS: Array[String] = ["spellbook_open", "spellbook_closed", "mug_full", "mug_empty", "staff", "wand"]
@@ -301,45 +301,66 @@ func _build_chapel() -> void:
 	_prop(room, "skull_candle", Vector3(-7, 0.83, 37), 0, 0.65, false)
 
 func _build_banquet() -> void:
-	var room := _room(10, AMBER)
-	_carpet(room, Vector3(30, 0.07, 26), Vector2(29, 7), CRIMSON)
-	for horizontal in [22.0, 31.0, 40.0]:
-		_prop(room, "table_long_tablecloth_decorated_A", Vector3(horizontal, 0, 26), PI / 2)
-		for side in [-2.0, 2.0]:
-			for seat in [-1.2, 1.2]:
-				_prop(room, "chair", Vector3(horizontal + seat, 0, 26 + side), PI if side > 0 else 0)
-		_chandelier(room, Vector3(horizontal, 3.5, 26), AMBER)
-	_prop(room, "table_small", Vector3(14, 0, 26), 0)
-	for horizontal in [24.0, 34.0, 44.0]:
-		_banner(room, Vector3(horizontal, 0, 20.8), "red")
-		_prop(room, "sword_shield_gold", Vector3(horizontal, 2.4, 31.2), PI, 0.8, false)
+	var room := _room(10, Color("e6b784"))
+	var first_table := _prop(room, "feast_table_full", Vector3(24.5, 0, 26), 0, 1, false)
+	var second_table := _prop(room, "feast_table_spilled", Vector3(35.5, 0, 26), 0, 1, false)
+	for table: Node3D in [first_table, second_table]:
+		_add_collision(table, Vector3(0, 0.61, 0), Vector3(7.8, 1.22, 2.5))
+		for seat in [-3.2, -1.6, 0.0, 1.6, 3.2]:
+			_prop(room, "chair", table.position + Vector3(seat, 0, -2), 0, 0.92)
+			if table == first_table or seat != 1.6:
+				_prop(room, "chair", table.position + Vector3(seat, 0, 2), PI, 0.92)
+		_practical(room, table.position + Vector3(0, 2.3, 0), AMBER, 2.4, 7)
+	_prop(room, "chair", Vector3(37.2, 0, 28.7), PI + 0.35, 0.92)
+	_prop(room, "feast_sideboard", Vector3(25.5, 0, 21.3))
+	var dais := _prop(room, "feast_dais", Vector3(45.1, 0, 26), 0, 1, false)
+	_add_collision(dais, Vector3(0, 0.15, 0), Vector3(4.8, 0.3, 6.8))
+	_add_collision(dais, Vector3(0.23, 0.45, 0), Vector3(4.35, 0.3, 6.4))
+	_add_collision(dais, Vector3(0.77, 1.7, 0), Vector3(1.4, 2.2, 1.7))
+	_add_collision(dais, Vector3(1.76, 2.1, 0), Vector3(0.3, 3.0, 4.95))
+	_add_collision(dais, Vector3(-0.65, 1.1, 0), Vector3(1.4, 1, 2.2))
+	_practical(room, Vector3(43, 2.8, 26), AMBER, 2.8, 7)
+	_prop(room, "feast_banquet_architecture", Vector3(30, 0, 26), 0, 1, false)
+	_portrait(room, Vector3(14.1, 2.25, 25.5), PI / 2, "portrait_knight")
+	_prop(room, "table_medium_tablecloth_decorated_B", Vector3(14.7, 0, 26), 0)
+	_prop(room, "bottle_A_brown", Vector3(14.7, 1.03, 26), 0, 1, false)
+	_prop(room, "candle_triple", Vector3(14.7, 1.03, 25.1), 0, 0.8, false)
+	_stain(room, Vector3(37.1, 0.07, 27.5), Vector2(1.1, 0.5), Color("572d3c"))
 
 func _build_kitchen() -> void:
-	var room := _room(11, AMBER)
-	for horizontal in [28.0, 35.0, 42.0]:
-		_prop(room, "table_long", Vector3(horizontal, 0, 41.5), PI / 2)
-		_prop(room, "plate_stack", Vector3(horizontal - 1.1, 1.03, 41.5), 0, 1.1, false)
-		_prop(room, "plate_food_B", Vector3(horizontal + 0.5, 1.03, 41.5), 0, 1.0, false)
-		_prop(room, "mug_full", Vector3(horizontal + 1.4, 1.03, 41.5), 0, 1.0, false)
-	for horizontal in [22.0, 30.0, 38.0, 45.0]:
-		_prop(room, "shelves", Vector3(horizontal, 0, 33), 0, 1.2, false)
-		_prop(room, "bottle_B_brown", Vector3(horizontal, 1.65, 33.6), 0, 1.0, false)
-		_prop(room, "plate_stack", Vector3(horizontal + 0.6, 2.75, 33.6), 0, 1.0, false)
-	_prop(room, "keg", Vector3(45.5, 0, 37.5), -PI / 2)
-	_prop(room, "barrel_small_stack", Vector3(15, 0, 41), 0)
-	_prop(room, "box_small", Vector3(16, 0, 37), 0)
-	_hearth(room, Vector3(31, 0, 34), 0)
-	_chandelier(room, Vector3(26, 3.4, 38), AMBER)
-	_prop(room, "herb_rack", Vector3(41, 2.7, 33), 0, 1.2, false)
-	_prop(room, "wash_station", Vector3(38, 0, 36), PI / 2)
-	_prop(room, "box_small", Vector3(26, 0, 34.5), 0)
-	_prop(room, "plate", Vector3(41, 0.07, 39.4), 0, 1.0, false)
-	_prop(room, "plate_small", Vector3(40.2, 0.07, 39.1), 0, 1.0, false)
-	_prop(room, "mug_empty", Vector3(42, 0.08, 39.5), 0, 1.0, false).rotation.z = PI / 2
-	_stain(room, Vector3(41.5, 0.07, 39.4), Vector2(1.8, 1), Color("3d4534"))
-	for horizontal in [25.5, 26.3, 27.0]:
-		_prop(room, "pumpkin_orange_small", Vector3(horizontal, 0.04, 35), horizontal * 0.1, 0.7, false)
-	_prop(room, "pumpkin_orange_jackolantern", Vector3(28, 1.02, 41.5), 0, 0.45, false)
+	var room := _room(11, Color("d8af77"))
+	var hearth := _prop(room, "feast_hearth", Vector3(44.425, 0, 33.3), 0, 0.85, false)
+	_add_collision(hearth, Vector3(0, 1.875, 0), Vector3(7.2, 3.75, 2.8))
+	_practical(room, Vector3(44.2, 1.25, 34.5), Color("ff9c50"), 3.8, 8)
+	var serving_hatch := _prop(room, "feast_serving_hatch", Vector3(38, 0, 32), 0, 1, false)
+	_add_collision(serving_hatch, Vector3(0, 0.5, 0), Vector3(3.2, 1, 1))
+	_add_collision(serving_hatch, Vector3(0, 1.05, 0.55), Vector3(6.7, 0.15, 2))
+	_add_collision(serving_hatch, Vector3(0, 3.12, 0), Vector3(3.5, 1.76, 1.08))
+	for jamb in [-1.75, 1.75]:
+		_add_collision(serving_hatch, Vector3(jamb, 2, 0), Vector3(0.5, 4, 1.12))
+	for cabinet in [-2.85, 2.85]:
+		_add_collision(serving_hatch, Vector3(cabinet, 0.5, 0.9), Vector3(0.85, 1, 1.2))
+	_prop(room, "feast_cookware", Vector3(31.8, 1.6, 32.95), 0, 1, false)
+	_prop(room, "feast_grain_station", Vector3(27.6, 0, 38.2))
+	var cook_station := _prop(room, "feast_cook_station", Vector3(43.4, 0, 38.5), 0, 1, false)
+	_add_collision(cook_station, Vector3(0, 0.6, 0), Vector3(3.2, 1.2, 1.6))
+	var preparation := _prop(room, "feast_preparation", Vector3(34.5, 0, 38.2), 0, 1, false)
+	_add_collision(preparation, Vector3(0, 0.6, 0), Vector3(6.7, 1.2, 2.25))
+	_prop(room, "feast_pantry", Vector3(15.4, 0, 39.3), PI / 2)
+	_prop(room, "lantern_standing", Vector3(16.05, 1.075, 37.7), 0, 0.55, false)
+	_practical(room, Vector3(16.5, 1.6, 37.7), AMBER, 1.8, 5)
+	var wash := _prop(room, "feast_wash", Vector3(30, 0, 42.8), PI, 1, false)
+	_add_collision(wash, Vector3(0, 0.68, 0), Vector3(5.5, 1.36, 1.5))
+	_add_collision(wash, Vector3(-1.3, 2.05, -0.53), Vector3(1.4, 1.05, 0.7))
+	_prop(room, "barrel_small", Vector3(17.4, 0, 42.2), 0, 0.95)
+	_prop(room, "barrel_small", Vector3(15.2, 0, 42.3), 0, 0.85)
+	_prop(room, "herb_rack", Vector3(25.8, 2.6, 32.9), 0, 1.15, false)
+	_prop(room, "table_long", Vector3(27, 0, 33.2), PI / 2, 1.15)
+	_prop(room, "plate_stack", Vector3(25.7, 1.18, 33.2), 0, 1.25, false)
+	_prop(room, "plate_stack", Vector3(26.5, 1.18, 33.2), 0, 0.9, false)
+	_prop(room, "plate_food_B", Vector3(28.2, 1.18, 33.2), 0, 1.15, false)
+	_sconce(room, Vector3(21, 2.5, 32.9), 0, AMBER)
+	_practical(room, Vector3(34, 3.2, 38), AMBER, 1.9, 8)
 
 func _build_crypt() -> void:
 	var room := _room(12, SPECTRAL)
@@ -486,7 +507,7 @@ func _prop(room: Node3D, model_name: String, position_value: Vector3, yaw: float
 		var extension := ".gltf"
 		if model_name in CUSTOM_MODELS:
 			directory = "res://assets/castle/"
-			if model_name in ["alembic", "preparation", "herb_rack", "wash_station"]:
+			if model_name in ["alembic", "preparation", "herb_rack", "wash_station"] or model_name.begins_with("feast_"):
 				extension = ".glb"
 		elif model_name in SPOOKY_MODELS:
 			directory = "res://assets/spooky/"
@@ -618,21 +639,6 @@ func _platform(room: Node3D, center: Vector3, size_value: Vector3) -> void:
 		_box(room, Vector3(center.x - 1.3 + plank_index * 0.52, size_value.y + 0.04, center.z), Vector3(0.5, 0.12, 2.7), Color("76604a"))
 	_add_collision(room, Vector3(center.x, size_value.y + 0.04, center.z), Vector3(3.1, 0.12, 2.7))
 	_box(room, Vector3(center.x, size_value.y + 0.11, center.z + 1.15), Vector3(2.8, 0.025, 0.1), BRASS)
-
-func _hearth(room: Node3D, position_value: Vector3, yaw: float) -> void:
-	var hearth := Node3D.new()
-	hearth.name = "KitchenHearth"
-	hearth.position = position_value
-	hearth.rotation.y = yaw
-	room.add_child(hearth)
-	_box(hearth, Vector3(0, 0.15, 0), Vector3(3.6, 0.3, 1.8), STONE, true)
-	_box(hearth, Vector3(-1.5, 1.4, 0), Vector3(0.45, 2.8, 1.3), STONE, true)
-	_box(hearth, Vector3(1.5, 1.4, 0), Vector3(0.45, 2.8, 1.3), STONE, true)
-	_box(hearth, Vector3(0, 2.4, 0), Vector3(3.6, 0.45, 1.6), STONE)
-	_box(hearth, Vector3(0, 3.2, -0.3), Vector3(2.3, 1.4, 0.9), STONE)
-	_prop(hearth, "brazier", Vector3(-0.65, 0.3, 0), 0, 0.8)
-	_prop(hearth, "brazier", Vector3(0.65, 0.3, 0), 0, 0.8)
-	_practical(hearth, Vector3(0, 1.1, 0.4), AMBER, 3, 6)
 
 func _practical(room: Node3D, position_value: Vector3, color: Color, energy: float, radius: float) -> void:
 	var light := OmniLight3D.new()

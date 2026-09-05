@@ -1,0 +1,25 @@
+extends GutTest
+
+func test_cached_castle_keeps_dynamic_chairs_and_independent_portal_floor() -> void:
+	var dressing := CastleDressing.new()
+	dressing.baked_scene = load("res://assets/lighting/castle.scn")
+	add_child_autofree(dressing)
+	assert_true(dressing.uses_baked_lighting)
+	var chairs := dressing.find_children("*", "RigidBody3D", true, false)
+	assert_gt(chairs.size(), 0)
+	for chair in chairs:
+		assert_true(chair.has_method("get_is_carried"))
+		assert_true(chair.get_parent().has_node("MultiplayerSynchronizer"))
+		assert_eq(chair.get_node("Mesh").gi_mode, GeometryInstance3D.GI_MODE_DYNAMIC)
+	var floors := dressing.get_node("Floors")
+	var first_floor: MeshInstance3D = floors.get_child(0)
+	var second_floor: MeshInstance3D = floors.get_child(1)
+	var coordinates := String(first_floor.name).split("_")
+	var cell := Vector3i(int(coordinates[1]), int(coordinates[2]), int(coordinates[3]))
+	var lightmap: LightmapGI = dressing.get_node("LightmapGI")
+	var baked_users := lightmap.light_data.get_user_count()
+	dressing.open_baked_floor(cell)
+	assert_false(first_floor.visible)
+	assert_true(second_floor.visible)
+	assert_eq(lightmap.light_data.get_user_count(), baked_users, "Opening one portal tile must preserve every other mesh lightmap")
+	assert_gt(baked_users, floors.get_child_count())

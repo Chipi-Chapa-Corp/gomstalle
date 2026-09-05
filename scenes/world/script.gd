@@ -24,6 +24,9 @@ extends Node3D
 @onready var castle_hud := CastleHud.new(self)
 
 func _ready():
+	if $CastleDressing.uses_baked_lighting:
+		grid_map.visible = false
+		$Light/Moonlight.visible = false
 	for helper in [player_list_utils, portal_utils, shrine_utils]:
 		helper.name = helper.get_script().get_global_name()
 		add_child(helper)

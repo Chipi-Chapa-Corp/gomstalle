@@ -1,6 +1,10 @@
 class_name CastleDressing
 extends Node3D
 
+@export var baked_scene: PackedScene
+
+var uses_baked_lighting: bool = false
+
 const ROOM_NAMES: Array[String] = ["The Midnight Library", "The Scriptorium", "The Arrival Hall", "The Alchemist's Still", "The Armory", "The Mirror Parlor", "The Apothecary", "The Wine Cellar", "The Portrait Gallery", "The Candle Chapel", "The Banquet Hall", "The Old Kitchen", "The Royal Crypt", "The Grand Hall", "The Treasury", "The Ossuary", "The Lost Archives", "The Astronomer's Tower"]
 const ROOM_BOUNDS: Array[Rect2] = [Rect2(-36, -12, 24, 16), Rect2(-36, 4, 24, 16), Rect2(-12, -12, 24, 32), Rect2(12, -12, 36, 12), Rect2(12, 0, 16, 20), Rect2(28, 0, 20, 12), Rect2(28, 12, 20, 8), Rect2(-36, 20, 12, 24), Rect2(-24, 20, 36, 12), Rect2(-12, 32, 24, 12), Rect2(12, 20, 36, 12), Rect2(12, 32, 36, 12), Rect2(-36, 44, 24, 24), Rect2(-12, 44, 48, 24), Rect2(36, 44, 12, 24), Rect2(-36, 68, 16, 24), Rect2(-20, 68, 12, 24), Rect2(-8, 68, 20, 24)]
 const AMBER := Color("ffbe70")
@@ -35,6 +39,12 @@ func get_furniture_bounds() -> Array[AABB]:
 	return _furniture_bounds
 
 func _ready() -> void:
+	var lighting_mode := OS.get_environment("GOMSTALLE_LIGHTING_MODE")
+	if lighting_mode == "baked":
+		baked_scene = load("res://assets/lighting/castle.scn")
+	if baked_scene != null and lighting_mode != "source":
+		_load_baked_castle()
+		return
 	_build_library()
 	_build_scriptorium()
 	_build_arrival()
@@ -55,6 +65,23 @@ func _ready() -> void:
 	_build_observatory()
 	set_meta("furnished_rooms", ROOM_NAMES.size())
 	set_meta("placed_props", _prop_count)
+
+func _load_baked_castle() -> void:
+	uses_baked_lighting = true
+	var saved: Node3D = baked_scene.instantiate()
+	_furniture_bounds.assign(saved.get_meta("furniture_bounds"))
+	for key in ["furnished_rooms", "placed_props"]:
+		set_meta(key, saved.get_meta(key))
+	saved.get_node("WorldEnvironment").free()
+	for descendant in saved.find_children("*", "", true, false):
+		descendant.owner = null
+	for child in saved.get_children():
+		child.reparent(self, false)
+	saved.free()
+
+func open_baked_floor(cell: Vector3i) -> void:
+	if uses_baked_lighting:
+		get_node("Floors/Floor_%d_%d_%d" % [cell.x, cell.y, cell.z]).visible = false
 
 func _room(room_index: int, accent: Color) -> Node3D:
 	var room := Node3D.new()

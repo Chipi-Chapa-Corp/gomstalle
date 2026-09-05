@@ -40,6 +40,7 @@ func spawn_portal(cell: Vector3i, item_id: int) -> void:
 	tile_instance.mesh = tile_mesh
 	tile_instance.global_transform = cell_transform
 	container.add_child(tile_instance)
+	world.get_node("CastleDressing").open_baked_floor(cell)
 	world.grid_map.set_cell_item(cell, -1)
 	var portal_instance = world.portal_scene.instantiate()
 	container.add_child(portal_instance)
@@ -72,9 +73,26 @@ func _collect_floor_candidates() -> Array[PortalCandidate]:
 	if world.grid_map == null or world.grid_map.mesh_library == null:
 		return candidates
 	var floor_cells = Utils.get_floor_cells(world.grid_map)
+	var clearance := CapsuleShape3D.new()
+	clearance.radius = 0.55
+	clearance.height = 2.0
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = clearance
+	query.collision_mask = 1
+	var excluded_players: Array[RID] = []
+	for player in world.player_container.get_children():
+		if player is CollisionObject3D:
+			excluded_players.append(player.get_rid())
+	query.exclude = excluded_players
+	var navigation: CastleNavigation = world.round_utils.navigation
 	for cell in floor_cells:
 		var item_id = world.grid_map.get_cell_item(cell)
 		var candidate_position = world.grid_map.to_global(world.grid_map.map_to_local(cell))
+		query.transform = Transform3D(Basis.IDENTITY, candidate_position + Vector3.UP * 1.1)
+		if not world.get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty():
+			continue
+		if not navigation.can_reach_floor(candidate_position):
+			continue
 		candidates.append(PortalCandidate.new(cell, item_id, candidate_position))
 	return candidates
 

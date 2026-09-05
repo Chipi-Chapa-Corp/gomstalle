@@ -16,6 +16,7 @@ var _scatter_gizmo_plugin := ScatterGizmoPlugin.new()
 var _shape_gizmo_plugin := ShapeGizmoPlugin.new()
 var _scatter_cache_plugin := ScatterCachePlugin.new()
 var _path_panel
+var _editor_selection: EditorSelection
 var _selected_scatter_group: Array[Node] = []
 
 
@@ -42,13 +43,14 @@ func _enter_tree():
 	_shape_gizmo_plugin.set_path_gizmo_panel(_path_panel)
 	_shape_gizmo_plugin.set_editor_plugin(self)
 
-	var editor_selection = get_editor_interface().get_selection()
-	editor_selection.selection_changed.connect(_on_selection_changed)
+	_editor_selection = get_editor_interface().get_selection()
+	_editor_selection.selection_changed.connect(_on_selection_changed)
 
 	scene_changed.connect(_on_scene_changed)
 
 
 func _exit_tree():
+	_editor_selection.selection_changed.disconnect(_on_selection_changed)
 	remove_inspector_plugin(_modifier_stack_plugin)
 	remove_inspector_plugin(_scatter_cache_plugin)
 	remove_node_3d_gizmo_plugin(_shape_gizmo_plugin)

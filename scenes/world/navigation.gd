@@ -103,6 +103,10 @@ func find_path(origin: Vector3, destination: Vector3) -> PackedVector3Array:
 		return PackedVector3Array()
 	return graph.get_point_path(graph.get_closest_point(origin), graph.get_closest_point(destination), true)
 
+func can_reach_floor(position: Vector3) -> bool:
+	var closest := graph.get_point_position(graph.get_closest_point(position))
+	return closest.distance_to(position) <= 0.9 and segment_clear(position, closest)
+
 func segment_clear(origin: Vector3, destination: Vector3) -> bool:
 	for height in [0.4, 1.1]:
 		var ray := PhysicsRayQueryParameters3D.create(origin + Vector3.UP * height, destination + Vector3.UP * height, 1, excluded_bodies)

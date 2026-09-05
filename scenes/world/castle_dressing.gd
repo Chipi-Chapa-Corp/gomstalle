@@ -114,27 +114,13 @@ func _build_library() -> void:
 	_sconce(room, Vector3(-20.4, 4.6, -10.1), 0, AMBER)
 
 func _build_scriptorium() -> void:
-	var room := _room(1, SPECTRAL)
-	_carpet(room, Vector3(-24, 0.07, 12), Vector2(5, 12), CRIMSON)
-	for depth in [8.0, 15.0]:
-		_prop(room, "table_long", Vector3(-29, 0, depth), PI / 2)
-		_prop(room, "chair", Vector3(-29, 0, depth + 1.8), PI)
-		_prop(room, "spellbook_open", Vector3(-29, 1.02, depth), 0, 1.0, false)
-		_prop(room, "candle_triple", Vector3(-30.4, 1.02, depth), 0, 1.0, false)
-		_prop(room, "bottle_A_green", Vector3(-27.5, 1.02, depth), 0, 0.8, false)
-		_bookcase(room, Vector3(-14, 0, depth), -PI / 2)
-	_prop(room, "lectern", Vector3(-23, 0, 6), 0, 1.2)
-	_prop(room, "soul_cage", Vector3(-33.8, 0, 15.3), 0, 1.1)
-	_prop(room, "mirror", Vector3(-20, 0, 5.3), 0)
-	_prop(room, "trunk_large_C", Vector3(-16, 0, 17.8), 0)
-	_banner(room, Vector3(-22, 0, 4.8), "green")
-	_practical(room, Vector3(-33.8, 2, 15.3), SPECTRAL, 2.8, 6)
-	_chandelier(room, Vector3(-24, 3.4, 12), AMBER)
-	_book_stack(room, Vector3(-27.4, 1.02, 15), 4)
-	_prop(room, "spellbook_closed", Vector3(-29.8, 1.04, 8.3), 0.3, 0.9, false)
-	_prop(room, "mug_full", Vector3(-27.6, 1.03, 8), 0, 0.7, false)
-	_prop(room, "box_small", Vector3(-33, 0, 10.5), 0)
-	_book_stack(room, Vector3(-32.5, 0.05, 12), 4)
+	var room := _room(1, AMBER)
+	_assembly(room, "res://assets/castle/scholars/scriptorium.glb", "IlluminatorsAndPrintingWorkshop")
+	for horizontal in [-29.5, -20.5]:
+		_practical(room, Vector3(horizontal, 1.7, 7.7), AMBER, 1.1, 5)
+	_practical(room, Vector3(-22.1, 1.7, 16.6), AMBER, 1.1, 5)
+	_sconce(room, Vector3(-30, 3.0, 4.8), 0, AMBER)
+	_sconce(room, Vector3(-14, 2.8, 15.8), -PI / 2, AMBER)
 
 func _build_arrival() -> void:
 	var room := _room(2, AMBER)
@@ -326,49 +312,21 @@ func _build_ossuary() -> void:
 
 func _build_archives() -> void:
 	var room := _room(16, AMBER)
-	for depth in [73.0, 78.0, 87.0]:
-		_bookcase(room, Vector3(-18.9, 0, depth), PI / 2)
-		_bookcase(room, Vector3(-9.1, 0, depth), -PI / 2)
-	_prop(room, "clock", Vector3(-14, 0, 90.5), PI, 1.1)
-	_prop(room, "table_small", Vector3(-16, 0, 70), 0)
-	_prop(room, "trunk_large_C", Vector3(-11, 0, 75), 0, 1.2)
-	_prop(room, "table_small", Vector3(-13.5, 0, 86), 0)
-	_book_stack(room, Vector3(-13.5, 1.02, 86), 4)
-	_prop(room, "chair", Vector3(-13.5, 0, 84), 0)
-	_prop(room, "lectern", Vector3(-11, 0, 89.5), PI)
-	_sconce(room, Vector3(-19, 2.6, 83), PI / 2, AMBER)
-	_practical(room, Vector3(-18, 2.5, 70), SPECTRAL, 2, 5)
-	_chandelier(room, Vector3(-14, 3.4, 77), AMBER)
-	_book_stack(room, Vector3(-16.7, 0.03, 76), 6)
-	_book_stack(room, Vector3(-16.1, 0.03, 77), 4)
-	_book_stack(room, Vector3(-11, 1.2, 75), 3)
-	_prop(room, "spellbook_open", Vector3(-15.1, 0.09, 78.1), -0.3, 0.9, false)
-	_prop(room, "skull_candle", Vector3(-13.5, 1.7, 86), 0, 0.7, false)
-	_prop(room, "Textiles_Stack_Small", Vector3(-11, 0, 80), 0, 0.6)
-	_prop(room, "lantern_standing", Vector3(-16, 1.02, 70), 0, 0.6, false)
+	_assembly(room, "res://assets/castle/scholars/archives.glb", "RoyalArchiveRecords")
+	_practical(room, Vector3(-14, 1.7, 75.8), AMBER, 1.0, 5)
+	for horizontal in [-15.95, -12.65]:
+		_practical(room, Vector3(horizontal, 1.7, 88.7), AMBER, 0.9, 4)
+	_sconce(room, Vector3(-19.1, 2.6, 80), PI / 2, AMBER)
+	_sconce(room, Vector3(-9, 2.6, 85.7), -PI / 2, AMBER)
 
 func _build_observatory() -> void:
 	var room := _room(17, MOONLIGHT)
-	_carpet(room, Vector3(2, 0.07, 76), Vector2(7, 10), INK)
-	_prop(room, "table_medium_tablecloth", Vector3(2, 0, 76), 0, 1.3)
-	_prop(room, "spellbook_open", Vector3(2, 1.32, 76), 0, 1.3, false)
-	_prop(room, "candle_triple", Vector3(3, 1.32, 76), 0, 1.0, false)
-	for depth in [72.0, 77.0, 87.0]:
-		_bookcase(room, Vector3(-6.8, 0, depth), PI / 2)
-	_prop(room, "clock", Vector3(8, 0, 70), 0)
-	_prop(room, "mirror", Vector3(-3, 0, 90.5), PI, 1.2)
-	_prop(room, "trunk_large_A", Vector3(5, 0, 80), 0)
-	_rune_circle(room, Vector3(6, 4.07, 87), 2.4, MOONLIGHT)
-	_prop(room, "lectern", Vector3(2, 4, 89.5), PI, 1.1)
-	_prop(room, "brazier", Vector3(1.5, 4, 85), 0, 0.8)
-	_practical(room, Vector3(1.5, 5.5, 85), SPECTRAL, 2.8, 7)
-	_practical(room, Vector3(10, 6.5, 89), MOONLIGHT, 2.6, 7)
-	_chandelier(room, Vector3(2, 3.5, 75), AMBER)
-	_prop(room, "staff", Vector3(-2.5, 0.1, 75), 0, 1.2, false).rotation.z = -0.2
-	_book_stack(room, Vector3(1.1, 1.32, 75.4), 3)
-	_prop(room, "sword_shield_gold", Vector3(6, 4.1, 88), 0, 0.65, false).rotation.x = -PI / 2
-	_prop(room, "spellbook_open", Vector3(2, 5.45, 89.5), PI, 0.7, false)
-	_orrery(room, Vector3(5, 0, 72.5))
+	_assembly(room, "res://assets/castle/scholars/observatory.glb", "AstronomersInstruments")
+	_practical(room, Vector3(4.2, 7.6, 87.5), MOONLIGHT, 1.9, 7)
+	_practical(room, Vector3(1.12, 5.7, 90.5), AMBER, 1.0, 4)
+	_practical(room, Vector3(1, 3.8, 75.2), MOONLIGHT, 1.5, 6)
+	_practical(room, Vector3(-5.4, 1.7, 73.7), AMBER, 1.0, 5)
+	_sconce(room, Vector3(-7, 2.7, 86.2), PI / 2, AMBER)
 
 func _prop(room: Node3D, model_name: String, position_value: Vector3, yaw: float = 0, scale_factor: float = 1, solid: bool = true) -> Node3D:
 	if not _models.has(model_name):

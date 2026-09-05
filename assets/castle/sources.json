@@ -120,5 +120,24 @@
       "hall_grand": 20260,
       "cellar_working": 31948
     }
+  },
+  "scholarly_wing": {
+    "files": [
+      "scholars/scriptorium.glb",
+      "scholars/archives.glb",
+      "scholars/observatory.glb"
+    ],
+    "sources": [
+      "scripts/art/build_scholars.py",
+      "scripts/art/build_observatory.py",
+      "scripts/art/workshop_geometry.py"
+    ],
+    "design": "Original manuscript illumination and printing workshop with a map of the actual castle; indexed scroll archive and document dispatch; astronomical terrace telescope, mechanical orrery, star charts and surveying tools.",
+    "processing": "Material and spatial mesh batches, linked source geometry for repeated scrolls, softened edges, weighted normals, linear shader colors, imported lightmap UVs and simple collision proxies.",
+    "triangles": {
+      "scriptorium": 113104,
+      "observatory": 53928,
+      "archives": 296540
+    }
   }
 }

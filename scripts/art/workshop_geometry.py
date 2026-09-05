@@ -110,8 +110,8 @@ def tube(name, points, radius, surface, cyclic=False):
     return finish(bpy.data.objects.new(name, curve), name, surface)
 
 
-def ring(name, center, radius, thickness, surface, rotation=(0, 0, 0)):
-    bpy.ops.mesh.primitive_torus_add(major_segments=48, minor_segments=8, location=center, major_radius=radius, minor_radius=thickness, rotation=rotation)
+def ring(name, center, radius, thickness, surface, rotation=(0, 0, 0), segments=48, sides=8):
+    bpy.ops.mesh.primitive_torus_add(major_segments=segments, minor_segments=sides, location=center, major_radius=radius, minor_radius=thickness, rotation=rotation)
     return finish(bpy.context.object, name, surface)
 
 

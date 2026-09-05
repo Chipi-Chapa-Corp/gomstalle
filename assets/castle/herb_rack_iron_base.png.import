@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ck58nb1i2assl"
-path="res://.godot/imported/herb_rack_iron_base.png-b31694d609427cc5828d6d074a71ae50.ctex"
+path.s3tc="res://.godot/imported/herb_rack_iron_base.png-b31694d609427cc5828d6d074a71ae50.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "519f4ef0e578df6672873b355683c863"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/castle/herb_rack_iron_base.png"
-dest_files=["res://.godot/imported/herb_rack_iron_base.png-b31694d609427cc5828d6d074a71ae50.ctex"]
+dest_files=["res://.godot/imported/herb_rack_iron_base.png-b31694d609427cc5828d6d074a71ae50.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://mj8c8gr76f4c"
-path="res://.godot/imported/wash_station_wood_base.png-0282de3c9f53ebcfd47d494ede876940.ctex"
+path.s3tc="res://.godot/imported/wash_station_wood_base.png-0282de3c9f53ebcfd47d494ede876940.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5e28aeb73b3854e99b9af7ae16932ea4"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/castle/wash_station_wood_base.png"
-dest_files=["res://.godot/imported/wash_station_wood_base.png-0282de3c9f53ebcfd47d494ede876940.ctex"]
+dest_files=["res://.godot/imported/wash_station_wood_base.png-0282de3c9f53ebcfd47d494ede876940.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

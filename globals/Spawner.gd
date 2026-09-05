@@ -17,7 +17,7 @@ func _do_spawn(data: Dictionary) -> Node3D:
 
 func _ready():
 	SpawnerNode.name = "MultiplayerSpawner"
-	get_parent().call_deferred("add_child", SpawnerNode)
+	add_child(SpawnerNode)
 	SpawnerNode.spawn_path = NodePath(".")
 	SpawnerNode.spawn_function = Callable(self, "_do_spawn")
 

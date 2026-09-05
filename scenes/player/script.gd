@@ -142,6 +142,11 @@ func _ready() -> void:
 		_on_game_started(GameState.hunter_peer_id)
 
 func _physics_process(delta: float) -> void:
+	if GameState.escaped_peer_ids.has(peer_id):
+		velocity = Vector3.ZERO
+		if is_local_player():
+			camera_utils.update(delta)
+		return
 	if not is_instance_valid(item):
 		item = null
 		anim_tree.set("parameters/IW/Hold_B/blend_amount", 0.0)

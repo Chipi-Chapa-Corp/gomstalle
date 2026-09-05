@@ -15,7 +15,12 @@ func get_hunter_can_interact() -> bool:
 	return false
 
 func _can_interact(_enable: bool, _payload: Dictionary) -> bool:
-	return current_amount > 0
+	return current_amount > 0 and GameState.game_state in [GameState.State.HIDING, GameState.State.STARTED]
+
+func _build_authoritative_payload(enable: bool, metadata: Dictionary, sender_id: int) -> Dictionary:
+	var payload := super._build_authoritative_payload(enable, metadata, sender_id)
+	payload["amount"] = mini(3, current_amount)
+	return payload
 
 func do_interact(_enable: bool, payload: Dictionary) -> void:
 	var caller: CharacterBody3D = payload.get("caller")

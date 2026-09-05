@@ -74,7 +74,7 @@ func test_apply_game_start_sets_state_and_positions() -> void:
 
 	assert_eq(GameState.hunter_peer_id, 2, "Apply start should set hunter id")
 	assert_eq(GameState.start_positions, positions, "Apply start should set positions")
-	assert_eq(GameState.game_state, GameState.State.STARTED, "Apply start should set STARTED state")
+	assert_eq(GameState.game_state, GameState.State.HIDING, "Apply start should begin the hiding grace period")
 
 func test_reset_clears_state() -> void:
 	GameState.is_paused = true

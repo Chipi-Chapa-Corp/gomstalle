@@ -27,6 +27,9 @@ func get_outline_target() -> MeshInstance3D:
 func get_is_static() -> bool:
 	return false
 
+func get_is_carried() -> bool:
+	return chair.freeze
+
 func get_hunter_can_interact() -> bool:
 	return false
 
@@ -77,12 +80,16 @@ func do_interact(enable: bool, payload: Dictionary) -> void:
 		return
 	chair.global_transform = payload.get("transform", chair.global_transform)
 	if enable:
+		caller.item = self
+		caller.anim_tree.set("parameters/IW/Hold_B/blend_amount", 1.0)
 		chair.freeze = true
 		hand.remote_path = get_path()
 		_set_collision_exclusion(caller, true)
 		chair.collision_layer = 1 << 0
 		return
 	chair.freeze = false
+	caller.item = null
+	caller.anim_tree.set("parameters/IW/Hold_B/blend_amount", 0.0)
 	hand.remote_path = ""
 	_set_collision_exclusion(caller, false)
 	chair.collision_layer = collision_layer_enabled

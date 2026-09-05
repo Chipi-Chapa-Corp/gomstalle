@@ -205,3 +205,17 @@ func test_sword_contact_records_capture_only_during_an_active_attack() -> void:
 	assert_true(target.is_dead, "The physical sword hitbox should capture the nearby hider")
 	assert_has(GameState.captured_peer_ids, 2)
 	GameState.reset(original_state)
+
+func test_escaped_player_remains_stationary_without_collision() -> void:
+	var original_state := GameState.game_state
+	GameState.escaped_peer_ids = [player.peer_id]
+	player.collision_layer = 0
+	player.collision_mask = 0
+	player.velocity = Vector3(4.0, -8.0, 3.0)
+	var escape_position: Vector3 = player.global_position
+	for frame_index in 10:
+		await get_tree().physics_frame
+		player._physics_process(STEP)
+	assert_eq(player.global_position, escape_position)
+	assert_eq(player.velocity, Vector3.ZERO)
+	GameState.reset(original_state)

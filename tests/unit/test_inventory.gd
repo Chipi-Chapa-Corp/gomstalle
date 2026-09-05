@@ -15,6 +15,7 @@ func _make_inventory() -> CharacterInventory:
 	add_child(character)
 	_created_nodes.append(character)
 	var inventory := CharacterInventory.new(character)
+	character.add_child(inventory)
 	_created_nodes.append(inventory)
 	return inventory
 
@@ -42,3 +43,10 @@ func test_inventory_updates_ui_for_authority() -> void:
 func test_has_item_zero_is_true() -> void:
 	var inventory := _make_inventory()
 	assert_true(inventory.has_item(CharacterInventory.InventoryItem.WOOD, 0), "Zero amount should always be available")
+
+func test_negative_inventory_mutations_cannot_create_or_destroy_fuel() -> void:
+	var inventory := _make_inventory()
+	inventory.sync_add_item(CharacterInventory.InventoryItem.WOOD, 3)
+	inventory.sync_add_item(CharacterInventory.InventoryItem.WOOD, -5)
+	inventory.sync_remove_item(CharacterInventory.InventoryItem.WOOD, -5)
+	assert_eq(inventory.items[CharacterInventory.InventoryItem.WOOD], 3)

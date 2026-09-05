@@ -20,6 +20,8 @@ var SPAWN_CONFIGS: Array[SceneSpawnConfig] = [
 
 var _configs := SPAWN_CONFIGS
 var _generated_world_instance_id: int = 0
+var _spawn_list: Array[Dictionary] = []
+var _furniture_bounds: Array[AABB] = []
 
 func _ready() -> void:
 	pass
@@ -31,6 +33,7 @@ func generate_for_world(world: Node3D) -> void:
 	if _generated_world_instance_id == world_instance_id:
 		return
 	_generated_world_instance_id = world_instance_id
+	_furniture_bounds = world.get_node("CastleDressing").get_furniture_bounds()
 	var grid_map: GridMap = world.grid_map
 	assert(grid_map != null)
 	var floor_cells: Array[Vector3i] = Utils.get_wall_adjacent_floor_cells(grid_map)
@@ -38,8 +41,12 @@ func generate_for_world(world: Node3D) -> void:
 		floor_cells = Utils.get_floor_cells(grid_map)
 	assert(not floor_cells.is_empty())
 	var spawn_seed := int(Time.get_ticks_usec())
-	var spawn_list := _build_spawn_list(grid_map, floor_cells, spawn_seed)
-	_apply_spawn_list.rpc(spawn_list)
+	_spawn_list = _build_spawn_list(grid_map, floor_cells, spawn_seed)
+	_apply_spawn_list(_spawn_list)
+
+func synchronize_peer(peer_id: int) -> void:
+	if multiplayer.is_server():
+		_apply_spawn_list.rpc_id(peer_id, _spawn_list)
 
 func _build_spawn_list(grid_map: GridMap, floor_cells: Array[Vector3i], spawn_seed: int) -> Array[Dictionary]:
 	var rng := RandomNumberGenerator.new()
@@ -67,6 +74,9 @@ func _cell_position(grid_map: GridMap, cell: Vector3i) -> Vector3:
 	return grid_map.to_global(grid_map.map_to_local(cell))
 
 func _is_position_free(position: Vector3, used_positions: Array[Vector3], min_distance: float) -> bool:
+	for furniture_bounds in _furniture_bounds:
+		if furniture_bounds.grow(0.8).has_point(position):
+			return false
 	var position_2d := Vector2(position.x, position.z)
 	for used_position in used_positions:
 		if position_2d.distance_to(Vector2(used_position.x, used_position.z)) < min_distance:
@@ -93,13 +103,15 @@ func _apply_spawn_list(spawn_list: Array[Dictionary]) -> void:
 	assert(world is Node3D)
 	var grid_map: GridMap = world.grid_map
 	assert(grid_map != null)
-	for entry in spawn_list:
+	for index in spawn_list.size():
+		var entry: Dictionary = spawn_list[index]
 		var config_index: int = entry["config_index"]
 		var config := _configs[config_index]
 		var target_container := _get_or_create_container(world as Node3D, config.container_path)
 		var instance = config.scene.instantiate()
 		assert(instance is Node3D)
 		var instance_node: Node3D = instance
+		instance_node.name = "Wood_%02d" % index
 		target_container.add_child(instance_node)
 		var cell: Vector3i = entry["cell"]
 		var position := _cell_position(grid_map, cell)

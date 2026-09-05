@@ -20,25 +20,39 @@ extends Node3D
 @onready var player_list_utils := WorldPlayerListUtils.new(self)
 @onready var portal_utils := WorldPortalUtils.new(self)
 @onready var shrine_utils := WorldShrineUtils.new(self)
+@onready var round_utils := WorldRoundUtils.new(self)
+@onready var castle_hud := CastleHud.new(self)
 
 func _ready():
+	for helper in [player_list_utils, portal_utils, shrine_utils]:
+		helper.name = helper.get_script().get_global_name()
+		add_child(helper)
 	player_list_utils.initialize()
 	Spawner.set_path(player_container.get_path())
 	NetworkManager.player_joined.connect(player_list_utils.handle_player_joined)
 	NetworkManager.peer_list_changed.connect(player_list_utils.handle_peer_list_changed)
 	GameState.state_changed.connect(_on_game_state_changed)
+	NetworkManager.session_lost.connect(_on_session_lost)
 	Generator.generate_for_world(self)
 	shrine_utils.register_shrines()
 	player_list_utils.handle_peer_list_changed(NetworkManager.connected_players_metadata)
 	if multiplayer.is_server():
 		start_button.visible = true
 		player_list_utils.spawn_existing_players()
+	menu.visible = false
+	hud.visible = false
+	add_child(round_utils)
+	add_child(castle_hud)
+	await round_utils.initialize()
+	while not round_utils.initialized or get_viewport().get_camera_3d() == null:
+		await get_tree().process_frame
+	SceneLoading.visible = false
 
 func _on_start_pressed():
 	if not NetworkManager.is_host():
 		return
 	start_button.visible = false
-	var result := GameState.start_game()
+	var result := round_utils.start_selected_round()
 	if result != OK:
 		push_error("Error: Failed to start game")
 		# TODO: Show error
@@ -49,19 +63,21 @@ func _on_game_state_changed(state: GameState.State) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if GameState.game_state != GameState.State.IDLE and event.is_action_pressed("menu"):
-		menu.visible = not menu.visible
-		hud.visible = not hud.visible
-		GameState.set_local_paused(menu.visible)
+		castle_hud.toggle_pause()
 
 func _on_quit_pressed() -> void:
 	GameState.quit(multiplayer)
+
+func _on_session_lost() -> void:
+	_on_quit_pressed.call_deferred()
 
 func _exit_tree() -> void:
 	NetworkManager.player_joined.disconnect(player_list_utils.handle_player_joined)
 	NetworkManager.peer_list_changed.disconnect(player_list_utils.handle_peer_list_changed)
 	GameState.state_changed.disconnect(_on_game_state_changed)
+	NetworkManager.session_lost.disconnect(_on_session_lost)
 	shrine_utils.cleanup()
 
-@rpc("any_peer", "call_local", "reliable")
+@rpc("authority", "call_local", "reliable")
 func spawn_portal(cell: Vector3i, item_id: int) -> void:
 	portal_utils.spawn_portal(cell, item_id)

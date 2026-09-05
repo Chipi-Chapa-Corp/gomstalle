@@ -31903,14 +31903,13 @@ scale_to = 0.3
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.56348, 0)
 offset = Vector2(0, 125)
 billboard = 1
-no_depth_test = true
 outline_render_priority = 0
 modulate = Color(0, 0, 0, 1)
-outline_modulate = Color(1, 1, 1, 1)
+outline_modulate = Color(0.075, 0.055, 0.045, 1)
 text = "Sack of Bones"
 font = ExtResource("3_itrdm")
 font_size = 85
-outline_size = 3
+outline_size = 8
 
 [node name="Rig" type="Node3D" parent="."]
 

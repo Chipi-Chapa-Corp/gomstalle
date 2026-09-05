@@ -94,7 +94,7 @@ func _select_role(role: int) -> void:
 	Settings.preferred_role = role
 	for role_index in _role_buttons.size():
 		var selected_color := CastleTheme.MINT if role_index == 0 else CastleTheme.DANGER
-		var fill := selected_color if role_index == role else Color("80613f")
+		var fill := selected_color if role_index == role else Color("c4ae8a")
 		_role_buttons[role_index].add_theme_stylebox_override("normal", CastleTheme.button_style(fill))
 		_role_buttons[role_index].add_theme_stylebox_override("hover", CastleTheme.button_style(fill.lightened(0.15)))
 

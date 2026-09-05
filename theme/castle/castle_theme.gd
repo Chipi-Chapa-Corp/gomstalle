@@ -18,12 +18,10 @@ static func create() -> Theme:
 	result.default_font = DISPLAY_FONT
 	result.default_font_size = 24
 	result.set_color("font_color", "Label", INK)
-	result.set_color("font_color", "Button", PAPER)
-	result.set_color("font_hover_color", "Button", Color.WHITE)
-	result.set_color("font_pressed_color", "Button", PAPER)
-	result.set_color("font_disabled_color", "Button", Color("b6a083"))
-	result.set_color("font_outline_color", "Button", INK)
-	result.set_constant("outline_size", "Button", 4)
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		result.set_color(color_name, "Button", INK)
+	result.set_color("font_disabled_color", "Button", Color("433628"))
+	result.set_constant("outline_size", "Button", 0)
 	result.set_stylebox("normal", "Button", button_style(GOLD))
 	result.set_stylebox("hover", "Button", button_style(Color("f4bc39")))
 	result.set_stylebox("pressed", "Button", button_style(Color("bd801c"), true))
@@ -35,8 +33,8 @@ static func create() -> Theme:
 	result.set_color("font_color", "LineEdit", INK)
 	result.set_color("font_placeholder_color", "LineEdit", MUTED)
 	result.set_color("caret_color", "LineEdit", INK)
-	result.set_color("font_color", "CheckButton", PAPER)
-	result.set_color("font_hover_color", "CheckButton", Color.WHITE)
+	result.set_color("font_color", "CheckButton", INK)
+	result.set_color("font_hover_color", "CheckButton", INK)
 	result.set_stylebox("background", "ProgressBar", panel(Color("6d4e33"), INK, 0, 0, 2))
 	result.set_stylebox("fill", "ProgressBar", panel(MINT, INK, 0, 0, 2))
 	result.set_stylebox("slider", "HSlider", panel(Color("ae8c5d"), INK, 0, 4, 2))

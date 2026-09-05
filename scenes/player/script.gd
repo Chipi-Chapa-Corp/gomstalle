@@ -47,8 +47,8 @@ extends CharacterBody3D
 @onready var space := get_world_3d().direct_space_state
 @onready var player_name
 
-@export var hunter_color: Color = Color(1, 0, 0, 1)
-@export var hider_color: Color = Color(0, 0, 1, 1)
+@export var hunter_color: Color = Color("e2a08b")
+@export var hider_color: Color = Color("c8deca")
 @export var dead_color: Color = Color(0, 0, 0, 1)
 @export var interact_on_layer: int = 5
 @export var interact_radius: float = 1.6
@@ -114,6 +114,7 @@ func _ready() -> void:
 	if is_local_player():
 		camera.set_as_top_level(true)
 		camera.make_current()
+		camera_utils.snap_to_character()
 		label.visible = false
 	else:
 		camera.current = false
@@ -289,6 +290,8 @@ func _on_game_started(hunter_peer_id: int) -> void:
 	if is_multiplayer_authority():
 		var target_position = GameState.start_positions.get(peer_id, global_position)
 		global_position = target_position
+		if is_local_player():
+			camera_utils.snap_to_character()
 
 func _on_attacked(body: Node3D) -> void:
 	actions.handle_attacked_body(body)

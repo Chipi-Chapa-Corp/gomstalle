@@ -1,32 +1,65 @@
 extends Node
 
+const BOT_NAMES := ["Rattle", "Bones", "Moss", "Pip", "Rook", "Ash", "Patch", "Twitch", "Flint"]
+
 signal player_joined(peer_id: int)
 signal player_left(peer_id: int)
 signal peer_list_changed(peers: Array[Dictionary])
 signal lobby_created(error)
 signal lobby_joined(error)
 signal lobby_match_list_updated(lobbies: Array)
+signal session_lost
 
 var connected_players_metadata: Array[Dictionary] = []
+var last_error := ""
 
 var _backend: Node
 var _is_dev_mode := false
 
 func _ready() -> void:
-	_is_dev_mode = OS.get_cmdline_args().has("--dev")
-	_backend = LocalBackend.new() if _is_dev_mode else SteamBackend.new()
-	_backend.lobby_created.connect(_on_backend_lobby_created)
-	_backend.lobby_joined.connect(func(error): lobby_joined.emit(error))
-	_backend.lobby_match_list_updated.connect(func(lobbies): lobby_match_list_updated.emit(lobbies))
-	add_child(_backend)
+	_set_backend(OS.get_cmdline_args().has("--steam"))
 
 	var multiplayer_api := get_tree().get_multiplayer()
 	multiplayer_api.peer_connected.connect(_on_peer_connected)
 	multiplayer_api.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer_api.connected_to_server.connect(_on_connected_to_server)
+	multiplayer_api.server_disconnected.connect(_on_server_disconnected)
 
 func is_dev_mode() -> bool:
 	return _is_dev_mode
+
+func is_using_steam() -> bool:
+	return not _is_dev_mode
+
+func use_local_backend(address: String = "127.0.0.1") -> void:
+	if not _is_dev_mode:
+		_set_backend(false)
+	(_backend as LocalBackend).host_address = address
+
+func use_steam_backend() -> bool:
+	if _is_dev_mode or not is_ready():
+		_set_backend(true)
+	return is_ready()
+
+func get_player_name(peer_id: int) -> String:
+	if peer_id < 0:
+		return BOT_NAMES[(absi(peer_id) - 2) % BOT_NAMES.size()]
+	for metadata in connected_players_metadata:
+		if metadata.peer_id == peer_id:
+			return metadata.name
+	return "Wanderer %d" % peer_id
+
+func _set_backend(use_steam: bool) -> void:
+	if is_instance_valid(_backend):
+		_backend.leave_lobby()
+		remove_child(_backend)
+		_backend.free()
+	_is_dev_mode = not use_steam
+	_backend = SteamBackend.new() if use_steam else LocalBackend.new()
+	_backend.lobby_created.connect(_on_backend_lobby_created)
+	_backend.lobby_joined.connect(func(error): lobby_joined.emit(error))
+	_backend.lobby_match_list_updated.connect(func(lobbies): lobby_match_list_updated.emit(lobbies))
+	add_child(_backend)
 
 func is_ready() -> bool:
 	return _backend.is_ready()
@@ -39,10 +72,12 @@ func current_lobby_id() -> int:
 	return _backend.current_lobby_id
 
 func create_lobby() -> void:
+	last_error = ""
 	connected_players_metadata.clear()
 	_backend.create_lobby()
 
 func join_lobby(lobby_id: int) -> void:
+	last_error = ""
 	connected_players_metadata.clear()
 	_backend.join_lobby(lobby_id)
 
@@ -83,6 +118,10 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	peer_list_changed.emit(connected_players_metadata)
 	player_left.emit(peer_id)
 
+func _on_server_disconnected() -> void:
+	last_error = tr("The host closed the castle. You can start another game.")
+	session_lost.emit()
+
 func _add_player_metadata(peer_id: int) -> void:
 	if _has_player_metadata(peer_id):
 		return
@@ -108,5 +147,5 @@ func _build_player_metadata(peer_id: int) -> Dictionary:
 		else:
 			player_name = Steam.getFriendPersonaName(peer_id)
 	if player_name.is_empty():
-		player_name = str(peer_id)
+		player_name = Settings.player_name if peer_id == get_tree().get_multiplayer().get_unique_id() else "Wanderer %d" % peer_id
 	return {"peer_id": peer_id, "name": player_name}

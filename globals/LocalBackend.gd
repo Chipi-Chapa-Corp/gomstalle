@@ -13,6 +13,8 @@ signal lobby_joined(error)
 signal lobby_match_list_updated(lobbies: Array)
 
 var current_lobby_id: int = 0
+var host_address: String = DEFAULT_HOST
+var _join_timeout: Timer
 
 var _ready_ok: bool = false
 var _peer: ENetMultiplayerPeer
@@ -46,15 +48,18 @@ func join_lobby(_lobby_id: int) -> void:
 	leave_lobby()
 
 	_peer = ENetMultiplayerPeer.new()
-	var error := _peer.create_client(DEFAULT_HOST, _server_port())
+	var error := _peer.create_client(host_address, _server_port())
 	if error != OK:
 		lobby_joined.emit("Could not reach the host.")
 		return
 
 	_pending_join_lobby_id = DEVELOPMENT_LOBBY_ID
 	get_tree().get_multiplayer().multiplayer_peer = _peer
+	_join_timeout.start()
 
 func leave_lobby() -> void:
+	_join_timeout.stop()
+	_pending_join_lobby_id = 0
 	if _peer:
 		_peer.close()
 		_peer = null
@@ -71,6 +76,11 @@ func refresh_lobby_list() -> void:
 	lobby_match_list_updated.emit([_known_lobbies[DEVELOPMENT_LOBBY_ID]])
 
 func _ready() -> void:
+	_join_timeout = Timer.new()
+	_join_timeout.one_shot = true
+	_join_timeout.wait_time = 8.0
+	_join_timeout.timeout.connect(_on_connection_failed)
+	add_child(_join_timeout)
 	var multiplayer_api := get_tree().get_multiplayer()
 	multiplayer_api.connected_to_server.connect(_on_connected_to_server)
 	multiplayer_api.connection_failed.connect(_on_connection_failed)
@@ -85,10 +95,13 @@ func _describe_lobby(state: String, member_count: int) -> Dictionary:
 	}
 
 func _on_connected_to_server() -> void:
+	_join_timeout.stop()
 	current_lobby_id = _pending_join_lobby_id if _pending_join_lobby_id != 0 else DEVELOPMENT_LOBBY_ID
 	_pending_join_lobby_id = 0
 	lobby_joined.emit(null)
 
 func _on_connection_failed() -> void:
-	_pending_join_lobby_id = 0
+	if _pending_join_lobby_id == 0:
+		return
+	leave_lobby()
 	lobby_joined.emit("Could not reach the host.")

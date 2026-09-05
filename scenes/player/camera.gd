@@ -41,6 +41,12 @@ func update(delta: float) -> void:
 	_update_camera_fov(camera_step.blend_factor)
 	character.portal_indicator_utils.update_portal_indicator(delta)
 
+func snap_to_character() -> void:
+	character.camera.global_position = character.global_position + camera_offset
+	character.camera.global_basis = base_camera_basis
+	character.camera.fov = base_camera_fov
+	camera_velocity = Vector3.ZERO
+
 func set_camera_override(target: Vector3, direction: Vector3, fov: float, damping_time_constant: float) -> void:
 	camera_override_active = true
 	camera_override_target = target

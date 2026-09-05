@@ -21,12 +21,21 @@ config/windows_native_icon="res://icon.ico"
 [autoload]
 
 Settings="*res://globals/Settings.gd"
+SceneLoading="*res://globals/SceneLoading.gd"
 Spawner="*res://globals/Spawner.gd"
 GameState="*res://globals/GameState.gd"
 NetworkManager="*res://globals/NetworkManager.gd"
 Utils="*res://globals/Utils.gd"
 DevHarness="*res://globals/DevHarness.gd"
 Generator="*res://globals/Generator.gd"
+
+[display]
+
+window/size/viewport_width=1440
+window/size/viewport_height=900
+window/size/window_width_override=1280
+window/size/window_height_override=800
+window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
@@ -110,3 +119,7 @@ skill_1={
 
 3d/physics_engine="Jolt Physics"
 3d/default_gravity=12.0
+
+[rendering]
+
+anti_aliasing/quality/msaa_3d=2

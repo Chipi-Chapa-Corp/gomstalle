@@ -7,10 +7,11 @@ func _init(node: CharacterBody3D) -> void:
 	character = node
 
 func handle(delta: float) -> void:
-	character.velocity.y += -character.gravity * delta
+	var gravity_scale := 0.25 if character.movement.is_air_sliding else 1.0
+	character.velocity.y -= character.gravity * gravity_scale * delta
 
-	for i in range(character.get_slide_collision_count()):
-		var collision = character.get_slide_collision(i)
+	for collision_index in range(character.get_slide_collision_count()):
+		var collision = character.get_slide_collision(collision_index)
 		var collider = collision.get_collider()
 		var normal = collision.get_normal()
 		if collider != null and collider.is_in_group("stunning") and collider.get_can_stun(character, normal):
@@ -19,12 +20,13 @@ func handle(delta: float) -> void:
 			collider.on_stun()
 
 	if character.is_stunned or character.is_dead:
-		character.velocity = Vector3.ZERO
+		character.velocity.x = 0.0
+		character.velocity.z = 0.0
 
 func set_dead(state: bool) -> void:
 	character.is_dead = state
+	character.actions.cancel_attack()
 	if character.is_dead:
 		character.playback.travel("Death_A", true)
 	else:
 		character.playback.travel("Ressurrect_A", true)
-		await character.get_tree().create_timer(0.6).timeout

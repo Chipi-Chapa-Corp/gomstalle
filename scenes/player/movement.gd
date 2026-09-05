@@ -1,123 +1,157 @@
 extends Node
 class_name CharacterMovement
 
+const COYOTE_TIME := 0.12
+const JUMP_BUFFER_TIME := 0.14
+const AIR_SLIDE_STAMINA := 12.0
+const GROUND_ACCELERATION := 42.0
+const AIR_ACCELERATION := 18.0
+const STEP_INTERVAL_WALK := 0.42
+const STEP_INTERVAL_RUN := 0.31
+
 var character: CharacterBody3D
-
+var is_air_sliding := false
+var is_compact := false
+var _air_slide_used := false
+var _slide_direction := Vector3.ZERO
+var _slide_time := 0.0
+var _coyote_time := 0.0
+var _jump_buffer_time := 0.0
 var _step_time := 0.0
-const STEP_INTERVAL_WALK := 0.58
-const STEP_INTERVAL_RUN := 0.5
-
-var _was_moving := false
-var _was_grounded := false
-var _is_landing := false
+var _grounded_before_move := false
+var _stamina_recovery_delay := 0.0
+var _sprint_exhausted := false
 
 func _init(node: CharacterBody3D) -> void:
 	character = node
-	character.jump_landing_timer.timeout.connect(func(): _is_landing = false)
 
-func _update_footsteps(delta: float, is_moving: bool, is_running: bool) -> void:
-	var grounded := character.is_on_floor()
+func reset() -> void:
+	is_air_sliding = false
+	_air_slide_used = false
+	_slide_time = 0.0
+	_coyote_time = 0.0
+	_jump_buffer_time = 0.0
+	character.dash = 0.0
+	_sprint_exhausted = false
+	_set_compact(false)
 
-	if !grounded or !is_moving:
-		_step_time = 0.0
-		_was_moving = is_moving
-		_was_grounded = grounded
-		return
+func request_jump() -> void:
+	_jump_buffer_time = JUMP_BUFFER_TIME
 
-	var interval := STEP_INTERVAL_RUN if is_running else STEP_INTERVAL_WALK
-
-	var just_started := is_moving and !_was_moving
-	var just_landed := grounded and !_was_grounded
-
-	if just_started or just_landed:
-		character.movement_audio_player.play()
-		_step_time = 0.0
-	else:
-		_step_time += delta
-		if _step_time >= interval:
-			_step_time = 0.0
-			character.movement_audio_player.play()
-
-	_was_moving = is_moving
-	_was_grounded = grounded
+func start_air_slide() -> bool:
+	if character.is_hunter or character.is_on_floor() or _air_slide_used or is_compact:
+		return false
+	if character.is_dead or character.is_stunned or character.ability_cooldown_timer.time_left > 0.0 or character.stamina < AIR_SLIDE_STAMINA:
+		return false
+	_slide_direction = Vector3(character.velocity.x, 0.0, character.velocity.z).normalized()
+	if _slide_direction == Vector3.ZERO:
+		_slide_direction = character.model.global_basis.z.normalized()
+	_slide_time = character.dash_duration
+	_air_slide_used = true
+	is_air_sliding = true
+	_set_compact(true)
+	character.dash = character.dash_speed
+	character.velocity.y = clampf(character.velocity.y, -1.5, 1.5)
+	character.stamina -= AIR_SLIDE_STAMINA
+	_stamina_recovery_delay = 0.8
+	character.ability_cooldown_timer.start()
+	character.rpc("play_action_animation", &"Roll")
+	return true
 
 func handle(delta: float) -> void:
-	var run_requested = Input.is_action_pressed("run")
-	var movement_input = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-	_apply_movement(delta, movement_input, run_requested)
+	_apply_movement(delta, Input.get_vector("move_left", "move_right", "move_forward", "move_backward"), Input.is_action_pressed("run"))
 
 func handle_input_locked(delta: float) -> void:
+	_jump_buffer_time = 0.0
+	is_air_sliding = false
+	_slide_time = 0.0
+	character.dash = 0.0
+	character.velocity.x = 0.0
+	character.velocity.z = 0.0
 	_apply_movement(delta, Vector2.ZERO, false)
 
 func _apply_movement(delta: float, movement_input: Vector2, run_requested: bool) -> void:
-	var vertical_velocity = character.velocity.y
-	character.velocity.y = 0.0
-	var movement_direction = Vector3.ZERO
-	if movement_input != Vector2.ZERO:
-		var input_vector = Vector3(movement_input.x, 0.0, movement_input.y)
-		movement_direction = input_vector.rotated(Vector3.UP, character.camera_utils.camera_yaw_offset)
-	if movement_direction.length() > 1.0:
-		movement_direction = movement_direction.normalized()
-	var is_moving := movement_direction.length() > 0.0
-	var has_stamina = character.stamina > 0.0
-	var is_running = run_requested and has_stamina and is_moving
+	_grounded_before_move = character.is_on_floor()
+	_coyote_time = COYOTE_TIME if _grounded_before_move else maxf(_coyote_time - delta, 0.0)
+	if _jump_buffer_time > 0.0 and _coyote_time > 0.0 and not is_compact:
+		character.velocity.y = character.jump_height
+		_jump_buffer_time = 0.0
+		_coyote_time = 0.0
+		character.rpc("play_action_animation", &"Jump")
+	_jump_buffer_time = maxf(_jump_buffer_time - delta, 0.0)
+	var movement_direction := Vector3(movement_input.x, 0.0, movement_input.y).rotated(Vector3.UP, character.camera_utils.camera_yaw_offset).limit_length(1.0)
+	var is_moving := movement_direction.length_squared() > 0.01
+	if character.stamina >= AIR_SLIDE_STAMINA:
+		_sprint_exhausted = false
+	var is_running: bool = run_requested and is_moving and character.stamina > 0.0 and not is_compact and not _sprint_exhausted
 	character.current_move_speed = character.run_move_speed if is_running else character.base_move_speed
-
-	var horizontal_velocity = movement_direction * character.current_move_speed
-	if character.dash > 0.0:
-		var dash_dir = movement_direction if is_moving else character.model.global_transform.basis.z
-		dash_dir.y = 0.0
-		dash_dir = dash_dir.normalized()
-		var new_velocity = horizontal_velocity + dash_dir * character.dash
-		horizontal_velocity = new_velocity.limit_length(character.dash_speed)
-
+	var target_velocity: Vector3 = movement_direction * character.current_move_speed
+	var horizontal_velocity := Vector3(character.velocity.x, 0.0, character.velocity.z)
+	var acceleration := GROUND_ACCELERATION if _grounded_before_move else AIR_ACCELERATION
+	horizontal_velocity = horizontal_velocity.move_toward(target_velocity, acceleration * delta)
+	if is_air_sliding:
+		_slide_time = maxf(_slide_time - delta, 0.0)
+		character.dash = lerpf(character.run_move_speed, character.dash_speed, _slide_time / character.dash_duration)
+		horizontal_velocity = _slide_direction * character.dash
+		if _slide_time == 0.0 or character.is_on_wall():
+			is_air_sliding = false
+			character.dash = 0.0
+	if is_compact and not is_air_sliding and _can_stand():
+		_set_compact(false)
+	character.anim_tree.set("parameters/IW/Compact_B/blend_amount", 1.0 if is_compact and not is_air_sliding else 0.0)
 	character.velocity.x = horizontal_velocity.x
 	character.velocity.z = horizontal_velocity.z
-	character.animation_velocity = character.animation_velocity.lerp(horizontal_velocity, 0.15)
+	_stamina_recovery_delay = maxf(_stamina_recovery_delay - delta, 0.0)
+	if is_running and _grounded_before_move:
+		character.stamina = maxf(character.stamina - character.stamina_usage * delta, 0.0)
+		_stamina_recovery_delay = 0.6
+		_sprint_exhausted = character.stamina == 0.0
+	elif not is_air_sliding and _stamina_recovery_delay == 0.0:
+		character.stamina = minf(character.stamina + character.stamina_regen * delta, character.max_stamina)
+	character.stamina_bar.visible = character.stamina < character.max_stamina
+	character.stamina_bar.value = character.stamina / character.max_stamina * 100.0
+	_update_animation(delta, horizontal_velocity, is_running)
 
-	var local_velocity = character.model.global_transform.basis.inverse() * character.animation_velocity
-	var local_plane_velocity = Vector2(local_velocity.x, -local_velocity.z)
-
-	var surface = character.surface_ray.get_collision_point()
-	var surface_distance = snapped(abs(surface.y - character.global_position.y), 0.1)
-	var falling_speed = snapped(vertical_velocity, 0.1)
-
-	var landing_height = 1
-
-	if surface_distance != 0:
-		if character.item == null:
-			if surface_distance >= 1 or (falling_speed < -0.2 and surface_distance > landing_height):
-					character.anim_tree.set("parameters/IW/Falling_B/blend_amount", 1.0)
-			elif surface_distance <= landing_height and falling_speed < -0.2 and not _is_landing:
-				_is_landing = true
-				character.jump_landing_timer.start()
-				character.anim_tree.set("parameters/IW/Land_OS/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+func finish_physics(delta: float) -> void:
+	var grounded := character.is_on_floor()
+	if grounded and not _grounded_before_move:
+		_air_slide_used = false
+		is_air_sliding = false
+		character.dash = 0.0
+		character.rpc("play_action_animation", &"Land")
+		character.rpc("play_footstep")
+		_step_time = 0.0
+	character.anim_tree.set("parameters/IW/Falling_B/blend_amount", 0.0 if grounded else 1.0)
+	var horizontal_speed := Vector2(character.velocity.x, character.velocity.z).length()
+	if grounded and horizontal_speed > 0.5:
+		_step_time += delta
+		var interval := STEP_INTERVAL_RUN if horizontal_speed > character.base_move_speed + 0.5 else STEP_INTERVAL_WALK
+		if _step_time >= interval:
+			character.rpc("play_footstep")
+			_step_time = 0.0
 	else:
-		_is_landing = false
-		character.anim_tree.set("parameters/IW/Falling_B/blend_amount", 0.0)
-		character.jump_landing_timer.stop()
+		_step_time = 0.0
 
-	var walk_blend_position = local_plane_velocity / character.base_move_speed if character.base_move_speed != 0.0 else Vector2.ZERO
-	walk_blend_position = walk_blend_position.limit_length(1.0)
-	character.anim_tree.set("parameters/IW/Walk/blend_position", walk_blend_position)
-
-	var run_blend_position = local_plane_velocity / character.run_move_speed if character.run_move_speed != 0.0 else Vector2.ZERO
-	run_blend_position = run_blend_position.limit_length(1.0)
-	character.anim_tree.set("parameters/IW/Run/blend_position", run_blend_position)
-
-	var target_movement_state = 1.0 if is_running else 0.0
-	character.movement_state_blend = lerp(character.movement_state_blend, target_movement_state, 0.15)
+func _update_animation(delta: float, horizontal_velocity: Vector3, is_running: bool) -> void:
+	var blend_weight := 1.0 - exp(-12.0 * delta)
+	character.animation_velocity = character.animation_velocity.lerp(horizontal_velocity, blend_weight)
+	var local_velocity: Vector3 = character.model.global_basis.inverse() * character.animation_velocity
+	var local_plane_velocity := Vector2(local_velocity.x, -local_velocity.z)
+	character.anim_tree.set("parameters/IW/Walk/blend_position", (local_plane_velocity / character.base_move_speed).limit_length(1.0))
+	character.anim_tree.set("parameters/IW/Run/blend_position", (local_plane_velocity / character.run_move_speed).limit_length(1.0))
+	character.movement_state_blend = lerpf(character.movement_state_blend, 1.0 if is_running else 0.0, blend_weight)
 	character.anim_tree.set("parameters/IW/MovementState/blend_amount", character.movement_state_blend)
 
-	if is_running:
-		character.stamina = max(character.stamina - character.stamina_usage * delta, 0.0)
-	elif not run_requested:
-		character.stamina = min(character.stamina + character.stamina_regen * delta, character.max_stamina)
-	if character.is_multiplayer_authority():
-		character.stamina_bar.visible = character.stamina < character.max_stamina
-		character.stamina_bar.value = character.stamina / character.max_stamina * 100.0
+func _can_stand() -> bool:
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = character.regular_collider.shape
+	query.transform = character.regular_collider.global_transform
+	query.transform.origin.y += 0.03
+	query.collision_mask = character.collision_mask
+	query.exclude = [character.get_rid()]
+	return character.space.intersect_shape(query, 1).is_empty()
 
-	character.dash = max(character.dash - (character.dash_speed / character.dash_duration) * delta, 0.0)
-	character.velocity.y = vertical_velocity
-
-	_update_footsteps(delta, is_moving, is_running)
+func _set_compact(enabled: bool) -> void:
+	is_compact = enabled
+	character.regular_collider.set_deferred("disabled", enabled)
+	character.dash_collider.set_deferred("disabled", not enabled)

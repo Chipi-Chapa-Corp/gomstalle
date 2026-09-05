@@ -1,4 +1,4 @@
-[gd_scene load_steps=168 format=4 uid="uid://baia4k0qqww23"]
+[gd_scene load_steps=173 format=4 uid="uid://baia4k0qqww23"]
 
 [ext_resource type="Script" uid="uid://dgbvrsxxd666k" path="res://scenes/player/script.gd" id="2_e4tch"]
 [ext_resource type="Material" uid="uid://dv7jqwtmnjk2v" path="res://materials/pre_depth.tres" id="2_l3ro8"]
@@ -31608,7 +31608,7 @@ fadeout_time = 0.1
 [sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_ak5du"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_an80j"]
-animation = &"Lie_Down"
+animation = &"Dodge_Forward"
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_fbsix"]
 fadeout_time = 0.5
@@ -31678,6 +31678,20 @@ blend_point_3/pos = Vector2(1, 0)
 blend_point_4/node = SubResource("AnimationNodeAnimation_ak5du")
 blend_point_4/pos = Vector2(0, 0)
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_throw"]
+animation = &"Throw"
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_throw"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_throw"]
+fadein_time = 0.05
+fadeout_time = 0.12
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_compact"]
+animation = &"Lie_Idle"
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_compact"]
+
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_t87ks"]
 graph_offset = Vector2(-498.77948, -200.26122)
 nodes/output/position = Vector2(3180, 160)
@@ -31731,7 +31745,17 @@ nodes/Land_A/node = SubResource("AnimationNodeAnimation_btr41")
 nodes/Land_A/position = Vector2(1660, 280)
 nodes/Land_OS/node = SubResource("AnimationNodeOneShot_wjmf3")
 nodes/Land_OS/position = Vector2(1840, 140)
-node_connections = [&"output", 0, &"Roll_OS", &"Attack_OS", 0, &"Stun_OS", &"Attack_OS", 1, &"Attack_S", &"Attack_S", 0, &"Attack_A", &"Cheer_OS", 0, &"MovementState", &"Cheer_OS", 1, &"Cheer_A", &"Hold_B", 0, &"Interact_OS", &"Hold_B", 1, &"Hold_A", &"Interact_OS", 0, &"Jump_OS", &"Interact_OS", 1, &"Interact_S", &"Interact_S", 0, &"Interact_A", &"Jump_OS", 0, &"Cheer_OS", &"Jump_OS", 1, &"Jump_A", &"MovementState", 0, &"Walk", &"MovementState", 1, &"Run", &"Stun_OS", 0, &"Land_OS", &"Stun_OS", 1, &"Stun_S", &"Stun_S", 0, &"Stun_A", &"Roll_OS", 0, &"Attack_OS", &"Roll_OS", 1, &"TimeScale", &"TimeScale", 0, &"Roll_A", &"Falling_B", 0, &"Hold_B", &"Falling_B", 1, &"Falling_A", &"Land_OS", 0, &"Falling_B", &"Land_OS", 1, &"Land_A"]
+nodes/Throw_A/node = SubResource("AnimationNodeAnimation_throw")
+nodes/Throw_A/position = Vector2(3100, 420)
+nodes/Throw_S/node = SubResource("AnimationNodeTimeScale_throw")
+nodes/Throw_S/position = Vector2(3260, 420)
+nodes/Throw_OS/node = SubResource("AnimationNodeOneShot_throw")
+nodes/Throw_OS/position = Vector2(3420, 140)
+nodes/Compact_A/node = SubResource("AnimationNodeAnimation_compact")
+nodes/Compact_A/position = Vector2(3580, 420)
+nodes/Compact_B/node = SubResource("AnimationNodeBlend2_compact")
+nodes/Compact_B/position = Vector2(3740, 140)
+node_connections = [&"output", 0, &"Compact_B", &"Compact_B", 0, &"Throw_OS", &"Compact_B", 1, &"Compact_A", &"Throw_OS", 0, &"Roll_OS", &"Throw_OS", 1, &"Throw_S", &"Throw_S", 0, &"Throw_A", &"Attack_OS", 0, &"Stun_OS", &"Attack_OS", 1, &"Attack_S", &"Attack_S", 0, &"Attack_A", &"Cheer_OS", 0, &"MovementState", &"Cheer_OS", 1, &"Cheer_A", &"Hold_B", 0, &"Interact_OS", &"Hold_B", 1, &"Hold_A", &"Interact_OS", 0, &"Jump_OS", &"Interact_OS", 1, &"Interact_S", &"Interact_S", 0, &"Interact_A", &"Jump_OS", 0, &"Cheer_OS", &"Jump_OS", 1, &"Jump_A", &"MovementState", 0, &"Walk", &"MovementState", 1, &"Run", &"Stun_OS", 0, &"Land_OS", &"Stun_OS", 1, &"Stun_S", &"Stun_S", 0, &"Stun_A", &"Roll_OS", 0, &"Attack_OS", &"Roll_OS", 1, &"TimeScale", &"TimeScale", 0, &"Roll_A", &"Falling_B", 0, &"Hold_B", &"Falling_B", 1, &"Falling_A", &"Land_OS", 0, &"Falling_B", &"Land_OS", 1, &"Land_A"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xp1pp"]
 animation = &"Lie_StandUp"
@@ -31797,39 +31821,42 @@ properties/0/replication_mode = 1
 properties/1/path = NodePath("Rig:rotation")
 properties/1/spawn = false
 properties/1/replication_mode = 2
-properties/2/path = NodePath("AnimationTree:parameters/IW/Cheer_OS/active")
-properties/2/spawn = true
+properties/2/path = NodePath("AnimationTree:parameters/IW/Walk/blend_position")
+properties/2/spawn = false
 properties/2/replication_mode = 1
-properties/3/path = NodePath("AnimationTree:parameters/IW/Jump_OS/active")
+properties/3/path = NodePath("StunEffect:scale")
 properties/3/spawn = true
-properties/3/replication_mode = 1
-properties/4/path = NodePath("AnimationTree:parameters/IW/Walk/blend_position")
-properties/4/spawn = false
-properties/4/replication_mode = 1
-properties/5/path = NodePath("StunEffect:scale")
+properties/3/replication_mode = 2
+properties/4/path = NodePath("StunEffect:modulate")
+properties/4/spawn = true
+properties/4/replication_mode = 2
+properties/5/path = NodePath("StunEffect:position")
 properties/5/spawn = true
-properties/5/replication_mode = 2
-properties/6/path = NodePath("StunEffect:modulate")
+properties/5/replication_mode = 1
+properties/6/path = NodePath("AnimationTree:parameters/IW/Hold_B/blend_amount")
 properties/6/spawn = true
-properties/6/replication_mode = 2
-properties/7/path = NodePath("StunEffect:position")
+properties/6/replication_mode = 1
+properties/7/path = NodePath("Label:text")
 properties/7/spawn = true
-properties/7/replication_mode = 1
-properties/8/path = NodePath("AnimationTree:parameters/IW/Attack_OS/active")
+properties/7/replication_mode = 2
+properties/8/path = NodePath("AnimationTree:parameters/IW/Run/blend_position")
 properties/8/spawn = true
 properties/8/replication_mode = 1
-properties/9/path = NodePath("AnimationTree:parameters/IW/Interact_OS/active")
+properties/9/path = NodePath("AnimationTree:parameters/IW/MovementState/blend_amount")
 properties/9/spawn = true
 properties/9/replication_mode = 1
-properties/10/path = NodePath("AnimationTree:parameters/IW/Stun_OS/active")
+properties/10/path = NodePath("AnimationTree:parameters/IW/Falling_B/blend_amount")
 properties/10/spawn = true
 properties/10/replication_mode = 1
-properties/11/path = NodePath("AnimationTree:parameters/IW/Hold_B/blend_amount")
+properties/11/path = NodePath("AnimationTree:parameters/IW/Compact_B/blend_amount")
 properties/11/spawn = true
 properties/11/replication_mode = 1
-properties/12/path = NodePath("Label:text")
+properties/12/path = NodePath("Regular Collider:disabled")
 properties/12/spawn = true
-properties/12/replication_mode = 2
+properties/12/replication_mode = 1
+properties/13/path = NodePath("Dash Collider:disabled")
+properties/13/spawn = true
+properties/13/replication_mode = 1
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("hud", "inventory_wood_label", "hider_parts", "hunter_parts", "hand", "camera", "anim_tree", "model", "label", "stamina_bar", "cooldown_timer", "attack_cooldown_timer", "ability_cooldown_timer", "jump_landing_timer", "attack_hitbox", "stun_effect", "regular_collider", "dash_collider", "movement_audio_player", "attack_audio_player", "surface_ray", "portal_indicator", "portal_indicator_through_walls") groups=["players"]]
 collision_layer = 2
@@ -32356,9 +32383,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_xvkdw")
 
 [node name="Dash Collider" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.38492918, 0)
 visible = false
 shape = SubResource("SphereShape3D_0niji")
+
+disabled = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -32368,6 +32397,8 @@ libraries = {
 [node name="AnimationTree" type="AnimationTree" parent="."]
 tree_root = SubResource("AnimationNodeStateMachine_xvkdw")
 anim_player = NodePath("../AnimationPlayer")
+parameters/IW/Throw_S/scale = 2.5
+parameters/IW/Compact_B/blend_amount = 0.0
 parameters/IW/Attack_OS/active = false
 parameters/IW/Attack_OS/internal_active = false
 parameters/IW/Attack_OS/request = 0
@@ -32393,7 +32424,7 @@ parameters/IW/Walk/blend_position = Vector2(0, 0.0020284653)
 parameters/IW/Roll_OS/active = false
 parameters/IW/Roll_OS/internal_active = false
 parameters/IW/Roll_OS/request = 0
-parameters/IW/TimeScale/scale = 2.0
+parameters/IW/TimeScale/scale = 0.62
 parameters/IW/Falling_B/blend_amount = 0.0
 parameters/IW/Land_OS/active = false
 parameters/IW/Land_OS/internal_active = false
@@ -32486,7 +32517,7 @@ one_shot = true
 one_shot = true
 
 [node name="Ability Cooldown" type="Timer" parent="Timers"]
-wait_time = 10.0
+wait_time = 3.0
 one_shot = true
 
 [node name="Jump Landing reset" type="Timer" parent="Timers"]

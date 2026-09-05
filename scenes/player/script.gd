@@ -54,11 +54,13 @@ extends CharacterBody3D
 @export var interact_radius: float = 1.6
 @export var max_interact_results: int = 8
 
-var attack_time: float = 0.4
-var jump_height: float = 6.0
-var dash_speed: float = 8.0
-var dash_duration: float = 2
-var dash_height: float = 6.0
+var attack_time: float = 0.24
+var jump_height: float = 6.6
+var dash_speed: float = 13.0
+var dash_duration: float = 0.65
+
+var is_bot := false
+var bot_controller: CastleBotController
 
 var peer_id: int
 var is_hunter := false
@@ -71,9 +73,10 @@ const stamina_regen = 5
 
 var dash := 0.0
 var current_move_speed = base_move_speed
-var stamina = max_stamina
+var stamina: float = max_stamina
 var is_stunned := false
 var is_dead := false
+var _attack_started_msec := -10000
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -91,28 +94,30 @@ var movement_state_blend: float = 0.0
 
 func _on_before_spawn(data: Dictionary) -> void:
 	peer_id = data["peer_id"]
-	set_multiplayer_authority(peer_id)
+	is_bot = data.get("is_bot", false)
+	set_multiplayer_authority(1 if is_bot else peer_id)
 	position = data["position"]
 
 func _ready() -> void:
-	add_child(inventory)
+	for helper in [forces, movement, interactions, actions, looks, camera_utils, portal_indicator_utils, inventory]:
+		helper.name = helper.get_script().get_global_name()
+		add_child(helper)
 	assert(camera != null)
 	assert(portal_indicator != null)
 	assert(portal_indicator_through_walls != null)
-	hud.visible = is_multiplayer_authority()
+	hud.visible = is_local_player()
+	if is_bot:
+		bot_controller = CastleBotController.new(self)
 	hand.transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
 	camera_utils.initialize(deg_to_rad(45.0))
-	if is_multiplayer_authority():
+	label.text = NetworkManager.get_player_name(peer_id)
+	if is_local_player():
 		camera.set_as_top_level(true)
 		camera.make_current()
-		if not NetworkManager.is_dev_mode() and NetworkManager.is_ready():
-			label.text = Steam.getPersonaName()
-		else:
-			label.text = str(peer_id)
 		label.visible = false
 	else:
 		camera.current = false
-		set_physics_process(false)
+		set_physics_process(is_bot and multiplayer.is_server())
 		set_process_input(false)
 	portal_indicator.top_level = true
 	portal_indicator.visible = false
@@ -121,6 +126,7 @@ func _ready() -> void:
 	attack_hitbox.monitoring = false
 
 	GameState.state_changed.connect(_on_game_state_changed)
+	GameState.round_changed.connect(_on_round_changed)
 
 	interact_shape.radius = interact_radius
 	interact_query_params.shape = interact_shape
@@ -129,27 +135,67 @@ func _ready() -> void:
 	interact_query_params.collide_with_areas = false
 	interact_query_params.exclude = [self]
 
-	looks.enable_wall_highlights(hunter_parts)
-	looks.enable_wall_highlights(hider_parts)
+	if is_local_player():
+		looks.enable_wall_highlights(hunter_parts)
+		looks.enable_wall_highlights(hider_parts)
+	if GameState.game_state in [GameState.State.HIDING, GameState.State.STARTED]:
+		_on_game_started(GameState.hunter_peer_id)
 
 func _physics_process(delta: float) -> void:
 	if not is_instance_valid(item):
 		item = null
+		anim_tree.set("parameters/IW/Hold_B/blend_amount", 0.0)
 
 	forces.handle(delta)
-	var can_process_input = not is_stunned and not is_dead and not GameState.is_paused
+	var can_process_input = not is_stunned and not is_dead and not GameState.is_paused and GameState.can_player_act(peer_id)
 	if can_process_input and not GameState.portal_cinematic_active:
-		movement.handle(delta)
-		interactions.handle(delta)
-		actions.handle(delta)
-	elif can_process_input and GameState.portal_cinematic_active:
+		if is_bot:
+			bot_controller.handle(delta)
+		else:
+			actions.handle(delta)
+			movement.handle(delta)
+			interactions.handle(delta)
+	else:
+		actions.cancel_attack()
 		movement.handle_input_locked(delta)
 
 	move_and_slide()
-	camera_utils.update(delta)
+	movement.finish_physics(delta)
+	if is_local_player():
+		camera_utils.update(delta)
+
+func is_local_player() -> bool:
+	return is_multiplayer_authority() and not is_bot
+
+func _on_round_changed() -> void:
+	model.visible = not GameState.escaped_peer_ids.has(peer_id)
 
 func set_dead(state: bool) -> void:
 	forces.set_dead(state)
+
+@rpc("authority", "call_local", "reliable")
+func play_action_animation(action: StringName) -> void:
+	if action == &"Attack":
+		var now_msec := Time.get_ticks_msec()
+		if now_msec - _attack_started_msec < attack_cooldown_timer.wait_time * 1000.0:
+			return
+		_attack_started_msec = now_msec
+		attack_audio_player.play()
+	anim_tree.set("parameters/IW/%s_OS/request" % action, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+@rpc("authority", "call_local", "unreliable")
+func play_footstep() -> void:
+	movement_audio_player.play()
+
+func can_reach_attack(target: Node3D) -> bool:
+	var offset := target.global_position - global_position
+	if offset.length() > 2.8 or model.global_basis.z.dot(offset) < -0.2:
+		return false
+	var ray := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP, target.global_position + Vector3.UP, 1)
+	ray.exclude = [get_rid()]
+	if target is CollisionObject3D:
+		ray.exclude.append(target.get_rid())
+	return space.intersect_ray(ray).is_empty()
 
 func request_stun(timeout: float) -> void:
 	if is_dead or is_stunned:
@@ -158,6 +204,9 @@ func request_stun(timeout: float) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func _stun_request(timeout: float) -> void:
+	var sender_id := multiplayer.get_remote_sender_id()
+	if sender_id != 0 and sender_id != get_multiplayer_authority():
+		return
 	if not multiplayer.is_server() or is_dead or is_stunned:
 		return
 	rpc("apply_stun", timeout)
@@ -168,6 +217,9 @@ func apply_stun(timeout: float) -> void:
 		return
 	stun_effect.play()
 	is_stunned = true
+	actions.cancel_attack()
+	for action in [&"Attack", &"Jump", &"Roll", &"Throw", &"Cheer"]:
+		anim_tree.set("parameters/IW/%s_OS/request" % action, AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
 	anim_tree.set("parameters/IW/Walk/blend_position", Vector2.ZERO)
 	anim_tree.set("parameters/IW/Run/blend_position", Vector2.ZERO)
 	anim_tree.set("parameters/IW/MovementState/blend_amount", 0.0)
@@ -180,12 +232,21 @@ func request_kill(target_peer_id: int) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func _kill_request(target_peer_id: int) -> void:
-	if not multiplayer.is_server() or is_dead or not is_hunter:
+	var sender_id := multiplayer.get_remote_sender_id()
+	if not multiplayer.is_server() or is_dead or is_stunned or not is_hunter:
+		return
+	if sender_id != 0 and sender_id != get_multiplayer_authority():
+		return
+	var attack_elapsed := (Time.get_ticks_msec() - _attack_started_msec) / 1000.0
+	if attack_elapsed < CharacterActions.ATTACK_STARTUP or attack_elapsed > CharacterActions.ATTACK_STARTUP + attack_time + 0.2:
+		return
+	if GameState.game_state != GameState.State.STARTED or not GameState.can_player_act(peer_id):
 		return
 	var target := _find_player(target_peer_id)
-	if target == null or target.is_hunter or target.is_dead:
+	if target == null or target.is_hunter or target.is_dead or not GameState.can_player_act(target_peer_id) or not can_reach_attack(target):
 		return
 	target.rpc("apply_kill")
+	GameState.record_capture(target_peer_id)
 
 @rpc("any_peer", "call_local", "reliable")
 func apply_kill() -> void:
@@ -204,11 +265,20 @@ func _find_player(target_peer_id: int) -> CharacterBody3D:
 	return null
 
 func _on_game_state_changed(state: GameState.State) -> void:
-	if state == GameState.State.STARTED:
+	if state == GameState.State.HIDING:
 		_on_game_started(GameState.hunter_peer_id)
 
 func _on_game_started(hunter_peer_id: int) -> void:
 	is_hunter = peer_id == hunter_peer_id
+	is_dead = false
+	is_stunned = false
+	model.visible = true
+	stamina = max_stamina
+	velocity = Vector3.ZERO
+	ability_cooldown_timer.stop()
+	attack_cooldown_timer.stop()
+	movement.reset()
+	playback.start("IW")
 	looks.sync_skin()
 
 	if is_multiplayer_authority():
@@ -220,3 +290,4 @@ func _on_attacked(body: Node3D) -> void:
 
 func _exit_tree() -> void:
 	GameState.state_changed.disconnect(_on_game_state_changed)
+	GameState.round_changed.disconnect(_on_round_changed)

@@ -1,0 +1,27 @@
+{
+  "title": "The Mirror Parlor and Ancestral Gallery",
+  "generator": "scripts/art/build_social.py",
+  "shared_geometry": "scripts/art/workshop_geometry.py",
+  "authorship": "Original procedural Blender furniture, architectural details, materials, relief portraits and working compositions created for Gomstalle",
+  "preserved_art": [
+    "../portrait_knight.png",
+    "../portrait_skeleton_minion.png",
+    "../mirror.gltf"
+  ],
+  "parlor": [
+    "Fitted marble and plaster hearth with grate and logs",
+    "Curved tufted velvet settees with turned legs, silk cushions and brass inlays",
+    "Oval conversation table with porcelain tea service and pastries",
+    "Chess table with an unfinished game and score sheet",
+    "Correspondence desk with sealed letters, ink and quill"
+  ],
+  "gallery": [
+    "Original knight and skeleton paintings in individually proportioned carved frames",
+    "Original sculpted founder, rose warden and astronomer relief medallions",
+    "Fluted display pilasters with capitals and shallow pediments",
+    "Low cushioned viewing benches and compass floor inlays",
+    "Curator flat-file cabinet, open provenance ledger, restoration brushes, magnifier, canvas rolls and stored frames"
+  ],
+  "circulation": "Explicit station-body collision proxies preserve all real door approaches, the shrine at (5, 23), the gallery south turn and loops around the parlor tea service",
+  "source_art_license": "Preserved portraits were rendered from existing KayKit CC0 characters; the mirror is an original Gomstalle model. See ../sources.json and ../KayKit-License.txt."
+}

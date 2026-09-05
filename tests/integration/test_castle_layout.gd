@@ -67,9 +67,5 @@ func test_room_names_cover_corridor_turn_and_upper_floor() -> void:
 	assert_eq(CastleDressing.get_room_name(Vector3(70, 0, 20)), "Castle Grounds")
 
 func _assert_clear(position_value: Vector3, context: String) -> void:
-	var standing_space := AABB(position_value + Vector3(-0.55, 0.1, -0.55), Vector3(1.1, 1.9, 1.1))
-	var blockers: Array[AABB] = []
-	for furniture in dressing.get_furniture_bounds():
-		if furniture.intersects(standing_space):
-			blockers.append(furniture)
+	var blockers := CastleClearance.blockers(dressing.get_furniture_bounds(), position_value)
 	assert_true(blockers.is_empty(), "%s intersects furniture %s" % [context, blockers])

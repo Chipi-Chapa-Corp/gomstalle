@@ -172,26 +172,12 @@ func _build_armory() -> void:
 
 func _build_parlor() -> void:
 	var room := _room(5, Color("c5a0d5"))
-	_carpet(room, Vector3(38, 0.07, 6), Vector2(9, 6), CRIMSON)
-	_prop(room, "mirror", Vector3(46.5, 0, 6), -PI / 2, 1.25)
-	for depth in [2.5, 9.5]:
-		_prop(room, "table_small", Vector3(44, 0, depth), 0)
-		_prop(room, "mug_full", Vector3(44, 1.02, depth), 0, 0.8, false)
-		_book_stack(room, Vector3(44.2, 1.02, depth + 0.3), 2)
-		_prop(room, "chair", Vector3(42, 0, depth), -PI / 2)
-	_prop(room, "table_medium_tablecloth", Vector3(37, 0, 6), PI / 2)
-	_game_board(room, Vector3(37, 1.03, 6))
-	_prop(room, "chair", Vector3(37, 0, 8.2), PI)
-	_prop(room, "chair", Vector3(37, 0, 3.8), 0)
-	_prop(room, "clock", Vector3(30, 0, 1), 0)
-	_prop(room, "trunk_large_A", Vector3(31, 0, 7.5), PI / 2)
-	_prop(room, "table_small", Vector3(38, 0, 10.1), 0)
-	_banner(room, Vector3(40, 0, 0.8), "red")
-	_chandelier(room, Vector3(38, 3.35, 6), AMBER)
-	_prop(room, "bed_decorated", Vector3(31.5, 0, 9), PI / 2, 0.9)
-	_prop(room, "mug_full", Vector3(37.5, 1.03, 6), 0, 0.8, false)
-	_prop(room, "spellbook_closed", Vector3(36.5, 1.03, 6), 0.3, 0.7, false)
-	_prop(room, "bottle_A_brown", Vector3(44, 1.04, 2.5), 0, 0.7, false)
+	_assembly(room, "res://assets/castle/social/parlor.glb", "EveningConversation")
+	_prop(room, "mirror", Vector3(38.8, 0, 1.05), 0, 1.45)
+	_practical(room, Vector3(43, 0.8, 1.6), AMBER, 2.1, 6)
+	_practical(room, Vector3(43, 2.6, 6.4), AMBER, 1.2, 6)
+	_sconce(room, Vector3(30.7, 2.7, 0.9), 0, AMBER)
+	_sconce(room, Vector3(40.45, 2.7, 0.9), 0, AMBER)
 
 func _build_apothecary() -> void:
 	var room := _room(6, SPECTRAL)
@@ -219,19 +205,12 @@ func _build_cellar() -> void:
 
 func _build_gallery() -> void:
 	var room := _room(8, Color("b9a1d3"))
-	_carpet(room, Vector3(-5, 0.07, 26), Vector2(30, 3.8), CRIMSON)
-	for horizontal in [-19.0, -10.0, -1.0, 8.0]:
-		_portrait(room, Vector3(horizontal, 2.1, 21), 0, "portrait_knight" if horizontal < 0 else "portrait_skeleton_minion")
-		_prop(room, "candle_triple", Vector3(horizontal, 0, 23.5), 0, 1.15, false)
-	for horizontal in [-17.0, 6.0]:
-		_prop(room, "table_long_tablecloth", Vector3(horizontal, 0, 29.5), PI / 2)
-		_prop(room, "soul_cage", Vector3(horizontal, 1.02, 29.5), 0, 0.7, false)
-	_prop(room, "table_small", Vector3(10, 0, 26), 0)
-	_prop(room, "trunk_large_B", Vector3(-21, 0, 37), 0)
-	_prop(room, "clock", Vector3(-23, 0, 41.5), PI / 2)
-	_banner(room, Vector3(-23.2, 0, 34.5), "red", PI / 2)
-	for horizontal in [-15.0, 1.0]:
-		_chandelier(room, Vector3(horizontal, 3.4, 26), AMBER)
+	_assembly(room, "res://assets/castle/social/gallery.glb", "AncestralGallery")
+	for horizontal in [-15.4, -5.5, 7.0]:
+		_sconce(room, Vector3(horizontal, 2.8, 20.85), 0, AMBER)
+	_practical(room, Vector3(-7.7, 3.1, 22.0), AMBER, 1.1, 5)
+	_practical(room, Vector3(1.0, 3.1, 22.0), AMBER, 1.1, 5)
+	_sconce(room, Vector3(-23.0, 2.8, 37.8), PI / 2, AMBER)
 
 func _build_chapel() -> void:
 	var room := _room(9, SPECTRAL)

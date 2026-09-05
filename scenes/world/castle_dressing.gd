@@ -213,26 +213,14 @@ func _build_gallery() -> void:
 	_sconce(room, Vector3(-23.0, 2.8, 37.8), PI / 2, AMBER)
 
 func _build_chapel() -> void:
-	var room := _room(9, SPECTRAL)
-	_carpet(room, Vector3(0, 0.07, 38), Vector2(4, 9), INK)
-	_prop(room, "lectern", Vector3(0, 0, 33.8), 0, 1.25)
-	_prop(room, "spellbook_open", Vector3(0, 1.62, 33.8), 0, 0.9, false)
-	for horizontal in [-7.0, 7.0]:
-		for depth in [37.0, 40.5]:
-			_prop(room, "table_long", Vector3(horizontal, 0, depth), PI / 2, 0.8)
-		_prop(room, "brazier", Vector3(horizontal, 0, 34), 0)
-		_practical(room, Vector3(horizontal, 1.8, 34), SPECTRAL, 2, 5)
-	_banner(room, Vector3(0, 0, 32.8), "white")
-	for horizontal in [-3.0, 3.0]:
-		_prop(room, "candle_triple", Vector3(horizontal, 0, 34), 0, 1.4, false)
-	_chandelier(room, Vector3(0, 3.45, 38), AMBER)
-	for horizontal in [-9.5, 9.5]:
-		_prop(room, "soul_cage", Vector3(horizontal, 0, 34), 0, 0.9)
-		_prop(room, "candle_melted", Vector3(horizontal - 0.4, 0.05, 35.5), 0, 1.3, false)
-		_prop(room, "candle_triple", Vector3(horizontal + 0.2, 0.05, 36), 0, 1.1, false)
-	_book_stack(room, Vector3(2.5, 0.03, 34), 3)
-	_prop(room, "shrine_candles", Vector3(7.5, 0, 33.8), 0, 1.2)
-	_prop(room, "skull_candle", Vector3(-7, 0.83, 37), 0, 0.65, false)
+	var room := _room(9, AMBER)
+	_assembly(room, "res://assets/castle/memorials/chapel.glb", "SanctuaryOfTheLastWatch")
+	for horizontal in [1.5, 5.5]:
+		_practical(room, Vector3(horizontal, 2.0, 33.7), AMBER, 1.1, 5)
+	for depth in [34.2, 39.4]:
+		_practical(room, Vector3(-10, 2.0, depth), AMBER, 1.1, 5)
+	_sconce(room, Vector3(9.8, 3.0, 32.9), 0, SPECTRAL)
+	_practical(room, Vector3(2.5, 3.7, 39), AMBER, 1.2, 7)
 
 func _build_banquet() -> void:
 	var room := _room(10, Color("e6b784"))
@@ -298,27 +286,12 @@ func _build_kitchen() -> void:
 
 func _build_crypt() -> void:
 	var room := _room(12, SPECTRAL)
-	for horizontal in [-31.0, -20.0]:
-		for depth in [49.0, 57.0, 63.0]:
-			_prop(room, "sarcophagus", Vector3(horizontal, 0, depth), 0, 1.3)
-			_prop(room, "candle_triple", Vector3(horizontal + 1.2, 0, depth - 1.2), 0, 1.0, false)
-			_prop(room, "pillar", Vector3(horizontal, 0, depth - 2.6), 0, 0.55)
-	_prop(room, "soul_cage", Vector3(-33.8, 0, 53), 0, 1.2)
-	_prop(room, "soul_cage", Vector3(-14.1, 0, 62.8), 0, 1.2)
-	_prop(room, "trunk_large_B", Vector3(-16, 0, 65.4), PI / 2)
-	_prop(room, "table_small", Vector3(-16, 0, 66), 0)
-	_rune_circle(room, Vector3(-25, 0.07, 55), 2.1, SPECTRAL)
-	for depth in [49.0, 63.0]:
-		_sconce(room, Vector3(-35, 2.4, depth), PI / 2, SPECTRAL)
-	_practical(room, Vector3(-14.1, 2, 62.8), SPECTRAL, 2, 6)
-	for depth in [48.0, 55.0, 63.0]:
-		_prop(room, "rubble_half", Vector3(-34, 0, depth + 0.5), 0.4, 0.75, false)
-		_prop(room, "candle_melted", Vector3(-30, 0.03, depth + 1.7), 0, 1.2, false)
-	_banner(room, Vector3(-25, 0, 44.8), "white")
-	_prop(room, "sword_shield_broken", Vector3(-20, 1.36, 57), 0, 0.7, false).rotation.x = -PI / 2
-	_bones(room, Vector3(-30, 0.1, 59), 0.4)
-	_bones(room, Vector3(-18, 0.1, 50), -0.5)
-	_prop(room, "plaque_candles", Vector3(-35, 1.7, 57), PI / 2, 0.8, false)
+	_assembly(room, "res://assets/castle/memorials/crypt.glb", "TombsOfTheSleepingCourt")
+	for horizontal in [-30.7, -23.3]:
+		_practical(room, Vector3(horizontal, 2.1, 47.5), AMBER, 1.1, 5)
+	for depth in [53.0, 63.0]:
+		_sconce(room, Vector3(-35, 2.7, depth), PI / 2, SPECTRAL)
+	_practical(room, Vector3(-25.5, 3.5, 57), SPECTRAL, 1.5, 9)
 
 func _build_grand_hall() -> void:
 	var room := _room(13, AMBER)
@@ -367,27 +340,12 @@ func _build_treasury() -> void:
 
 func _build_ossuary() -> void:
 	var room := _room(15, MOONLIGHT)
-	for depth in [72.0, 78.0]:
-		_prop(room, "sarcophagus", Vector3(-32.5, 0, depth), 0, 1.15)
-		_prop(room, "sarcophagus", Vector3(-23, 0, depth), 0, 1.15)
-		_prop(room, "sword_shield_broken", Vector3(-35, 2, depth), PI / 2, 1.0, false)
-	_prop(room, "soul_cage", Vector3(-26, 0, 90), PI, 1.3)
-	_prop(room, "lectern", Vector3(-25, 0, 85), PI, 1.1)
-	_prop(room, "candle_triple", Vector3(-27, 0, 87), 0, 1.3, false)
-	_prop(room, "brazier", Vector3(-23, 0, 89), 0)
-	_practical(room, Vector3(-26, 2.1, 90), SPECTRAL, 2.5, 7)
-	_sconce(room, Vector3(-35, 2.5, 75), PI / 2, SPECTRAL)
-	_chandelier(room, Vector3(-28, 3.5, 81), AMBER)
-	_prop(room, "coffin_decorated", Vector3(-32, 0, 87), 0.2, 1.1)
-	_prop(room, "coffin", Vector3(-29, 0, 86), -0.25, 1.1)
-	_bones(room, Vector3(-32, 0.1, 83), 0.3)
-	_bones(room, Vector3(-25, 0.1, 76), -0.2)
-	_prop(room, "ribcage", Vector3(-30, 0.08, 84.5), 0.6, 1.0, false)
-	_prop(room, "table_long", Vector3(-24, 0, 88), 0, 0.9)
-	_prop(room, "skull", Vector3(-24, 0.93, 87.1), 0, 0.9, false)
-	_prop(room, "skull_candle", Vector3(-24, 0.93, 88.3), 0, 0.9, false)
-	_prop(room, "bone_B", Vector3(-23.6, 0.93, 89), 0.5, 0.7, false)
-	_prop(room, "plaque_candles", Vector3(-35.1, 1.7, 85), PI / 2, 1.0, false)
+	_assembly(room, "res://assets/castle/memorials/ossuary.glb", "BoneKeepersWorkshop")
+	for horizontal in [-32.8, -22.65]:
+		_sconce(room, Vector3(horizontal, 3.7, 68.7), 0, SPECTRAL)
+	for position_value in [Vector3(-31.3, 1.6, 75.6), Vector3(-22.5, 1.6, 76.6), Vector3(-24, 1.7, 89.5)]:
+		_practical(room, position_value, AMBER, 1.0, 5)
+	_practical(room, Vector3(-27.7, 3.5, 82), MOONLIGHT, 1.2, 8)
 
 func _build_archives() -> void:
 	var room := _room(16, AMBER)

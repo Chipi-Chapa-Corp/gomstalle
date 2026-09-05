@@ -17,6 +17,10 @@ extends Interactable
 const THROW_SPEED := 18.0
 @export var can_stun := false
 
+func _notification(notification_type: int) -> void:
+	if notification_type == NOTIFICATION_PREDELETE and is_instance_valid(collision_shadow):
+		collision_shadow.free()
+
 func get_outline_target() -> MeshInstance3D:
 	return mesh
 

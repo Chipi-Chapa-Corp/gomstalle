@@ -24,17 +24,28 @@
 [ext_resource type="Script" uid="uid://csldl8kual6ro" path="res://addons/proton_scatter/src/scatter_shape.gd" id="22_jm7ge"]
 [ext_resource type="Script" uid="uid://cbh6i475pyy45" path="res://addons/proton_scatter/src/shapes/box_shape.gd" id="23_jnn3q"]
 [ext_resource type="Texture2D" uid="uid://drdh36j6mu3ah" path="res://addons/proton_scatter/demos/assets/textures/t_rock_dirty.png" id="24_53vc2"]
-[ext_resource type="PackedScene" uid="uid://d28j7v7rw0oih" path="res://scenes/table_long_barrels/scene.tscn" id="25_mty66"]
+
+[ext_resource type="Script" path="res://scenes/world/castle_dressing.gd" id="26_castle_dressing"]
 
 [sub_resource type="Environment" id="Environment_k3o70"]
-ambient_light_source = 2
-ambient_light_color = Color(1, 1, 1, 1)
-ambient_light_energy = 0.1
+background_mode = 1
+background_color = Color(0.018, 0.025, 0.047, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.49, 0.58, 0.75, 1)
+ambient_light_energy = 0.4
+reflected_light_source = 2
 tonemap_mode = 3
-ssr_fade_in = 7860.227
-ssao_power = 16.39244
-fog_mode = 1
-fog_density = 1.0
+ssao_enabled = true
+ssao_radius = 1.4
+ssao_intensity = 1.4
+ssao_power = 1.3
+glow_enabled = true
+glow_intensity = 0.35
+glow_bloom = 0.04
+fog_enabled = true
+fog_light_color = Color(0.16, 0.21, 0.32, 1)
+fog_density = 0.0025
+fog_sky_affect = 0.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8a3a"]
 content_margin_left = 0.0
@@ -244,257 +255,15 @@ metadata/_editor_floor_ = Vector3(0, 0, 0)
 
 [node name="Light" type="Node" parent="."]
 
-[node name="OmniLight3D15" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 12, 11)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
+[node name="Moonlight" type="DirectionalLight3D" parent="Light"]
+rotation_degrees = Vector3(-58, -28, 0)
+light_color = Color(0.56, 0.67, 0.92, 1)
+light_energy = 0.55
 shadow_enabled = true
-omni_range = 17.0
+directional_shadow_max_distance = 65.0
 
-[node name="OmniLight3D21" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 12, 26)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D43" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 12, 29)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 16.0
-
-[node name="OmniLight3D44" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 12, 39)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 15.0
-
-[node name="OmniLight3D23" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 12, 26)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D35" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 11, 39)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D38" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 11, 75)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D39" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 11, 86)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D24" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 12, 26)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D36" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 11, 39)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 14.0
-
-[node name="OmniLight3D25" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 12, 26)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D26" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 12, 26)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D27" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 12, 26)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D28" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 12, 37)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D32" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43, 13, 61)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D33" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43, 13, 52)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D29" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 12, 37)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D42" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 12, 81)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 20.0
-
-[node name="OmniLight3D40" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 12, 86)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D41" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 76)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D30" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 12, 37)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D31" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 12, 55)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 21.0
-
-[node name="OmniLight3D34" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 58)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 21.0
-
-[node name="OmniLight3D37" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 17, 57)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 25.0
-
-[node name="OmniLight3D22" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 12, 35)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D17" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 12, -3)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D48" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 12, -5)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D49" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 12, -5)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D50" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 12, -5)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D19" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 12, -3)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 20.0
-
-[node name="OmniLight3D20" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 12, 9)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 20.0
-
-[node name="OmniLight3D45" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 12, 10)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 20.0
-
-[node name="OmniLight3D46" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 12, 5)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 20.0
-
-[node name="OmniLight3D47" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37, 12, 17)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 20.0
-
-[node name="OmniLight3D18" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 12, -3)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
-
-[node name="OmniLight3D16" type="OmniLight3D" parent="Light"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 12, 11)
-light_color = Color(1, 0.945488, 0.732193, 1)
-light_energy = 8.083
-shadow_enabled = true
-omni_range = 17.0
+[node name="CastleDressing" type="Node3D" parent="."]
+script = ExtResource("26_castle_dressing")
 
 [node name="Interactibles" type="Node" parent="."]
 
@@ -1400,20 +1169,3 @@ skeleton = NodePath("../MeshInstance3D")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Background"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73, -1, 32)
 mesh = SubResource("BoxMesh_53vc2")
-
-[node name="Tables" type="Node" parent="."]
-
-[node name="Table Long with Barrels" parent="Tables" instance=ExtResource("25_mty66")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 0, 26)
-
-[node name="Table Long with Barrels2" parent="Tables" instance=ExtResource("25_mty66")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -31, 0, 88)
-
-[node name="Table Long with Barrels3" parent="Tables" instance=ExtResource("25_mty66")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -31, 0, 84)
-
-[node name="Table Long with Barrels4" parent="Tables" instance=ExtResource("25_mty66")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7, 0, 34)
-
-[connection signal="pressed" from="UI/Menu/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
-[connection signal="pressed" from="UI/HUD/Start" to="." method="_on_start_pressed"]

@@ -1,0 +1,62 @@
+{
+  "purpose": "Gomstalle castle furnishing assets",
+  "original_castle_props": {
+    "files": [
+      "brazier.gltf",
+      "clock.gltf",
+      "lectern.gltf",
+      "mirror.gltf",
+      "sarcophagus.gltf",
+      "soul_cage.gltf"
+    ],
+    "source_project": "gomstalle_castle_props/output/game",
+    "style": "Original low-poly shapes using the existing KayKit dungeon palette",
+    "triangles": {
+      "brazier": 688,
+      "clock": 792,
+      "lectern": 678,
+      "mirror": 477,
+      "sarcophagus": 616,
+      "soul_cage": 628
+    }
+  },
+  "original_alchemy_assemblies": {
+    "files": [
+      "alembic.glb",
+      "preparation.glb",
+      "herb_rack.glb",
+      "wash_station.glb"
+    ],
+    "source_project": "gomstalle_widows_salt/export/widows_salt.glb",
+    "processing": "Selected functional assemblies; removed room architecture; recentered at ground level; reduced meshes; joined meshes; embedded original materials",
+    "alembic_triangles": 22513
+  },
+  "portrait_compositions": {
+    "files": [
+      "portrait_knight.png",
+      "portrait_skeleton_minion.png"
+    ],
+    "source_models": [
+      "assets/models/Knight.glb",
+      "assets/models/Skeleton_Minion.glb"
+    ],
+    "processing": "Rendered directly in Godot from existing licensed character models; original framing and studio lighting",
+    "source_license": "KayKit CC0"
+  },
+  "procedural_furnishings": {
+    "source": "scenes/world/castle_dressing.gd",
+    "original_designs": [
+      "bookcases and colored book rows",
+      "book stacks",
+      "framed ancestral portraits",
+      "candle chandeliers",
+      "heraldic rugs",
+      "alchemy ward rings",
+      "wooden crate parkour platforms",
+      "kitchen hearth",
+      "astronomical orrery",
+      "parlor game board"
+    ]
+  },
+  "license_notice": "KayKit-derived textures and models retain their source CC0 license; see KayKit-License.txt. New original compositions and assemblies were created for the Gomstalle project."
+}

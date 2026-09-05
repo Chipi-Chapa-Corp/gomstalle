@@ -138,20 +138,14 @@ func _build_scriptorium() -> void:
 
 func _build_arrival() -> void:
 	var room := _room(2, AMBER)
-	_carpet(room, Vector3(0, 0.07, 10), Vector2(5.5, 15), CRIMSON)
-	_carpet(room, Vector3(0, 0.07, -7), Vector2(5.5, 5), CRIMSON)
-	for horizontal in [-8.0, 8.0]:
-		for depth in [-7.0, 15.0]:
-			_prop(room, "pillar_decorated", Vector3(horizontal, 0, depth), 0, 0.7)
-			_prop(room, "brazier", Vector3(horizontal, 0, depth + 2), 0, 1.1)
-			_practical(room, Vector3(horizontal, 1.8, depth + 2), AMBER, 2.3, 6)
-	_prop(room, "table_medium_tablecloth_decorated_B", Vector3(7.3, 0, 5), 0)
-	_prop(room, "chair", Vector3(7.3, 0, 7), PI)
-	_prop(room, "clock", Vector3(0, 0, -10.6), 0, 1.25)
-	_banner(room, Vector3(-5, 0, -11.1), "red")
-	_banner(room, Vector3(5, 0, -11.1), "red")
-	for depth in [-5.0, 11.0]:
-		_chandelier(room, Vector3(0, 3.5, depth), AMBER)
+	_assembly(room, "res://assets/castle/hall_arrival.glb", "CastleGatehouseReception")
+	for horizontal in [-6.2, 6.2]:
+		_practical(room, Vector3(horizontal, 3.3, -10.2), AMBER, 1.8, 7)
+	_practical(room, Vector3(9.05, 1.9, -7.15), AMBER, 1.3, 5)
+	_practical(room, Vector3(-9.6, 2.0, 7.4), AMBER, 1.5, 5)
+	for horizontal in [-2.35, 2.35]:
+		_practical(room, Vector3(horizontal, 1.9, 12.2), AMBER, 1.0, 4)
+	_sconce(room, Vector3(10.8, 2.7, 15.5), -PI / 2, AMBER)
 
 func _build_alchemy() -> void:
 	var room := _room(3, SPECTRAL)
@@ -188,20 +182,12 @@ func _build_apothecary() -> void:
 
 func _build_cellar() -> void:
 	var room := _room(7, AMBER)
-	for depth in [23.0, 29.0, 35.0, 41.0]:
-		_prop(room, "keg_decorated", Vector3(-33.5, 0, depth), PI / 2)
-		_prop(room, "barrel_small", Vector3(-26, 0, depth + 0.4), 0)
-	_prop(room, "table_small_decorated_A", Vector3(-29, 0, 38), 0)
-	_prop(room, "stool", Vector3(-29, 0, 36.4), 0)
-	_prop(room, "box_small", Vector3(-32, 0, 32), 0, 1.1)
-	_prop(room, "trunk_medium_B", Vector3(-29.5, 0, 33), 0)
-	_prop(room, "bottle_B_brown", Vector3(-29.3, 1.02, 38), 0, 1.0, false)
-	_prop(room, "mug_full", Vector3(-28.6, 1.02, 38.2), 0, 0.8, false)
-	_prop(room, "box_small", Vector3(-26, 0, 37.5), 0, 0.8)
-	_prop(room, "bottle_C_brown", Vector3(-31.5, 0.2, 26.5), 0, 1.0, false).rotation.z = PI / 2
-	_stain(room, Vector3(-31.3, 0.07, 26.5), Vector2(1.6, 1), Color("462b34"))
-	for depth in [24.0, 38.0]:
-		_sconce(room, Vector3(-35.2, 2.5, depth), PI / 2, AMBER)
+	_assembly(room, "res://assets/castle/cellar_working.glb", "WineStorageAndBottlingWorkshop")
+	_practical(room, Vector3(-26.7, 1.95, 40.65), AMBER, 1.8, 6)
+	_sconce(room, Vector3(-35.2, 2.5, 25), PI / 2, AMBER)
+	_sconce(room, Vector3(-35.2, 2.5, 36.5), PI / 2, AMBER)
+	_sconce(room, Vector3(-30, 3.3, 20.7), 0, AMBER)
+	_practical(room, Vector3(-26.7, 2.1, 32.5), AMBER, 1.2, 6)
 
 func _build_gallery() -> void:
 	var room := _room(8, Color("b9a1d3"))
@@ -295,27 +281,18 @@ func _build_crypt() -> void:
 
 func _build_grand_hall() -> void:
 	var room := _room(13, AMBER)
-	_carpet(room, Vector3(12, 0.07, 56), Vector2(43, 5), CRIMSON)
-	for horizontal in [-7.0, 1.0, 23.0, 31.0]:
-		_prop(room, "table_long_tablecloth", Vector3(horizontal, 0, 48), PI / 2)
-		_prop(room, "candle_triple", Vector3(horizontal, 1.02, 48), 0, 1.1, false)
-		_prop(room, "sword_shield_gold", Vector3(horizontal, 1.25, 48), 0, 0.7, false)
-		_prop(room, "trunk_large_C", Vector3(horizontal, 0, 64), PI / 2, 1.1)
-		_banner(room, Vector3(horizontal, 0, 44.8), "red")
-	for horizontal in [-3.0, 27.0]:
-		_chandelier(room, Vector3(horizontal, 3.5, 56), AMBER)
-	for depth in [47.0, 65.0]:
-		_prop(room, "brazier", Vector3(9.8, 0, depth), 0, 1.2)
-		_prop(room, "brazier", Vector3(14.2, 0, depth), 0, 1.2)
-		_practical(room, Vector3(12, 2, depth), AMBER, 2, 8)
-	_platform(room, Vector3(-6, 0.6, 61), Vector3(3, 1.2, 2.5))
-	_platform(room, Vector3(-1, 1.2, 61), Vector3(3, 2.4, 2.5))
-	_platform(room, Vector3(5, 1.2, 61), Vector3(3, 2.4, 2.5))
-	_platform(room, Vector3(19, 0.6, 51), Vector3(3, 1.2, 2.5))
-	_platform(room, Vector3(24, 1.2, 51), Vector3(3, 2.4, 2.5))
-	_platform(room, Vector3(30, 1.2, 51), Vector3(3, 2.4, 2.5))
-	_prop(room, "chest_gold", Vector3(5, 2.4, 61), 0, 0.8)
-	_prop(room, "soul_cage", Vector3(30, 2.4, 51), 0, 0.75)
+	_assembly(room, "res://assets/castle/hall_grand.glb", "RoyalAudienceAndMinstrelsGallery")
+	for horizontal in [23.1, 26.0, 28.9]:
+		_prop(room, "chair", Vector3(horizontal, 0, 63.0))
+		_prop(room, "chair", Vector3(horizontal, 0, 66.25), PI)
+	_practical(room, Vector3(18.35, 1.9, 48), AMBER, 1.4, 5)
+	for horizontal in [21.9, 30.1]:
+		_practical(room, Vector3(horizontal, 2.0, 64.65), AMBER, 1.2, 5)
+	_sconce(room, Vector3(0.2, 4.2, 45.3), 0, AMBER)
+	_sconce(room, Vector3(6.8, 4.2, 45.3), 0, AMBER)
+	_sconce(room, Vector3(28, 4.8, 45.3), 0, AMBER)
+	for depth in [50.0, 56.0, 62.0]:
+		_practical(room, Vector3(12, 5.1, depth), AMBER, 1.6, 7)
 
 func _build_treasury() -> void:
 	var room := _room(14, AMBER)
@@ -535,17 +512,6 @@ func _potion_shelf(room: Node3D, position_value: Vector3, yaw: float) -> void:
 		for bottle_index in 3:
 			var bottle_name := "bottle_A_labeled_green" if (shelf_index + bottle_index) % 2 == 0 else "bottle_B_brown"
 			_prop(cabinet, bottle_name, Vector3(-0.75 + bottle_index * 0.7, 1.0 + shelf_index * 0.8, 0.55), 0, 0.85, false)
-
-func _platform(room: Node3D, center: Vector3, size_value: Vector3) -> void:
-	var tier_count := roundi(size_value.y / 1.2)
-	for tier_index in tier_count:
-		for horizontal in [-0.65, 0.65]:
-			for depth in [-0.6, 0.6]:
-				_prop(room, "box_large", Vector3(center.x + horizontal, tier_index * 1.2, center.z + depth), 0, 0.8)
-	for plank_index in 6:
-		_box(room, Vector3(center.x - 1.3 + plank_index * 0.52, size_value.y + 0.04, center.z), Vector3(0.5, 0.12, 2.7), Color("76604a"))
-	_add_collision(room, Vector3(center.x, size_value.y + 0.04, center.z), Vector3(3.1, 0.12, 2.7))
-	_box(room, Vector3(center.x, size_value.y + 0.11, center.z + 1.15), Vector3(2.8, 0.025, 0.1), BRASS)
 
 func _practical(room: Node3D, position_value: Vector3, color: Color, energy: float, radius: float) -> void:
 	var light := OmniLight3D.new()

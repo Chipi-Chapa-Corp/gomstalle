@@ -52,7 +52,6 @@
       "candle chandeliers",
       "heraldic rugs",
       "alchemy ward rings",
-      "wooden crate parkour platforms",
       "astronomical orrery",
       "parlor game board"
     ]
@@ -101,5 +100,25 @@
     "design": "Original two-level reading gallery with fitted bookcases, oak balustrades, bound books, card catalogue, binding press, illuminated reading tables, and celestial globe.",
     "processing": "Spatial and material mesh batches, softened edges, weighted normals, linear shader colors, and simplified collision surfaces.",
     "triangles": 196180
+  },
+  "castle_halls_and_wine_cellar": {
+    "files": [
+      "hall_arrival.glb",
+      "hall_grand.glb",
+      "cellar_working.glb"
+    ],
+    "sources": [
+      "scripts/art/build_halls.py",
+      "scripts/art/build_cellar.py",
+      "scripts/art/castle_interior.py",
+      "scripts/art/castle_mesh.py"
+    ],
+    "design": "Original gatehouse reception with sealed outer gate, castle model, notices and luggage; raised audience court and organ gallery connected by four walkable stairways; working wine cellar with staved barrels, timber cradles, decanting and corking bench, bottle racks and transport trolley.",
+    "processing": "Joined material meshes with non-overlapping lightmap UVs, applied bevels and linear shader colors; explicit collision surfaces with continuous stair slopes.",
+    "triangles": {
+      "hall_arrival": 10648,
+      "hall_grand": 20260,
+      "cellar_working": 31948
+    }
   }
 }

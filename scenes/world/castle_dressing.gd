@@ -77,31 +77,14 @@ func _room(room_index: int, accent: Color) -> Node3D:
 
 func _build_library() -> void:
 	var room := _room(0, AMBER)
-	_carpet(room, Vector3(-24, 0.07, -4), Vector2(5.5, 12), INK)
-	for column in [-32.0, -26.0, -20.0, -14.5]:
-		_bookcase(room, Vector3(column, 0, -10.8), 0)
-	for depth in [-7.0, -1.0]:
-		_bookcase(room, Vector3(-34.8, 0, depth), PI / 2)
-		_prop(room, "table_small", Vector3(-16.5, 0, depth), PI / 2)
-		_prop(room, "spellbook_open", Vector3(-16.5, 1.02, depth), PI / 2, 0.85, false)
-		_book_stack(room, Vector3(-16.4, 1.02, depth + 0.45), 3)
-		_prop(room, "chair", Vector3(-18.5, 0, depth), -PI / 2)
-	_prop(room, "clock", Vector3(-30, 0, 2.7), PI, 1.15)
-	_prop(room, "lectern", Vector3(-24, 0, -7), 0, 1.1)
-	_prop(room, "spellbook_open", Vector3(-24, 1.52, -7), 0, 0.8, false)
-	_prop(room, "trunk_large_A", Vector3(-31, 0, -4), 0, 1.2)
-	_prop(room, "trunk_medium_B", Vector3(-29, 0, -1), PI / 2)
-	_banner(room, Vector3(-24, 0, -11.3), "blue")
-	_chandelier(room, Vector3(-24, 3.25, -3), AMBER)
-	_sconce(room, Vector3(-35.2, 2.3, -8), PI / 2, AMBER)
-	_prop(room, "table_long", Vector3(-29, 0, -7), 0)
-	_prop(room, "spellbook_open", Vector3(-29, 1.02, -7), 0, 1.1, false)
-	_book_stack(room, Vector3(-29, 1.02, -8.3), 5)
-	_book_stack(room, Vector3(-28.4, 1.02, -5.8), 3)
-	_prop(room, "candle_triple", Vector3(-29.6, 1.02, -5.8), 0, 0.8, false)
-	_book_stack(room, Vector3(-33.3, 0.05, -3.3), 5)
-	_book_stack(room, Vector3(-32.8, 0.05, -2.5), 3)
-	_prop(room, "spellbook_open", Vector3(-32.1, 0.07, -1.7), 0.4, 1.1, false)
+	_assembly(room, "res://assets/castle/library/reading_gallery.glb", "ReadingGallery")
+	for horizontal in [-26.9, -21.7]:
+		for depth in [-1.55, -4.55]:
+			_practical(room, Vector3(horizontal, 1.55, depth), AMBER, 0.9, 3.8)
+	_practical(room, Vector3(-31.85, 1.65, 1.4), AMBER, 1.2, 4)
+	_practical(room, Vector3(-18.25, 2.7, 1.45), MOONLIGHT, 1.0, 4)
+	_sconce(room, Vector3(-29.2, 4.6, -10.1), 0, AMBER)
+	_sconce(room, Vector3(-20.4, 4.6, -10.1), 0, AMBER)
 
 func _build_scriptorium() -> void:
 	var room := _room(1, SPECTRAL)
@@ -145,65 +128,20 @@ func _build_arrival() -> void:
 
 func _build_alchemy() -> void:
 	var room := _room(3, SPECTRAL)
-	_prop(room, "alembic", Vector3(29, 0, -8.5), 0, 0.88)
-	_practical(room, Vector3(28, 1.1, -7.2), AMBER, 3, 7)
-	_practical(room, Vector3(31, 2.2, -7.8), SPECTRAL, 2, 6)
-	for horizontal in [16.0, 22.0, 38.0, 44.0]:
-		_potion_shelf(room, Vector3(horizontal, 0, -11), 0)
-	_prop(room, "table_long", Vector3(42, 0, -5), PI / 2)
-	_prop(room, "spellbook_open", Vector3(41, 1.03, -5), 0, 1.0, false)
-	for horizontal in [42.0, 43.2]:
-		_prop(room, "bottle_A_green", Vector3(horizontal, 1.02, -5), 0, 1.1, false)
-	_prop(room, "barrel_small", Vector3(45.7, 0, -8), 0, 1.2)
-	_prop(room, "barrel_small", Vector3(45.7, 0, -5.7), 0, 1.2)
-	_prop(room, "trunk_large_B", Vector3(16.5, 0, -4.5), PI / 2)
-	_prop(room, "table_small", Vector3(18, 0, -1.8), 0)
-	_prop(room, "candle_triple", Vector3(18, 1.03, -1.8), 0, 1.0, false)
-	_prop(room, "lectern", Vector3(25, 0, -4.5), -0.25)
-	_rune_circle(room, Vector3(30, 0.07, -3.5), 1.7, SPECTRAL)
-	_banner(room, Vector3(35, 0, -11), "green")
+	_assembly(room, "res://assets/castle/alchemy/working_bays.glb", "AlchemicalWorkingBays")
+	_practical(room, Vector3(19.5, 1.0, -8.9), AMBER, 3.1, 7)
+	_practical(room, Vector3(22.5, 1.0, -9.3), SPECTRAL, 1.5, 4)
+	_practical(room, Vector3(31.5, 2.4, -7.55), SPECTRAL, 2.4, 7)
+	_practical(room, Vector3(41.3, 0.8, -9.1), AMBER, 2.6, 6)
+	_practical(room, Vector3(44.5, 1.6, -9.2), SPECTRAL, 1.4, 4)
 	_sconce(room, Vector3(13, 2.5, -6), PI / 2, AMBER)
-	_carpet(room, Vector3(30, 0.06, -3.7), Vector2(5.5, 3.5), INK)
-	_prop(room, "preparation", Vector3(22, 0, -6), PI / 2, 1.25)
-	_prop(room, "wash_station", Vector3(16, 0, -9), 0, 1.2)
-	_prop(room, "herb_rack", Vector3(20, 2.7, -10.8), 0, 1.2, false)
-	_prop(room, "herb_rack", Vector3(42, 2.7, -10.8), 0, 1.2, false)
-	_prop(room, "crates_stacked", Vector3(15.3, 0, -5), 0, 0.9)
-	_prop(room, "box_small_decorated", Vector3(18.1, 0, -8.3), 0.35)
-	_prop(room, "barrel_small", Vector3(38, 0, -8), 0, 1.1)
-	_prop(room, "table_medium", Vector3(37.5, 0, -3.5), 0)
-	_prop(room, "bottle_A_green", Vector3(37.1, 1.02, -3.7), 0, 1.2, false)
-	_prop(room, "bottle_C_green", Vector3(37.9, 1.02, -3.4), 0, 1.0, false)
-	_prop(room, "candle_triple", Vector3(38, 1.02, -4.2), 0, 0.8, false)
-	_prop(room, "spellbook_closed", Vector3(37, 1.03, -3.1), 0.2, 0.8, false)
-	_prop(room, "stool", Vector3(36, 0, -4.2), 0)
-	_prop(room, "bottle_B_brown", Vector3(36, 0.1, -2.7), PI / 2, 0.8, false).rotation.z = PI / 2
-	_stain(room, Vector3(35.8, 0.075, -2.7), Vector2(1.4, 0.7), Color("315b50"))
-	_prop(room, "barrel_small_stack", Vector3(45, 0, -2.4), 0, 0.85)
-	_prop(room, "Copper_Nuggets", Vector3(42.4, 1.05, -5), 0, 0.45, false)
-	_prop(room, "Parts_Cog", Vector3(43.2, 1.05, -5.3), 0, 0.5, false)
-	_prop(room, "skull_candle", Vector3(23, 1.03, -6), 0, 0.8, false)
 
 func _build_armory() -> void:
 	var room := _room(4, MOONLIGHT)
-	_carpet(room, Vector3(20, 0.07, 11), Vector2(4.5, 14), INK)
-	for depth in [3.0, 10.0, 17.0]:
-		_prop(room, "sword_shield", Vector3(13, 2.1, depth), PI / 2, 1.2, false)
-		_prop(room, "trunk_large_C", Vector3(14.5, 0, depth), PI / 2)
-	_prop(room, "table_long", Vector3(24.5, 0, 15), 0)
-	_prop(room, "sword_shield", Vector3(24.5, 1.1, 15), 0, 0.65, false).rotation.x = -PI / 2
-	_prop(room, "barrel_small", Vector3(24.8, 0, 9.5), 0)
-	_prop(room, "box_small", Vector3(24.8, 0, 7), 0, 1.1)
-	_prop(room, "table_small", Vector3(25.5, 0, 4.5), 0)
-	_prop(room, "table_small", Vector3(18, 0, 2), 0)
-	_banner(room, Vector3(23, 0, 0.8), "blue")
-	_chandelier(room, Vector3(20, 3.3, 11), AMBER)
-	_prop(room, "box_stacked", Vector3(25.5, 0, 17.4), 0, 0.65)
-	_prop(room, "sword_shield_broken", Vector3(22, 0.15, 15.5), 0, 0.7, false).rotation.x = -PI / 2
-	_prop(room, "keyring", Vector3(24.6, 1.04, 15), 0, 1.0, false)
-	_prop(room, "candle_triple", Vector3(24.5, 1.03, 13.5), 0, 0.8, false)
-	_prop(room, "Iron_Bars", Vector3(24.5, 1.04, 16.1), 0, 0.65, false)
-	_prop(room, "lantern_standing", Vector3(14.5, 1.0, 17), 0, 0.65, false)
+	_assembly(room, "res://assets/castle/workshops/armory.glb", "ArmoryForgeAndRepair")
+	_practical(room, Vector3(25, 1.55, 16.6), AMBER, 3.0, 8)
+	_practical(room, Vector3(22.5, 3.1, 3.8), MOONLIGHT, 1.7, 8)
+	_sconce(room, Vector3(13, 2.5, 7), PI / 2, AMBER)
 
 func _build_parlor() -> void:
 	var room := _room(5, Color("c5a0d5"))
@@ -230,20 +168,10 @@ func _build_parlor() -> void:
 
 func _build_apothecary() -> void:
 	var room := _room(6, SPECTRAL)
-	for horizontal in [31.0, 35.0, 41.0]:
-		_potion_shelf(room, Vector3(horizontal, 0, 19), PI)
-	_prop(room, "table_small", Vector3(38, 0, 13.8), 0)
-	_prop(room, "table_long", Vector3(32, 0, 14), PI / 2)
-	for horizontal in [30.5, 32.0, 33.5]:
-		_prop(room, "bottle_A_labeled_green", Vector3(horizontal, 1.02, 14), 0, 1.1, false)
-	_prop(room, "soul_cage", Vector3(43.5, 0, 13.5), 0)
-	_practical(room, Vector3(45.8, 2.8, 14), SPECTRAL, 2.8, 6)
+	_assembly(room, "res://assets/castle/workshops/apothecary.glb", "ApothecaryDispensingWorkshop")
+	_practical(room, Vector3(32, 2.6, 15.7), AMBER, 1.7, 7)
+	_practical(room, Vector3(44, 2.5, 17), AMBER, 1.5, 5)
 	_sconce(room, Vector3(29, 2.4, 16), PI / 2, AMBER)
-	_banner(room, Vector3(46.8, 0, 17.7), "green", -PI / 2)
-	_prop(room, "herb_rack", Vector3(31, 2.8, 12.7), 0, 0.85, false)
-	_prop(room, "wash_station", Vector3(43, 0, 17.5), PI, 0.8)
-	_prop(room, "box_small", Vector3(29.5, 0, 17.5), 0, 0.8)
-	_prop(room, "candle_triple", Vector3(35, 0.02, 14), 0, 0.9, false)
 
 func _build_cellar() -> void:
 	var room := _room(7, AMBER)
@@ -539,6 +467,21 @@ func _prop(room: Node3D, model_name: String, position_value: Vector3, yaw: float
 			bounds.size.y = minf(bounds.size.y, 3.0)
 		_add_collision(prop, bounds.position + bounds.size * 0.5, bounds.size)
 	return prop
+
+func _assembly(room: Node3D, scene_path: String, assembly_name: String) -> void:
+	var assembly_scene: PackedScene = load(scene_path)
+	var assembly: Node3D = assembly_scene.instantiate()
+	assembly.name = assembly_name
+	room.add_child(assembly)
+	for mesh_node: MeshInstance3D in assembly.find_children("*", "MeshInstance3D", true, false):
+		mesh_node.visibility_range_end = 54
+		mesh_node.visibility_range_end_margin = 6
+		_prop_count += 1
+	for collision: CollisionShape3D in assembly.find_children("*", "CollisionShape3D", true, false):
+		var body: StaticBody3D = collision.get_parent()
+		body.collision_layer = 1
+		body.collision_mask = 0
+		_furniture_bounds.append(collision.global_transform * collision.shape.get_debug_mesh().get_aabb())
 
 func _material(color: Color) -> StandardMaterial3D:
 	if not _materials.has(color):

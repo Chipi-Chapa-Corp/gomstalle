@@ -7,7 +7,7 @@ var _created_nodes: Array[Node] = []
 func after_each() -> void:
 	for node in _created_nodes:
 		if is_instance_valid(node):
-			node.queue_free()
+			node.free()
 	_created_nodes.clear()
 
 func test_do_spawn_player_calls_before_spawn() -> void:

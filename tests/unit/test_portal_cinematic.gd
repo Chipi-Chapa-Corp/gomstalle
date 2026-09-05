@@ -57,7 +57,7 @@ var _created_nodes: Array[Node] = []
 func after_each() -> void:
 	for node in _created_nodes:
 		if is_instance_valid(node):
-			node.queue_free()
+			node.free()
 	_created_nodes.clear()
 	GameState.portal_active = false
 	GameState.portal_cinematic_active = false

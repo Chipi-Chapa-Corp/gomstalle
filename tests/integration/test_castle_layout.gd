@@ -31,6 +31,30 @@ func test_door_approaches_preserve_player_width() -> void:
 		for side in [-1.8, 1.8]:
 			_assert_clear(doorway + Vector3(0, 0, side), "Doorway approach at %s" % doorway)
 
+func test_alchemy_working_bays_preserve_circulation() -> void:
+	for horizontal in range(14, 47, 2):
+		_assert_clear(Vector3(horizontal, 0, -1.4), "Alchemy circulation lane at %s" % horizontal)
+	for position_value in [Vector3(18, 0, -5), Vector3(27.6, 0, -7), Vector3(35.3, 0, -7), Vector3(42, 0, -7)]:
+		_assert_clear(position_value, "Alchemy working aisle at %s" % position_value)
+
+func test_apothecary_door_and_climbable_window_approaches_remain_clear() -> void:
+	for depth in [13.8, 15.5, 17.5, 18.2]:
+		_assert_clear(Vector3(38, 0, depth), "Apothecary central route at %s" % depth)
+	_assert_clear(Vector3(38, 1.35, 19.0), "Apothecary climbable window landing")
+
+func test_armory_cross_room_routes_remain_clear() -> void:
+	for depth in range(2, 20, 2):
+		_assert_clear(Vector3(18, 0, depth), "Armory north-south aisle at %s" % depth)
+	for horizontal in range(18, 28, 2):
+		_assert_clear(Vector3(horizontal, 0, 6), "Armory east doorway aisle at %s" % horizontal)
+
+func test_armory_bellows_excludes_overlapping_resource_piles() -> void:
+	var generator := preload("res://globals/Generator.gd").new()
+	generator._furniture_bounds = dressing.get_furniture_bounds()
+	assert_false(generator._is_position_free(Vector3(22.1, 0, 17.5), [], 4.5), "Piles must not overlap the side-mounted forge bellows")
+	assert_true(generator._is_position_free(Vector3(20, 0, 17.5), [], 4.5), "The open forge approach remains available")
+	generator.free()
+
 func test_stair_run_and_mezzanine_arrival_remain_clear() -> void:
 	for step_index in 10:
 		var depth: float = 79.5 + step_index * 0.5

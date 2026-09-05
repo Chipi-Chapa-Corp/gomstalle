@@ -5,6 +5,10 @@ extends Interactable
 
 @export var current_amount: int = 10
 
+func notice(enable: bool) -> void:
+	super.notice(enable)
+	label.visible = enable
+
 func get_outline_target() -> MeshInstance3D:
 	return mesh
 
@@ -38,4 +42,5 @@ func do_interact(_enable: bool, payload: Dictionary) -> void:
 
 func _ready():
 	super._ready()
+	label.visible = false
 	label.text = str(current_amount)

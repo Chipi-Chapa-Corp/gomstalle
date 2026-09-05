@@ -1,0 +1,9 @@
+{
+  "title": "Apothecary and armory working interiors",
+  "generator": "scripts/art/build_workshops.py",
+  "shared_geometry": "scripts/art/workshop_geometry.py",
+  "authorship": "Original procedural Blender geometry and materials created for Gomstalle",
+  "apothecary": "Stocked dispensing cabinets, labeled jars, prescription counter, balance scales, mortar and pestle, screw herb press, collection bowl, drying rail and sage bundles",
+  "armory": "Armor fitting stands, breastplates and helmets, inventory sword and shield racks, wheeled repair trolley with padded cradles, riveting bench and drawers, repair tools, forge with arched masonry and chimney, banked coals, billets, bellows, horn anvil and quench tub",
+  "collision": "Simple explicit imported collision meshes for station bodies; central passages and interaction approaches remain clear"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "The Alchemist's Still — working bays",
+  "generator": "scripts/art/build_alchemy.py",
+  "original_sources": [
+    "gomstalle_alchemy_lab/output/alchemy_lab_final.blend",
+    "gomstalle_widows_salt/widows_salt.blend"
+  ],
+  "preserved_assemblies": [
+    "Preparation bench, scales, mortar, cutting tools, drying racks and stocked shelves",
+    "Grand copper still, masonry hearth, coal tools, vapor connection, cooling coil and receiving vessel",
+    "Widow's Salt retort, furnace, lid hoist, pressure gauge, cooling jacket, gravity water cask and receiving bench",
+    "Refinery preparation, labeled storage and finished ward-lamp dispatch"
+  ],
+  "new_original_geometry": [
+    "Timber and masonry working-bay frames with pegged diagonal braces",
+    "Shared copper cooling supply with brass unions and masonry anchors",
+    "Stepped octagonal ward-calibration dais, copper reservoir, curved brass ribs, armillary rings and suspended salt crystal",
+    "Instrument benches, calibrated salt jars and engraved station signs"
+  ],
+  "third_party_assets": "KayKit Dungeon Remastered and resource props reused from the original Gomstalle laboratory scenes under CC0; see ../KayKit-License.txt",
+  "collision": "Simplified named collision meshes embedded in GLB; stepped dais preserves its octagonal footprint"
+}

@@ -105,7 +105,32 @@ func _on_backend_lobby_created(error) -> void:
 	lobby_created.emit(error)
 
 func _on_connected_to_server() -> void:
-	_add_player_metadata(get_tree().get_multiplayer().get_unique_id())
+	var local_peer_id := multiplayer.get_unique_id()
+	_add_player_metadata(local_peer_id)
+	peer_list_changed.emit(connected_players_metadata)
+	_register_player_name.rpc_id(1, get_player_name(local_peer_id))
+
+@rpc("any_peer", "call_remote", "reliable")
+func _register_player_name(player_name: String) -> void:
+	var sender_id := multiplayer.get_remote_sender_id()
+	if not multiplayer.is_server() or not _has_player_metadata(sender_id):
+		return
+	var trimmed_name := player_name.strip_edges().left(24)
+	if trimmed_name.is_empty():
+		return
+	_set_player_name(sender_id, trimmed_name)
+	for metadata in connected_players_metadata:
+		if metadata.peer_id != sender_id:
+			_set_player_name.rpc_id(sender_id, metadata.peer_id, metadata.name)
+	_set_player_name.rpc(sender_id, trimmed_name)
+
+@rpc("authority", "call_remote", "reliable")
+func _set_player_name(peer_id: int, player_name: String) -> void:
+	_add_player_metadata(peer_id)
+	for metadata in connected_players_metadata:
+		if metadata.peer_id == peer_id:
+			metadata.name = player_name
+			break
 	peer_list_changed.emit(connected_players_metadata)
 
 func _on_peer_connected(peer_id: int) -> void:

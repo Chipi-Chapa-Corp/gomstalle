@@ -63,6 +63,9 @@ func _run_host() -> void:
 		return
 	if not _require(_world().player_container.get_child_count() == 4, "Four participants include two humans and two bots."):
 		return
+	if not await _wait(func(): return _player(_client_peer_id).label.text == "Little Bones", "client name on host actor"):
+		return
+	_checks.append("The host displays the remote player's chosen name.")
 	var client_world := _client_stages["world_ready"]
 	if not _require(client_world["wood_piles"] == _world().get_node("Generated").get_child_count()
 		and client_world["shrines"] == 3, "Late client received the same generated fuel and active shrines."):
@@ -166,6 +169,9 @@ func _run_host() -> void:
 func _run_client() -> void:
 	if not await _wait(_world_ready, "client world readiness"):
 		return
+	if not await _wait(func(): return _player(1).label.text == "Lantern Knight" and NetworkManager.get_player_name(multiplayer.get_unique_id()) == "Little Bones", "host name on client actor"):
+		return
+	_checks.append("The client displays the host's chosen name.")
 	_report_stage("world_ready", {"wood_piles": _world().get_node("Generated").get_child_count(), "shrines": _world().shrine_utils.active_paths.size()})
 	if not await _wait(func(): return GameState.game_state == GameState.State.HIDING, "hiding state"):
 		return

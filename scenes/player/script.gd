@@ -111,6 +111,7 @@ func _ready() -> void:
 	hand.transform = Transform3D(Basis.from_euler(Vector3(0.0, deg_to_rad(-90.0), deg_to_rad(-90.0))), Vector3(0.35, 0, -0.7))
 	camera_utils.initialize(deg_to_rad(45.0))
 	label.text = NetworkManager.get_player_name(peer_id)
+	NetworkManager.peer_list_changed.connect(_on_peer_names_changed)
 	if is_local_player():
 		camera.set_as_top_level(true)
 		camera.make_current()
@@ -141,6 +142,9 @@ func _ready() -> void:
 		looks.enable_wall_highlights(hider_parts)
 	if GameState.game_state in [GameState.State.HIDING, GameState.State.STARTED]:
 		_on_game_started(GameState.hunter_peer_id)
+
+func _on_peer_names_changed(_peers: Array[Dictionary]) -> void:
+	label.text = NetworkManager.get_player_name(peer_id)
 
 func _physics_process(delta: float) -> void:
 	if GameState.escaped_peer_ids.has(peer_id):

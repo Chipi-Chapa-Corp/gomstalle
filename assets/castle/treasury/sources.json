@@ -1,0 +1,10 @@
+{
+  "title": "Royal Counting House and Crown Reserve",
+  "generator": "scripts/art/build_treasury.py",
+  "shared_geometry": "scripts/art/workshop_geometry.py",
+  "authorship": "Original procedural Blender geometry and materials created for Gomstalle",
+  "strongroom": "Open paired iron gate wings, fixed security grilles, narrow gate piers, strapped vaulted coffers, closed padlocks, fitted deposit cabinets and heraldic reserve keys",
+  "assay": "Reused workshop balance design with calibrated brass weights, a touchstone and test streaks, and graded gold and silver ingot trays",
+  "counting": "Divided coin-counting trays, minted coin stacks, leather account folios, tally sheets, screw seal press, sealed documents, treasury ledgers, clerk stools and bound coin sacks",
+  "circulation": "Explicit collision proxies protect the entrance at (36,58), the shrine at (42,47), the open strongroom gate and a complete route around the counting counter"
+}

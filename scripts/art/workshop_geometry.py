@@ -204,3 +204,27 @@ def profile(name, center, outline, depth, surface, bevel=0.015):
     obj = bpy.data.objects.new(name, mesh)
     obj.location = center
     return finish(obj, name, surface, bevel)
+
+
+def bench(center, width, depth, colors, cabinet=False):
+    box('Planked work surface', (center[0], center[1], center[2] + 1.03), (width, depth, 0.18), colors['oak_top'], 0.045)
+    collider('Working bench', (center[0], center[1], center[2] + 0.57), (width, depth, 1.14))
+    for side in (-1, 1):
+        box('Trestle support', (center[0] + side * (width / 2 - 0.25), center[1], center[2] + 0.48), (0.17, depth - 0.12, 0.96), colors['oak'])
+    box('Bench lower shelf', (center[0], center[1], center[2] + 0.28), (width - 0.24, depth - 0.20, 0.10), colors['oak'])
+    if cabinet:
+        for index in range(int(width / 0.8)):
+            horizontal = center[0] - width / 2 + 0.48 + index * 0.8
+            box('Counter recessed panel', (horizontal, center[1] + depth / 2 - 0.02, center[2] + 0.66), (0.66, 0.07, 0.50), colors['oak'])
+            ring('Counter drawer pull', (horizontal, center[1] + depth / 2 + 0.04, center[2] + 0.76), 0.065, 0.014, colors['brass'], (math.pi / 2, 0, 0))
+
+
+def scales(center, colors):
+    box('Balance scale plinth', center, (0.64, 0.42, 0.10), colors['oak'], 0.04)
+    rod('Balance pillar', center, (center[0], center[1], center[2] + 0.65), 0.04, colors['brass'])
+    rod('Balance beam', (center[0] - 0.43, center[1], center[2] + 0.62), (center[0] + 0.43, center[1], center[2] + 0.68), 0.025, colors['brass'])
+    for side in (-1, 1):
+        horizontal = center[0] + side * 0.36
+        for depth in (-0.1, 0.1):
+            rod('Balance pan suspension', (horizontal, center[1], center[2] + 0.63), (horizontal, center[1] + depth, center[2] + 0.27), 0.008, colors['brass'])
+        lathe('Balance weighing pan', (horizontal, center[1], center[2] + 0.24), [(0.05, 0), (0.18, 0.06), (0.20, 0.09)], colors['brass'], 20)

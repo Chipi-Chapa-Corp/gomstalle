@@ -282,24 +282,12 @@ func _build_grand_hall() -> void:
 
 func _build_treasury() -> void:
 	var room := _room(14, AMBER)
-	_carpet(room, Vector3(42, 0.07, 56), Vector2(4.5, 17), INK)
-	for depth in [51.0, 57.0, 64.0]:
-		_prop(room, "chest_gold", Vector3(45.7, 0, depth), -PI / 2, 1.15)
-		_prop(room, "coin_stack_large", Vector3(44.8, 0.02, depth - 1), 0, 1.0, false)
-		_prop(room, "coin_stack_medium", Vector3(46, 0.02, depth - 1.2), 0, 1.0, false)
-	for depth in [51.0, 63.0]:
-		_prop(room, "trunk_large_A", Vector3(38, 0, depth), PI / 2)
-		_prop(room, "sword_shield_gold", Vector3(37, 2.3, depth), PI / 2, 1.0, false)
-	_prop(room, "soul_cage", Vector3(44.5, 0, 47), 0)
-	_practical(room, Vector3(42, 2.4, 47), SPECTRAL, 2.8, 6)
-	_banner(room, Vector3(42, 0, 67), "yellow", PI)
-	_chandelier(room, Vector3(42, 3.4, 56), AMBER)
-	_prop(room, "table_small_decorated_B", Vector3(38.5, 0, 47.5), 0)
-	_prop(room, "coin_stack_large", Vector3(38.5, 1.02, 63), 0, 0.8, false)
-	_prop(room, "keyring", Vector3(44, 0.06, 62.5), 0, 1.0, false)
-	_prop(room, "box_small_decorated", Vector3(45.3, 0, 60), 0.2, 0.8)
-	_prop(room, "Gold_Bars_Stack_Small", Vector3(38, 1.03, 51), 0, 0.55, false)
-	_prop(room, "Silver_Bars", Vector3(38, 1.03, 63), 0, 0.55, false)
+	_assembly(room, "res://assets/castle/treasury/counting_house.glb", "RoyalCountingHouse")
+	_practical(room, Vector3(42, 2.4, 47), SPECTRAL, 2.2, 5)
+	_practical(room, Vector3(42.4, 2.7, 62.2), AMBER, 1.6, 6)
+	_sconce(room, Vector3(40.25, 2.7, 44.85), 0, AMBER)
+	_sconce(room, Vector3(36.85, 2.7, 54.2), PI / 2, AMBER)
+	_sconce(room, Vector3(36.85, 2.7, 62.2), PI / 2, AMBER)
 
 func _build_ossuary() -> void:
 	var room := _room(15, MOONLIGHT)

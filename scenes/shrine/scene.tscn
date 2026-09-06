@@ -1,7 +1,8 @@
-[gd_scene load_steps=12 format=4 uid="uid://dpllhcj5deajc"]
+[gd_scene load_steps=13 format=4 uid="uid://dpllhcj5deajc"]
 
 [ext_resource type="Texture2D" uid="uid://bc8klgv1y42pk" path="res://assets/spooky/halloweenbits_texture.png" id="1_622pe"]
 [ext_resource type="Script" uid="uid://ch6xgiibovped" path="res://scenes/shrine/script.gd" id="2_isyg8"]
+[ext_resource type="FontFile" uid="uid://dutfmpe7fdhsu" path="res://assets/fonts/MedievalSharp-Regular.ttf" id="3_castle_font"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sc8cg"]
 resource_name = "HalloweenBits"
@@ -91,7 +92,11 @@ size = Vector3(2, 3.4765625, 1.8438721)
 [node name="Label3D" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.472949, 0.91947603)
 billboard = 1
-font_size = 96
+font = ExtResource("3_castle_font")
+font_size = 56
+modulate = Color(0.92549, 0.819608, 0.627451, 1)
+outline_modulate = Color(0.08, 0.06, 0.045, 1)
+outline_size = 7
 
 [node name="post_skull" type="MeshInstance3D" parent="."]
 mesh = SubResource("ArrayMesh_hggwf")

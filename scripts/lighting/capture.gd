@@ -24,17 +24,23 @@ func _capture() -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	RenderingServer.viewport_set_measure_render_time(root.get_viewport_rid(), true)
 	var views: Array[Dictionary] = [
-		{"name": "library", "focus": Vector3(-24, 0, -4)},
-		{"name": "alchemy", "focus": Vector3(31, 0, -6)},
-		{"name": "banquet", "focus": Vector3(34, 0, 26)},
-		{"name": "kitchen", "focus": Vector3(35, 0, 38)}
+		{"name": "library", "focus": Vector3(-24, 0, -4), "distance": 1.0},
+		{"name": "alchemy", "focus": Vector3(31, 0, -6), "distance": 1.0},
+		{"name": "banquet", "focus": Vector3(34, 0, 26), "distance": 1.0},
+		{"name": "kitchen", "focus": Vector3(35, 0, 38), "distance": 1.0}
 	]
+	for room_index in CastleDressing.ROOM_NAMES.size():
+		var bounds := CastleDressing.ROOM_BOUNDS[room_index]
+		var center := bounds.get_center()
+		var height := 4.0 if room_index == 17 else 0.0
+		views.append({"name": "overview_%02d_%s" % [room_index + 1, CastleDressing.ROOM_NAMES[room_index].to_snake_case()],
+			"focus": Vector3(center.x, height, center.y), "distance": maxf(1.2, maxf(bounds.size.x, bounds.size.y) / 18.0)})
 	if OS.get_environment("GOMSTALLE_LIGHTMAP_PROOF") == "1":
 		views = [{"name": "proof", "from": Vector3(6, 5, 6), "to": Vector3(0, 0.5, 0)}]
 	var metrics: Array[Dictionary] = []
 	for view in views:
 		if view.has("focus"):
-			camera.position = view["focus"] + Vector3(4.94975, 11, 4.94975)
+			camera.position = view["focus"] + Vector3(4.94975, 11, 4.94975) * view["distance"]
 			camera.rotation_degrees = Vector3(-55, 45, 0)
 		else:
 			camera.position = view["from"]

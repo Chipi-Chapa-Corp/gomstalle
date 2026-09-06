@@ -11,10 +11,15 @@ PROJECT = Path(__file__).resolve().parents[2]
 LIGHTING = PROJECT / "assets/lighting"
 MANIFEST = LIGHTING / "manifest.json"
 SESSION = "castle-lighting"
+NON_VISUAL_SUFFIXES = {".wav", ".ogg", ".mp3", ".flac", ".opus", ".m4a", ".aif", ".aiff", ".json", ".unwrap_cache"}
 
 
 def source_hashes() -> dict[str, str]:
-    paths = [path for path in (PROJECT / "assets").rglob("*") if path.is_file() and LIGHTING not in path.parents]
+    paths = []
+    for path in (PROJECT / "assets").rglob("*"):
+        source = path.with_suffix("") if path.suffix == ".import" else path
+        if path.is_file() and LIGHTING not in path.parents and source.suffix.lower() not in NON_VISUAL_SUFFIXES:
+            paths.append(path)
     paths.extend(PROJECT / name for name in [
         "scenes/world/scene.tscn", "scenes/world/castle_dressing.gd", "scenes/chair/scene.tscn",
         "scenes/chair/script.gd", "scripts/lighting/prepare.gd",

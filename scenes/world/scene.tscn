@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://cw0ja2d8khrr7"]
+[gd_scene load_steps=41 format=3 uid="uid://cw0ja2d8khrr7"]
 
 [ext_resource type="Script" uid="uid://cyrhcnxnnewpi" path="res://scenes/world/script.gd" id="1_0rkgh"]
 [ext_resource type="MeshLibrary" uid="uid://bv7jriu4vhs6d" path="res://assets/meshlib.tres" id="1_bp46t"]
@@ -7,6 +7,7 @@
 [ext_resource type="StyleBox" uid="uid://liox5pylg8l3" path="res://theme/button/pressed-dangerous.tres" id="4_hi41q"]
 [ext_resource type="StyleBox" uid="uid://n6ia02gel5tb" path="res://theme/button/regular-dangerous.tres" id="5_a8a3a"]
 [ext_resource type="PackedScene" uid="uid://bafpmkm4tdjlp" path="res://scenes/chair/scene.tscn" id="5_qbeeu"]
+[ext_resource type="PackedScene" path="res://assets/lighting/castle.scn" id="27_castle_lighting"]
 [ext_resource type="Texture2D" uid="uid://bd50iwnsco52k" path="res://assets/static/plate.png" id="6_a8a3a"]
 [ext_resource type="PackedScene" uid="uid://d2d5gjlemdjis" path="res://scenes/door/scene.tscn" id="8_hi41q"]
 [ext_resource type="PackedScene" uid="uid://c05xs4dhrmial" path="res://scenes/door_scaffold/scene.tscn" id="9_hi41q"]
@@ -264,6 +265,7 @@ directional_shadow_max_distance = 65.0
 
 [node name="CastleDressing" type="Node3D" parent="."]
 script = ExtResource("26_castle_dressing")
+baked_scene = ExtResource("27_castle_lighting")
 
 [node name="Interactibles" type="Node" parent="."]
 

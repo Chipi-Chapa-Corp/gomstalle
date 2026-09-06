@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ds14x8eqs7j23"
-path="res://.godot/imported/gallery_portrait_skeleton_minion.png-a5f1b5aa3e88dcd3c22adad65c4d69cc.ctex"
+path.s3tc="res://.godot/imported/gallery_portrait_skeleton_minion.png-a5f1b5aa3e88dcd3c22adad65c4d69cc.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "17eb1e0a450e2a01595f55fb3617ce14"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/castle/social/gallery_portrait_skeleton_minion.png"
-dest_files=["res://.godot/imported/gallery_portrait_skeleton_minion.png-a5f1b5aa3e88dcd3c22adad65c4d69cc.ctex"]
+dest_files=["res://.godot/imported/gallery_portrait_skeleton_minion.png-a5f1b5aa3e88dcd3c22adad65c4d69cc.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

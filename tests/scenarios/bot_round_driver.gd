@@ -52,11 +52,18 @@ func _process(_delta: float) -> void:
 		_report()
 		var complete := GameState.captured_peer_ids.has(1) if _testing_hunter else GameState.winner == 1 and GameState.shrines_completed == 3 and not GameState.escaped_peer_ids.is_empty()
 		print("PASS bot round" if complete else "FAIL bot round")
-		get_tree().quit(0 if complete else 1)
+		_finish(0 if complete else 1)
 	elif now > _deadline:
 		push_error("Bot round timed out.")
-		get_tree().quit(1)
+		_finish(1)
 	return
+
+func _finish(exit_code: int) -> void:
+	_started = false
+	GameState.quit(multiplayer)
+	await get_tree().scene_changed
+	await get_tree().process_frame
+	get_tree().quit(exit_code)
 
 func _report() -> void:
 	var players: Array[Dictionary] = []

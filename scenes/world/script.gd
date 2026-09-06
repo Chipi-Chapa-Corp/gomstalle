@@ -36,7 +36,6 @@ func _ready():
 	NetworkManager.peer_list_changed.connect(player_list_utils.handle_peer_list_changed)
 	GameState.state_changed.connect(_on_game_state_changed)
 	NetworkManager.session_lost.connect(_on_session_lost)
-	Generator.generate_for_world(self)
 	shrine_utils.register_shrines()
 	player_list_utils.handle_peer_list_changed(NetworkManager.connected_players_metadata)
 	if multiplayer.is_server():

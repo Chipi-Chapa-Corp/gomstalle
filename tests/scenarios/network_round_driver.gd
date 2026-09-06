@@ -132,6 +132,11 @@ func _run_host() -> void:
 	_pause_bots()
 	if not _require(not GameState.portal_active and GameState.captured_peer_ids.is_empty(), "Rematch clears portal and captured roster."):
 		return
+	var rematch_shrines: Array = _world().shrine_utils.shrine_nodes.duplicate()
+	rematch_shrines.sort_custom(func(first: Node3D, second: Node3D): return first.global_position.y < second.global_position.y)
+	var rematch_paths: Array[NodePath] = [rematch_shrines[0].get_path(), rematch_shrines[1].get_path(), rematch_shrines[-1].get_path()]
+	_world().shrine_utils.configure_active_shrines(rematch_paths)
+	_world().round_utils._configure_shrines.rpc(rematch_paths)
 	GameState.start_game(multiplayer.get_unique_id())
 	if not await _wait(func(): return _client_stages.has("second_hiding"), "second round role setup"):
 		return
@@ -231,14 +236,16 @@ func _interaction_position(player: CharacterBody3D, target: Interactable) -> Vec
 			and absf(position.y - target.global_position.y) < 2.0:
 			candidates.append(position + Vector3.UP * 0.15)
 	candidates.sort_custom(func(first: Vector3, second: Vector3): return first.distance_squared_to(target.global_position) < second.distance_squared_to(target.global_position))
+	var diagnostics: Array[Dictionary] = []
 	for candidate in candidates:
 		player.global_position = candidate
 		player.interactions._update_target()
+		diagnostics.append({"position": candidate, "can_interact": target.can_player_interact(player, true), "closest": str(player.closest_item)})
 		if player.closest_item == target and target.can_player_interact(player, true):
 			player.global_position = original_position
 			return candidate
 	player.global_position = original_position
-	_fail("No reachable input position for " + str(target.get_path()))
+	_fail("No reachable input position for %s; actor=%s dead=%s stunned=%s held=%s active=%s candidates=%s" % [target.get_path(), player.peer_id, player.is_dead, player.is_stunned, player.item, GameState.can_player_act(player.peer_id), JSON.stringify(diagnostics)])
 	return original_position
 
 func _place_client(position: Vector3) -> bool:

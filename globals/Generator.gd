@@ -6,6 +6,7 @@ class SceneSpawnConfig:
 	var density: float
 	var container_path: NodePath
 	var configure_method: Callable
+	var bounds: AABB
 
 	func _init(scene_value: PackedScene, amount_value: int, density_value: float, container_path_value: NodePath, configure_method_value: Callable) -> void:
 		scene = scene_value
@@ -13,6 +14,28 @@ class SceneSpawnConfig:
 		density = density_value
 		container_path = container_path_value
 		configure_method = configure_method_value
+		var instance: Node3D = scene.instantiate()
+		var shapes: Array[AABB] = []
+		for collision: CollisionShape3D in instance.find_children("*", "CollisionShape3D", true, false):
+			var body: CollisionObject3D = collision.get_parent()
+			if body.collision_layer & 1 == 0:
+				continue
+			var transform_value := collision.transform
+			var parent := collision.get_parent()
+			while parent != instance:
+				transform_value = parent.transform * transform_value
+				parent = parent.get_parent()
+			shapes.append(transform_value * collision.shape.get_debug_mesh().get_aabb())
+		assert(not shapes.is_empty(), "Generated obstacles require physical collision shapes.")
+		bounds = shapes[0]
+		for shape_bounds in shapes:
+			bounds = bounds.merge(shape_bounds)
+		var radius := 0.0
+		for corner in 8:
+			var endpoint := bounds.get_endpoint(corner)
+			radius = maxf(radius, Vector2(endpoint.x, endpoint.z).length())
+		bounds = AABB(Vector3(-radius, bounds.position.y, -radius), Vector3(radius * 2, bounds.size.y, radius * 2))
+		instance.free()
 
 var SPAWN_CONFIGS: Array[SceneSpawnConfig] = [
 	SceneSpawnConfig.new(preload("res://scenes/pile/scene.tscn"), 40, 4.5, NodePath("Generated"), _configure_wood_pile),
@@ -22,6 +45,8 @@ var _configs := SPAWN_CONFIGS
 var _generated_world_instance_id: int = 0
 var _spawn_list: Array[Dictionary] = []
 var _furniture_bounds: Array[AABB] = []
+var _protected_positions: Array[Vector3] = []
+var _navigation: CastleNavigation
 
 func _ready() -> void:
 	pass
@@ -34,15 +59,23 @@ func generate_for_world(world: Node3D) -> void:
 		return
 	_generated_world_instance_id = world_instance_id
 	_furniture_bounds = world.get_node("CastleDressing").get_furniture_bounds()
+	_navigation = world.round_utils.navigation
+	_protected_positions = [GameState.player_spawn_center]
+	for shrine: Node3D in world.shrine_utils.shrine_nodes:
+		_protected_positions.append(shrine.global_position)
 	var grid_map: GridMap = world.grid_map
 	assert(grid_map != null)
-	var floor_cells: Array[Vector3i] = Utils.get_wall_adjacent_floor_cells(grid_map)
-	if floor_cells.is_empty():
-		floor_cells = Utils.get_floor_cells(grid_map)
+	var floor_cells := _eligible_floor_cells(grid_map)
 	assert(not floor_cells.is_empty())
 	var spawn_seed := int(Time.get_ticks_usec())
 	_spawn_list = _build_spawn_list(grid_map, floor_cells, spawn_seed)
 	_apply_spawn_list(_spawn_list)
+
+func _eligible_floor_cells(grid_map: GridMap) -> Array[Vector3i]:
+	var floor_cells := Utils.get_floor_cells(grid_map).filter(func(cell: Vector3i): return _navigation.can_reach_floor(_cell_position(grid_map, cell)))
+	var wall_adjacent := Utils.get_wall_adjacent_floor_cells(grid_map)
+	var preferred := floor_cells.filter(func(cell: Vector3i): return wall_adjacent.has(cell))
+	return floor_cells if preferred.is_empty() else preferred
 
 func synchronize_peer(peer_id: int) -> void:
 	if multiplayer.is_server():
@@ -64,6 +97,9 @@ func _build_spawn_list(grid_map: GridMap, floor_cells: Array[Vector3i], spawn_se
 			var position := _cell_position(grid_map, cell)
 			if not _is_position_free(position, used_positions, config.density):
 				continue
+			var obstacle := AABB(position + config.bounds.position, config.bounds.size)
+			if not _has_placement_clearance(obstacle) or not _navigation.try_reserve_obstacle(obstacle, position, CastleBotController.INTERACTION_DISTANCE):
+				continue
 			var instance_seed := int(rng.randi())
 			spawn_list.append({"config_index": config_index, "cell": cell, "instance_seed": instance_seed})
 			used_positions.append(position)
@@ -74,6 +110,9 @@ func _cell_position(grid_map: GridMap, cell: Vector3i) -> Vector3:
 	return grid_map.to_global(grid_map.map_to_local(cell))
 
 func _is_position_free(position: Vector3, used_positions: Array[Vector3], min_distance: float) -> bool:
+	for protected in _protected_positions:
+		if position.distance_to(protected) < 3.0:
+			return false
 	for furniture_bounds in _furniture_bounds:
 		if furniture_bounds.grow(0.8).has_point(position):
 			return false
@@ -82,6 +121,16 @@ func _is_position_free(position: Vector3, used_positions: Array[Vector3], min_di
 		if position_2d.distance_to(Vector2(used_position.x, used_position.z)) < min_distance:
 			return false
 	return true
+
+func _has_placement_clearance(obstacle: AABB) -> bool:
+	var shape := BoxShape3D.new()
+	shape.size = obstacle.size + Vector3(0.7, 0, 0.7)
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = Transform3D(Basis.IDENTITY, obstacle.get_center() + Vector3.UP * 0.1)
+	query.collision_mask = 1
+	query.exclude = _navigation.excluded_bodies
+	return _navigation.world.get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 func _get_or_create_container(world: Node3D, container_path: NodePath) -> Node3D:
 	if container_path == NodePath("Generated"):

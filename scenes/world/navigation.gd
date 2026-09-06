@@ -84,6 +84,12 @@ func build() -> void:
 
 func _retain_reachable_floor() -> void:
 	assert(graph.get_point_count() > 0, "The castle requires walkable floors.")
+	var visited := _reachable_points()
+	for identifier in graph.get_point_ids():
+		if not visited.has(identifier):
+			graph.remove_point(identifier)
+
+func _reachable_points() -> Dictionary[int, bool]:
 	var pending: Array[int] = [graph.get_closest_point(GameState.player_spawn_center)]
 	var visited: Dictionary[int, bool] = {pending[0]: true}
 	var cursor := 0
@@ -91,12 +97,40 @@ func _retain_reachable_floor() -> void:
 		var identifier := pending[cursor]
 		cursor += 1
 		for neighbor in graph.get_point_connections(identifier):
-			if not visited.has(neighbor):
+			if not graph.is_point_disabled(neighbor) and not visited.has(neighbor):
 				visited[neighbor] = true
 				pending.append(neighbor)
+	return visited
+
+func try_reserve_obstacle(obstacle: AABB, interaction_position: Vector3, interaction_distance: float) -> bool:
+	var clearance := obstacle.grow(0.35)
+	var blocked: Array[int] = []
+	var disconnected: Array[Vector2i] = []
 	for identifier in graph.get_point_ids():
-		if not visited.has(identifier):
+		var position := graph.get_point_position(identifier)
+		if clearance.has_point(position):
+			blocked.append(identifier)
+			graph.set_point_disabled(identifier, true)
+		if not clearance.grow(GRID_SPACING * 1.5).has_point(position):
+			continue
+		for neighbor in graph.get_point_connections(identifier):
+			if identifier < neighbor and clearance.intersects_segment(position, graph.get_point_position(neighbor)) != null:
+				disconnected.append(Vector2i(identifier, neighbor))
+	for edge in disconnected:
+		graph.disconnect_points(edge.x, edge.y)
+	var connected := blocked.size() < graph.get_point_count() and _reachable_points().size() == graph.get_point_count() - blocked.size()
+	if connected:
+		var approach := graph.get_point_position(graph.get_closest_point(interaction_position))
+		connected = approach.distance_to(interaction_position) < interaction_distance
+	if connected:
+		for identifier in blocked:
 			graph.remove_point(identifier)
+	else:
+		for identifier in blocked:
+			graph.set_point_disabled(identifier, false)
+		for edge in disconnected:
+			graph.connect_points(edge.x, edge.y)
+	return connected
 
 func find_path(origin: Vector3, destination: Vector3) -> PackedVector3Array:
 	if graph.get_point_count() == 0:

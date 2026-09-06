@@ -21,6 +21,9 @@ func initialize() -> void:
 	if multiplayer.is_server():
 		navigation = CastleNavigation.new(world)
 		navigation.build()
+		Generator.generate_for_world(world)
+		await get_tree().physics_frame
+		await get_tree().physics_frame
 		initialized = true
 		if GameState.solo_session:
 			start_selected_round()
@@ -58,6 +61,8 @@ func _client_world_ready() -> void:
 	if not multiplayer.is_server():
 		return
 	var peer_id := multiplayer.get_remote_sender_id()
+	while not initialized:
+		await get_tree().process_frame
 	Generator.synchronize_peer(peer_id)
 	_configure_shrines.rpc_id(peer_id, world.shrine_utils.active_paths)
 	GameState._publish_round()

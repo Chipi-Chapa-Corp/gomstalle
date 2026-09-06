@@ -192,7 +192,7 @@ func set_dead(state: bool) -> void:
 @rpc("authority", "call_local", "reliable")
 func play_action_animation(action: StringName) -> void:
 	if action == &"Attack":
-		var now_msec := Time.get_ticks_msec()
+		var now_msec := GameState.simulation_msec
 		if now_msec - _attack_started_msec < attack_cooldown_timer.wait_time * 1000.0:
 			return
 		_attack_started_msec = now_msec
@@ -253,7 +253,7 @@ func _kill_request(target_peer_id: int) -> void:
 		return
 	if sender_id != 0 and sender_id != get_multiplayer_authority():
 		return
-	var attack_elapsed := (Time.get_ticks_msec() - _attack_started_msec) / 1000.0
+	var attack_elapsed := (GameState.simulation_msec - _attack_started_msec) / 1000.0
 	if attack_elapsed < CharacterActions.ATTACK_STARTUP or attack_elapsed > CharacterActions.ATTACK_STARTUP + attack_time + 0.2:
 		return
 	if GameState.game_state != GameState.State.STARTED or not GameState.can_player_act(peer_id):

@@ -42,6 +42,14 @@ var _clock_publish_time: float = 0.0
 var _restarting: bool = false
 var _reload_waiting: Array[int] = []
 
+var _simulation_seconds: float = 0.0
+var simulation_msec: int:
+	get:
+		return roundi(_simulation_seconds * 1000.0)
+
+func _physics_process(delta: float) -> void:
+	_simulation_seconds += delta
+
 # --------- PUBLIC API ---------
 func create_and_join_lobby(callback: Callable) -> void:
 	NetworkManager.lobby_created.connect(func(error):

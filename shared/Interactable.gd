@@ -56,7 +56,7 @@ func _execute_player_request(player: CharacterBody3D, enable: bool, metadata: Di
 	if not can_player_interact(player, enable):
 		return
 	var peer_id: int = player.peer_id
-	var now := Time.get_ticks_msec()
+	var now := GameState.simulation_msec
 	if now < _next_interaction_time.get(peer_id, 0):
 		return
 	var payload := _build_authoritative_payload(enable, metadata, peer_id)

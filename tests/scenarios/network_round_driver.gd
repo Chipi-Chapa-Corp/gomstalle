@@ -346,4 +346,5 @@ func _finish(passed: bool) -> void:
 	result_file.close()
 	print("PASS network round" if passed else "FAIL network round")
 	await get_tree().process_frame
+	await CastleAudio.shutdown()
 	get_tree().quit(0 if passed else 1)

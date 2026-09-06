@@ -29,6 +29,7 @@ func remove_item(item: InventoryItem, amount: int) -> void:
 func sync_add_item(item: InventoryItem, amount: int) -> void:
 	if not _is_server_call() or item != InventoryItem.WOOD or amount <= 0:
 		return
+	CastleAudio.play_at(&"fuel", character.global_position)
 	items[item] = items.get(item, 0) + amount
 	update_ui()
 

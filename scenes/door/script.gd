@@ -50,7 +50,7 @@ func do_interact(_enable: bool, payload: Dictionary) -> void:
 	open_target_degrees = 0.0 if is_open else signf(axis_value) * OPEN_DEGREES
 
 func _animate_to(target: float) -> void:
-	audio_player.play()
+	CastleAudio.play_at(&"door", body.global_position)
 	if _rotation_tween:
 		_rotation_tween.kill()
 	_rotation_tween = get_tree().create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)

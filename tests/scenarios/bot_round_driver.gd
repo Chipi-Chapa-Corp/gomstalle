@@ -20,6 +20,7 @@ func _run() -> void:
 func _on_lobby_created(success: bool) -> void:
 	if not success:
 		push_error("Bot round could not host.")
+		await CastleAudio.shutdown()
 		get_tree().quit(1)
 		return
 	GameState.enter_lobby()
@@ -63,6 +64,7 @@ func _finish(exit_code: int) -> void:
 	GameState.quit(multiplayer)
 	await get_tree().scene_changed
 	await get_tree().process_frame
+	await CastleAudio.shutdown()
 	get_tree().quit(exit_code)
 
 func _report() -> void:

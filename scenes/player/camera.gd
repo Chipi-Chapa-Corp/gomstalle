@@ -39,6 +39,7 @@ func update(delta: float) -> void:
 	camera_velocity = camera_step.velocity
 	_update_camera_orientation(camera_step.blend_factor)
 	_update_camera_fov(camera_step.blend_factor)
+	character.audio_listener.global_basis = character.camera.global_basis
 	character.portal_indicator_utils.update_portal_indicator(delta)
 
 func snap_to_character() -> void:

@@ -160,9 +160,9 @@ if [ "$USE_STEAMGODOT" != "0" ]; then
   LD_LIBRARY_PATH="$ROOT/third_party/godotsteam:${LD_LIBRARY_PATH:-}" \
     "${RUNNER[@]}" "$GODOT_BIN" "${HEADLESS_ARGS[@]}" "${VERBOSE_ARGS[@]}" --path "$ROOT" \
     -s res://addons/gut/gut_cmdln.gd "${JUNIT_ARGS[@]}" "${TEST_EXTRA_ARGS[@]}" \
-    -gdir=res://tests -ginclude_subdirs -gexit
+    -gdir=res://tests -ginclude_subdirs -gpost_run_script=res://tests/helpers/audio_shutdown.gd -gexit
 else
   "${RUNNER[@]}" "$GODOT_BIN" "${HEADLESS_ARGS[@]}" "${VERBOSE_ARGS[@]}" --path "$ROOT" \
     -s res://addons/gut/gut_cmdln.gd "${JUNIT_ARGS[@]}" "${TEST_EXTRA_ARGS[@]}" \
-    -gdir=res://tests -ginclude_subdirs -gexit
+    -gdir=res://tests -ginclude_subdirs -gpost_run_script=res://tests/helpers/audio_shutdown.gd -gexit
 fi

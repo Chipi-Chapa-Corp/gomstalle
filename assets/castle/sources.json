@@ -139,5 +139,15 @@
       "observatory": 53928,
       "archives": 296540
     }
+  },
+  "original_castle_audio": {
+    "directory": "assets/sounds/castle",
+    "sources": [
+      "scripts/audio/generate.py",
+      "scripts/audio/trailer_score.py"
+    ],
+    "design": "Original offline synthesis and composition: seamless castle air and sparse modal lute/recorder ambience; wooden and armored footfalls, cloth movement, doors, fuel, shrine, portal, interface and round cues; a 40-second medieval chase score with plucked strings, recorder and hand percussion.",
+    "processing": "Deterministic NumPy/SciPy synthesis, shaped transients, room reflections, stereo placement, seamless wrapped music tails and ambience crossfade. Vorbis background loops and 44.1 kHz 16-bit PCM effects; trailer true peak -1.5 dBTP.",
+    "source_license": "Original compositions and sound recordings created for the Gomstalle project; no external samples or existing melodies."
   }
 }

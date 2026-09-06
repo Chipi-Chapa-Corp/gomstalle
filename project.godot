@@ -28,6 +28,7 @@ NetworkManager="*res://globals/NetworkManager.gd"
 Utils="*res://globals/Utils.gd"
 DevHarness="*res://globals/DevHarness.gd"
 Generator="*res://globals/Generator.gd"
+CastleAudio="*res://globals/CastleAudio.gd"
 
 [display]
 

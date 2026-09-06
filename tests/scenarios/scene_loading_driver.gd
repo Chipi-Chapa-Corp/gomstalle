@@ -47,4 +47,5 @@ func _finish(passed: bool, message: String) -> void:
 			get_viewport().get_texture().get_image().save_png(output)
 	GameState.quit(multiplayer)
 	await get_tree().process_frame
+	await CastleAudio.shutdown()
 	get_tree().quit(0 if passed else 1)

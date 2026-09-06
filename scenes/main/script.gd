@@ -74,7 +74,7 @@ func _build_menu() -> void:
 		var button := CastleTheme.button(entry[0], entry[1])
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		options.add_child(button)
-	_main.add_child(CastleTheme.button(tr("Quit"), get_tree().quit))
+	_main.add_child(CastleTheme.button(tr("Quit"), CastleAudio.quit_game))
 	_status = CastleTheme.paragraph("", 22, CastleTheme.PAPER)
 	_status.add_theme_color_override("font_outline_color", CastleTheme.INK)
 	_status.add_theme_constant_override("outline_size", 4)

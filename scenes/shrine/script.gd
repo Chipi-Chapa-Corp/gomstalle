@@ -31,12 +31,14 @@ func do_interact(_enable: bool, payload: Dictionary) -> void:
 		return
 	if multiplayer.is_server():
 		caller.inventory.remove_item(CharacterInventory.InventoryItem.WOOD, required_amount_per_use)
+	CastleAudio.play_at(&"fuel", global_position)
 	current_amount += required_amount_per_use
 	label.text = "%d / %d" % [current_amount, required_amount]
 	if current_amount >= required_amount and not is_filled:
 		is_filled = true
 		collision_layer = 0
 		label.text = "KINDLED"
+		CastleAudio.play_at(&"shrine", global_position)
 		filled.emit(self)
 
 func set_active(active: bool) -> void:

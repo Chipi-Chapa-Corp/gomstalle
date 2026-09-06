@@ -58,6 +58,7 @@ func _run_portal_sequence(tile_instance: MeshInstance3D, portal_instance: Node3D
 	portal_instance.visible = true
 	GameState.portal_position = portal_position
 	GameState.portal_active = true
+	CastleAudio.play_ui(&"portal")
 	var slide_offset = _get_portal_slide_offset(tile_instance)
 	var tween = world.create_tween()
 	tween.tween_property(tile_instance, "global_position", tile_instance.global_position + slide_offset, world.portal_tile_slide_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)

@@ -59,6 +59,8 @@ var jump_height: float = 6.6
 var dash_speed: float = 13.0
 var dash_duration: float = 0.65
 
+var audio_listener: AudioListener3D
+
 var is_bot := false
 var bot_controller: CastleBotController
 
@@ -115,6 +117,10 @@ func _ready() -> void:
 	if is_local_player():
 		camera.set_as_top_level(true)
 		camera.make_current()
+		audio_listener = AudioListener3D.new()
+		add_child(audio_listener)
+		audio_listener.position = Vector3.UP * 1.1
+		audio_listener.make_current()
 		camera_utils.snap_to_character()
 		label.visible = false
 	else:
@@ -190,12 +196,12 @@ func play_action_animation(action: StringName) -> void:
 		if now_msec - _attack_started_msec < attack_cooldown_timer.wait_time * 1000.0:
 			return
 		_attack_started_msec = now_msec
-		attack_audio_player.play()
+	CastleAudio.play_action(attack_audio_player, action)
 	anim_tree.set("parameters/IW/%s_OS/request" % action, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 @rpc("authority", "call_local", "unreliable")
 func play_footstep() -> void:
-	movement_audio_player.play()
+	CastleAudio.play_step(movement_audio_player, is_hunter)
 
 func can_reach_attack(target: Node3D) -> bool:
 	var offset := target.global_position - global_position
@@ -262,6 +268,7 @@ func _kill_request(target_peer_id: int) -> void:
 func apply_kill() -> void:
 	if not _is_server_call():
 		return
+	CastleAudio.play_at(&"capture", global_position)
 	set_dead(true)
 
 func _is_server_call() -> bool:

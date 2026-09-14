@@ -171,4 +171,4 @@ func _apply_spawn_list(spawn_list: Array[Dictionary]) -> void:
 func _configure_wood_pile(instance: Node3D, _position: Vector3, instance_seed: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = instance_seed
-	instance.rotation.y = rng.randf_range(0.0, TAU)
+	instance.rotation.y = float(rng.randi_range(0, 3)) * PI * 0.5

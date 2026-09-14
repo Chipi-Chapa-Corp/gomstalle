@@ -218,6 +218,8 @@ func _interaction_prompt() -> String:
 		return tr("E: Offer wood  %d / %d") % [target.current_amount, target.required_amount]
 	if "pile" in path:
 		return tr("E: Gather wood")
+	if "echo_bell" in path:
+		return tr("E: Echo Bell · Throw to distract")
 	if "door" in path:
 		return tr("E: Open / close door")
 	return tr("E: Pick up")

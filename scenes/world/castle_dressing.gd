@@ -26,6 +26,8 @@ var _materials: Dictionary[Color, StandardMaterial3D] = {}
 var _prop_count: int = 0
 var _furniture_bounds: Array[AABB] = []
 
+const ECHO_BELL_SCENE: PackedScene = preload("res://scenes/echo_bell/scene.tscn")
+
 static func get_room_name(world_position: Vector3) -> String:
 	var floor_position := Vector2(world_position.x, world_position.z)
 	for room_index in ROOM_BOUNDS.size():
@@ -34,6 +36,21 @@ static func get_room_name(world_position: Vector3) -> String:
 	if Rect2(-24, 32, 12, 12).has_point(floor_position):
 		return ROOM_NAMES[8]
 	return "Castle Grounds"
+
+static func spawn_echo_bells(world: Node3D) -> void:
+	var container := Node3D.new()
+	container.name = "CastleEchoBells"
+	world.add_child(container)
+	var placements: Array[Dictionary] = [
+		{"name": "EchoBellLibrary", "position": Vector3(-14.8, 0.04, 2.1)},
+		{"name": "EchoBellGallery", "position": Vector3(-17.4, 0.04, 22.2)},
+		{"name": "EchoBellKitchen", "position": Vector3(20.0, 0.04, 35.4)},
+	]
+	for placement in placements:
+		var bell: Node3D = ECHO_BELL_SCENE.instantiate()
+		bell.name = placement["name"]
+		bell.position = placement["position"]
+		container.add_child(bell)
 
 func get_furniture_bounds() -> Array[AABB]:
 	return _furniture_bounds

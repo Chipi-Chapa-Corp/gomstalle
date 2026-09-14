@@ -7,17 +7,20 @@ var _checks: Array[String] = []
 var _failed: bool = false
 var _placement_sequence: int = 0
 var _movement_origin := Vector3.ZERO
+var _party_size := 4
 
 func _ready() -> void:
 	name = "NetworkRoundScenario"
 	_host = OS.get_environment("GOMSTALLE_E2E_ROLE") == "HOST"
+	if not OS.get_environment("GOMSTALLE_E2E_PARTY_SIZE").is_empty():
+		_party_size = int(OS.get_environment("GOMSTALLE_E2E_PARTY_SIZE"))
 	_run.call_deferred()
 
 func _run() -> void:
 	Settings.preferred_role = 1
 	Settings.player_name = "Lantern Knight" if _host else "Little Bones"
 	GameState.solo_session = false
-	GameState.target_player_count = 4
+	GameState.target_player_count = _party_size
 	NetworkManager.use_local_backend()
 	if _host:
 		GameState.create_and_join_lobby(_on_lobby_created)
@@ -61,7 +64,7 @@ func _run_host() -> void:
 			_client_peer_id = peer_id
 	if not await _wait(func(): return _client_stages.has("world_ready"), "client world contents"):
 		return
-	if not _require(_world().player_container.get_child_count() == 4, "Four participants include two humans and two bots."):
+	if not _require(_world().player_container.get_child_count() == _party_size, "%d participants include two humans and %d bots." % [_party_size, _party_size - 2]):
 		return
 	if not await _wait(func(): return _player(_client_peer_id).label.text == "Little Bones", "client name on host actor"):
 		return
@@ -173,6 +176,8 @@ func _run_host() -> void:
 
 func _run_client() -> void:
 	if not await _wait(_world_ready, "client world readiness"):
+		return
+	if not await _wait(func(): return _world().player_container.get_child_count() == _party_size, "complete participant roster on the remote client"):
 		return
 	if not await _wait(func(): return _player(1).label.text == "Lantern Knight" and NetworkManager.get_player_name(multiplayer.get_unique_id()) == "Little Bones", "host name on client actor"):
 		return
@@ -339,7 +344,7 @@ func _finish(passed: bool) -> void:
 	Input.action_release("move_forward")
 	Input.action_release("interact")
 	Input.action_release("attack")
-	var result := {"passed": passed, "checks": _checks, "player_count": 4, "game_started": _checks.size() > 2,
+	var result := {"passed": passed, "checks": _checks, "player_count": _party_size, "game_started": _checks.size() > 2,
 		"door_opened": _client_stages.has("door") if _host else _checks.has("door")}
 	var result_file := FileAccess.open(OS.get_environment("GOMSTALLE_E2E_RESULT"), FileAccess.WRITE)
 	result_file.store_string(JSON.stringify(result))

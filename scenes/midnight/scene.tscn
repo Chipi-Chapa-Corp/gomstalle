@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/midnight/world.gd" id="1"]
+[ext_resource type="AudioStream" path="res://assets/sounds/midnight/midnight.wav" id="2"]
+
+[node name="MidnightLibrary" type="Node3D"]
+script = ExtResource("1")
+score = ExtResource("2")

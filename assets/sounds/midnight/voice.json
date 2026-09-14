@@ -1,0 +1,16 @@
+{
+  "provider": "ElevenLabs",
+  "model": "eleven_v3",
+  "voice": "Lily",
+  "voice_id": "pFZP5JQG7iQjIQuC4Bku",
+  "settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.75,
+    "style": 0.0
+  },
+  "lines": {
+    "voice_plan.mp3": "Keep him busy. I'll find us a way out.",
+    "voice_escape.mp3": "Everyone through. Now."
+  },
+  "selection": "Working selection pending human audition; perceptual quality has not been assessed by the coding agent."
+}

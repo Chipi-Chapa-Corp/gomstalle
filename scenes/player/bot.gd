@@ -16,6 +16,7 @@ var _last_position := Vector3.ZERO
 var _memory_time: float = 0.0
 var _target_peer_id: int = 0
 var _interaction: Interactable
+var _echo_bell: EchoBell
 var _fleeing: bool = false
 var _delivering: bool = false
 var _avoidance_target := Vector3.ZERO
@@ -136,13 +137,38 @@ func _choose_hunter_destination(world: Node3D, navigation: CastleNavigation) -> 
 			closest = player
 	if closest != null:
 		_target_peer_id = closest.peer_id
+		_echo_bell = null
 		_destination = closest.global_position
 		_memory_time = 4.0
 		return
+	if is_instance_valid(_echo_bell) and _echo_bell.is_ringing:
+		_target_peer_id = 0
+		_destination = _echo_bell.global_position
+		return
 	if _memory_time <= 0.0:
+		_echo_bell = _nearest_echo_bell(world)
+		if _echo_bell != null:
+			_target_peer_id = 0
+			_destination = _echo_bell.global_position
+			return
 		_target_peer_id = 0
 		if _path_index >= _path.size() or _horizontal_distance(character.global_position, _destination) < 1.5:
 			_destination = _patrol_destination(navigation)
+
+func _nearest_echo_bell(world: Node3D) -> EchoBell:
+	var nearest_bell: EchoBell
+	var nearest_distance := INF
+	for candidate in world.get_tree().get_nodes_in_group("echo_bells"):
+		var bell := candidate as EchoBell
+		if bell == null or not bell.is_ringing:
+			continue
+		var distance := character.global_position.distance_squared_to(bell.global_position)
+		if distance > EchoBell.CHIME_HEARING_RADIUS * EchoBell.CHIME_HEARING_RADIUS:
+			continue
+		if distance < nearest_distance:
+			nearest_distance = distance
+			nearest_bell = bell
+	return nearest_bell
 
 func _patrol_destination(navigation: CastleNavigation) -> Vector3:
 	var identifiers := navigation.graph.get_point_ids()

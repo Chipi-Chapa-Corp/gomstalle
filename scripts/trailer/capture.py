@@ -9,11 +9,13 @@ import sys
 
 PROJECT = Path(__file__).resolve().parents[2]
 SHOTS = ('library', 'kitchen', 'grand_hall', 'offering', 'escape')
+COOP_SHOTS = ('distraction', 'parkour', 'escape')
 
 
 def main():
     parser = argparse.ArgumentParser(description='Exercise production gameplay trailer shots; record native 60 FPS video and audio masters after castle lighting is finalized.')
-    parser.add_argument('--shot', choices=(*SHOTS, 'all'), default='all')
+    parser.add_argument('--sequence', choices=('original', 'cooperation'), default='original')
+    parser.add_argument('--shot', choices=tuple(dict.fromkeys((*SHOTS, *COOP_SHOTS, 'all'))), default='all')
     parser.add_argument('--record', action='store_true', help='Record 1920x1080 video and native audio on an isolated desktop. Requires baked lighting.')
     parser.add_argument('--format', choices=('png', 'avi'), default='avi')
     parser.add_argument('--output', type=Path, default=PROJECT / '.ci' / 'trailer' / datetime.now().strftime('%Y%m%d-%H%M%S'))
@@ -28,7 +30,10 @@ def main():
     if args.record:
         subprocess.run([sys.executable, str(args.desktop), '--session', args.session, 'start', '--size', '1920x1080', '--gpu', 'nvidia'], check=True)
     args.output.mkdir(parents=True, exist_ok=True)
-    chosen = SHOTS if args.shot == 'all' else (args.shot,)
+    sequence_shots = COOP_SHOTS if args.sequence == 'cooperation' else SHOTS
+    if args.shot != 'all' and args.shot not in sequence_shots:
+        parser.error(f'{args.shot} is not a shot in the {args.sequence} sequence')
+    chosen = sequence_shots if args.shot == 'all' else (args.shot,)
     results = []
     for shot in chosen:
         directory = args.output.resolve() / shot
@@ -39,7 +44,11 @@ def main():
             probe.bind(('127.0.0.1', 0))
             port = probe.getsockname()[1]
         environment = os.environ | {'GOMSTALLE_TRAILER_SHOT': shot, 'GOMSTALLE_TRAILER_RESULT': str(directory / 'result.json'), 'GOMSTALLE_LIGHTING_MODE': args.lighting, 'GOMSTALLE_LOCAL_PORT': str(port)}
-        command = [str(binary), '--path', str(PROJECT), '--script', 'res://tests/scenarios/trailer.gd', '--fixed-fps', '60', '--resolution', '1920x1080']
+        scenario = 'trailer'
+        if args.sequence == 'cooperation':
+            environment['GOMSTALLE_COOP_SHOT'] = shot
+            scenario = 'cooperation'
+        command = [str(binary), '--path', str(PROJECT), '--script', f'res://tests/scenarios/{scenario}.gd', '--fixed-fps', '60', '--resolution', '1920x1080']
         if args.record:
             command += ['--display-driver', 'x11', '--borderless', '--position', '0,0', '--write-movie', str(directory / f'frame.{args.format}'), '--disable-vsync']
             command = [sys.executable, str(args.desktop), '--session', args.session, 'run', '--cwd', str(PROJECT), '--', *command]

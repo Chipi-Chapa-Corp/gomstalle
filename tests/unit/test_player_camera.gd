@@ -5,8 +5,18 @@ const CameraUtils = preload("res://scenes/player/camera.gd")
 const PortalIndicatorUtils = preload("res://scenes/player/portal.gd")
 
 var _created_nodes: Array[Node] = []
+var _portal_active: bool
+var _escaped_peer_ids: Array[int]
+
+func before_each() -> void:
+	_portal_active = GameState.portal_active
+	_escaped_peer_ids = GameState.escaped_peer_ids.duplicate()
+	GameState.portal_active = false
+	GameState.escaped_peer_ids.clear()
 
 func after_each() -> void:
+	GameState.portal_active = _portal_active
+	GameState.escaped_peer_ids = _escaped_peer_ids
 	for node in _created_nodes:
 		if is_instance_valid(node):
 			node.free()
@@ -15,6 +25,9 @@ func after_each() -> void:
 func _create_camera_context() -> Dictionary:
 	var player := PlayerScript.new()
 	_created_nodes.append(player)
+	player.camera = Camera3D.new()
+	player.camera.current = true
+	_created_nodes.append(player.camera)
 	var camera_utils := CameraUtils.new(player)
 	_created_nodes.append(camera_utils)
 	player.camera_utils = camera_utils
@@ -92,20 +105,21 @@ func test_portal_indicator_visible_after_override() -> void:
 	assert_true(portal_utils._should_show_portal_indicator(), "Indicator should show after camera override ends")
 	GameState.portal_active = false
 
-func test_portal_indicator_through_walls_detects_player_projection() -> void:
+func test_portal_indicator_hidden_when_another_camera_is_current() -> void:
 	var context = _create_camera_context()
 	var player = context["player"]
 	var portal_utils = _create_portal_indicator_utils(player)
-	player.portal_indicator_player_occlusion_radius = 0.5
-	player.position = Vector3(1.0, 0.0, 0.0)
-	var result = portal_utils._is_portal_indicator_occluded_by_player(Vector3.ZERO, Vector3(2.0, 0.0, 0.0))
-	assert_true(result, "Through-walls indicator should hide when player blocks the view.")
+	GameState.portal_active = true
+	player.camera.current = false
+	assert_false(portal_utils._should_show_portal_indicator(), "Player compass should stay hidden during external camera shots")
 
-func test_portal_indicator_through_walls_ignores_player_outside_radius() -> void:
+func test_portal_indicator_hidden_for_captured_or_escaped_player() -> void:
 	var context = _create_camera_context()
 	var player = context["player"]
 	var portal_utils = _create_portal_indicator_utils(player)
-	player.portal_indicator_player_occlusion_radius = 0.4
-	player.position = Vector3(1.0, 0.0, 1.0)
-	var result = portal_utils._is_portal_indicator_occluded_by_player(Vector3.ZERO, Vector3(2.0, 0.0, 0.0))
-	assert_false(result, "Through-walls indicator should ignore players outside the occlusion radius.")
+	GameState.portal_active = true
+	player.is_dead = true
+	assert_false(portal_utils._should_show_portal_indicator(), "Captured players should not receive escape guidance")
+	player.is_dead = false
+	GameState.escaped_peer_ids.append(player.peer_id)
+	assert_false(portal_utils._should_show_portal_indicator(), "Escaped players should not receive escape guidance")

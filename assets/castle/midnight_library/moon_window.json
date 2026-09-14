@@ -1,0 +1,6 @@
+{
+  "provider": "OpenAI built-in image generation",
+  "usage": "Stained-glass artwork texture on a real 3D rose window",
+  "prompt": "Flat orthographic circular stained-glass rose window, black outside the circle. A kind crescent moon protects a tiny skeleton carrying a lantern. Twelve-petal rose structure, jewel blue, teal and gold glass, handcrafted lead outlines, fine floral gothic detail, no lettering, no environment or perspective.",
+  "asset": "moon_window.png"
+}

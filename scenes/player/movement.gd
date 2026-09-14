@@ -71,6 +71,7 @@ func handle_input_locked(delta: float) -> void:
 	_apply_movement(delta, Vector2.ZERO, false)
 
 func _apply_movement(delta: float, movement_input: Vector2, run_requested: bool) -> void:
+	_ensure_animation_state()
 	_grounded_before_move = character.is_on_floor()
 	_coyote_time = COYOTE_TIME if _grounded_before_move else maxf(_coyote_time - delta, 0.0)
 	if _jump_buffer_time > 0.0 and _coyote_time > 0.0 and not is_compact:
@@ -141,6 +142,11 @@ func _update_animation(delta: float, horizontal_velocity: Vector3, is_running: b
 	character.anim_tree.set("parameters/IW/Run/blend_position", (local_plane_velocity / character.run_move_speed).limit_length(1.0))
 	character.movement_state_blend = lerpf(character.movement_state_blend, 1.0 if is_running else 0.0, blend_weight)
 	character.anim_tree.set("parameters/IW/MovementState/blend_amount", character.movement_state_blend)
+
+func _ensure_animation_state() -> void:
+	if character.playback.get_current_node().is_empty():
+		character.playback.start("IW")
+		character.anim_tree.advance(0.0)
 
 func _can_stand() -> bool:
 	var query := PhysicsShapeQueryParameters3D.new()

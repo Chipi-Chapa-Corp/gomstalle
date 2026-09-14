@@ -81,7 +81,7 @@ def main():
     end_filter = ','.join([
         'drawbox=x=570:y=365:w=780:h=2:color=0x806b45:t=fill',
         typography('GOMSTALLE', 128, '440'),
-        typography('A castle chase for 2–4 players', 36, '625'),
+        typography('A castle chase for 4–6 players', 36, '625'),
         'drawbox=x=570:y=725:w=780:h=2:color=0x806b45:t=fill',
         'fade=t=in:d=0.25',
     ])

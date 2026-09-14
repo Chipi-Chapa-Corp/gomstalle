@@ -189,7 +189,7 @@ func _scale_portal_surface(portal_node: Node3D, tile_instance: MeshInstance3D) -
 	if portal_size <= 0.0 or base_size <= 0.0:
 		return
 	var scale_factor = (portal_size / base_size) * 1.05
-	surface_node.scale = Vector3.ONE * scale_factor
+	portal_node.set_diameter(scale_factor)
 
 func _get_portal_corner_direction(portal_cell: Vector3i) -> Vector3:
 	if world.grid_map == null:

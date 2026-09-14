@@ -27,6 +27,7 @@ func _ready():
 	if $CastleDressing.uses_baked_lighting:
 		grid_map.visible = false
 		$Light/Moonlight.visible = false
+	CastleDressing.spawn_echo_bells(self)
 	for helper in [player_list_utils, portal_utils, shrine_utils]:
 		helper.name = helper.get_script().get_global_name()
 		add_child(helper)

@@ -1,10 +1,14 @@
 extends Control
 
+const PARTY_SIZES: Array[int] = [4, 5, 6]
+const DEFAULT_PARTY_SIZE := 6
+
 var _main: VBoxContainer
 var _modal: PanelContainer
 var _modal_content: VBoxContainer
 var _status: Label
 var _role_buttons: Array[Button] = []
+var _party_size_buttons: Array[Button] = []
 var _busy := false
 var _room_list: VBoxContainer
 var _loading: Control
@@ -58,7 +62,24 @@ func _build_menu() -> void:
 		roles.add_child(button)
 		_role_buttons.append(button)
 	_select_role(Settings.preferred_role)
+	var party_size := VBoxContainer.new()
+	party_size.add_theme_constant_override("separation", 6)
+	var party_label := CastleTheme.label(tr("Party size"), 22, CastleTheme.MUTED)
+	party_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	party_size.add_child(party_label)
+	var party_choices := HBoxContainer.new()
+	party_choices.add_theme_constant_override("separation", 8)
+	party_size.add_child(party_choices)
+	for player_count in PARTY_SIZES:
+		var button := CastleTheme.button(str(player_count), _select_party_size.bind(player_count))
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		party_choices.add_child(button)
+		_party_size_buttons.append(button)
+	var selected_party_size := GameState.target_player_count if PARTY_SIZES.has(GameState.target_player_count) else DEFAULT_PARTY_SIZE
+	_select_party_size(selected_party_size)
+	_main.add_child(party_size)
 	_main.add_child(CastleTheme.button(tr("Play solo"), _host.bind(true, false), true))
+	_main.add_child(CastleTheme.button(tr("Midnight Library"), _open_midnight))
 	var friends := HBoxContainer.new()
 	_main.add_child(friends)
 	var host := CastleTheme.button(tr("Host"), _host.bind(false, false))
@@ -98,6 +119,20 @@ func _select_role(role: int) -> void:
 		_role_buttons[role_index].add_theme_stylebox_override("normal", CastleTheme.button_style(fill))
 		_role_buttons[role_index].add_theme_stylebox_override("hover", CastleTheme.button_style(fill.lightened(0.15)))
 
+func _select_party_size(player_count: int) -> void:
+	if not PARTY_SIZES.has(player_count):
+		return
+	GameState.target_player_count = player_count
+	for index in _party_size_buttons.size():
+		var fill := CastleTheme.GOLD if PARTY_SIZES[index] == player_count else Color("c4ae8a")
+		_party_size_buttons[index].add_theme_stylebox_override("normal", CastleTheme.button_style(fill))
+		_party_size_buttons[index].add_theme_stylebox_override("hover", CastleTheme.button_style(fill.lightened(0.15)))
+
+func _open_midnight() -> void:
+	if _busy:
+		return
+	get_tree().change_scene_to_file("res://scenes/midnight/scene.tscn")
+
 func _open_modal(title: String) -> void:
 	for child in _modal_content.get_children():
 		_modal_content.remove_child(child)
@@ -122,7 +157,7 @@ func _show_help() -> void:
 		["Shift", tr("Sprint")],
 		["Space", tr("Jump")],
 		["F", tr("Air slide while airborne (skeleton)")],
-		["E", tr("Interact / pick up / offer wood")],
+		["E", tr("Interact / pick up / throw / offer wood")],
 		[tr("Left mouse"), tr("Strike / throw")],
 		[tr("Right mouse"), tr("Aim")],
 		["Esc", tr("Menu")],

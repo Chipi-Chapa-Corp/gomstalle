@@ -203,7 +203,7 @@ func _build_gallery() -> void:
 
 func _build_chapel() -> void:
 	var room := _room(9, AMBER)
-	_assembly(room, "res://assets/castle/memorials/chapel.glb", "SanctuaryOfTheLastWatch")
+	_assembly(room, "res://assets/castle/chapel_v2/candle_chapel.glb", "SanctuaryOfTheLastWatch")
 	for horizontal in [1.5, 5.5]:
 		_practical(room, Vector3(horizontal, 2.0, 33.7), AMBER, 1.1, 5)
 	for depth in [34.2, 39.4]:
@@ -213,30 +213,11 @@ func _build_chapel() -> void:
 
 func _build_banquet() -> void:
 	var room := _room(10, Color("e6b784"))
-	var first_table := _prop(room, "feast_table_full", Vector3(24.5, 0, 26), 0, 1, false)
-	var second_table := _prop(room, "feast_table_spilled", Vector3(35.5, 0, 26), 0, 1, false)
-	for table: Node3D in [first_table, second_table]:
-		_add_collision(table, Vector3(0, 0.61, 0), Vector3(7.8, 1.22, 2.5))
-		for seat in [-3.2, -1.6, 0.0, 1.6, 3.2]:
-			_prop(room, "chair", table.position + Vector3(seat, 0, -2), 0, 0.92)
-			if table == first_table or seat != 1.6:
-				_prop(room, "chair", table.position + Vector3(seat, 0, 2), PI, 0.92)
-		_practical(room, table.position + Vector3(0, 2.3, 0), AMBER, 2.4, 7)
+	_assembly(room, "res://assets/castle/banquet_v2/haunted_feast.glb", "HauntedFeast")
 	_prop(room, "chair", Vector3(37.2, 0, 28.7), PI + 0.35, 0.92)
-	_prop(room, "feast_sideboard", Vector3(25.5, 0, 21.3))
-	var dais := _prop(room, "feast_dais", Vector3(45.1, 0, 26), 0, 1, false)
-	_add_collision(dais, Vector3(0, 0.15, 0), Vector3(4.8, 0.3, 6.8))
-	_add_collision(dais, Vector3(0.23, 0.45, 0), Vector3(4.35, 0.3, 6.4))
-	_add_collision(dais, Vector3(0.77, 1.7, 0), Vector3(1.4, 2.2, 1.7))
-	_add_collision(dais, Vector3(1.76, 2.1, 0), Vector3(0.3, 3.0, 4.95))
-	_add_collision(dais, Vector3(-0.65, 1.1, 0), Vector3(1.4, 1, 2.2))
-	_practical(room, Vector3(43, 2.8, 26), AMBER, 2.8, 7)
-	_prop(room, "feast_banquet_architecture", Vector3(30, 0, 26), 0, 1, false)
-	_portrait(room, Vector3(14.1, 2.25, 25.5), PI / 2, "portrait_knight")
-	_prop(room, "table_medium_tablecloth_decorated_B", Vector3(14.7, 0, 26), 0)
-	_prop(room, "bottle_A_brown", Vector3(14.7, 1.03, 26), 0, 1, false)
-	_prop(room, "candle_triple", Vector3(14.7, 1.03, 25.1), 0, 0.8, false)
-	_stain(room, Vector3(37.1, 0.07, 27.5), Vector2(1.1, 0.5), Color("572d3c"))
+	_practical(room, Vector3(24.5, 2.4, 26), AMBER, 2.4, 7)
+	_practical(room, Vector3(30, 2.7, 26), SPECTRAL, 1.3, 7)
+	_practical(room, Vector3(43.5, 2.8, 26), AMBER, 2.2, 7)
 
 func _build_kitchen() -> void:
 	var room := _room(11, Color("d8af77"))
@@ -284,10 +265,7 @@ func _build_crypt() -> void:
 
 func _build_grand_hall() -> void:
 	var room := _room(13, AMBER)
-	_assembly(room, "res://assets/castle/hall_grand.glb", "RoyalAudienceAndMinstrelsGallery")
-	for horizontal in [23.1, 26.0, 28.9]:
-		_prop(room, "chair", Vector3(horizontal, 0, 63.0))
-		_prop(room, "chair", Vector3(horizontal, 0, 66.25), PI)
+	_assembly(room, "res://assets/castle/grand_hall_v2/grand_hall_v2.glb", "RoyalAudienceAndMinstrelsGallery")
 	_practical(room, Vector3(18.35, 1.9, 48), AMBER, 1.4, 5)
 	for horizontal in [21.9, 30.1]:
 		_practical(room, Vector3(horizontal, 2.0, 64.65), AMBER, 1.2, 5)
